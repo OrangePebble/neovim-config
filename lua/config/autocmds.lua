@@ -28,6 +28,31 @@ vim.api.nvim_create_autocmd("TextYankPost", {
 	end,
 })
 
+-- Don't move after yank. Taken from https://github.com/svban/YankAssassin.nvim
+local pre_yank_pos = {}
+vim.api.nvim_create_autocmd({ "VimEnter", "CursorMoved" }, {
+	callback = function()
+		pre_yank_pos = vim.api.nvim_win_get_cursor(0)
+	end,
+})
+vim.api.nvim_create_autocmd("TextYankPost", {
+	callback = function()
+		-- Fixes the error caused by yanking in the file tree from 'nvim-tree'
+		if vim.fn.bufname() == "" then
+			return
+		end
+		-- Only restore position after yanked with 'y' operator only
+		-- If not set, text yanked with c will also activate it
+		local operators = { "y" } -- Add more operators here if needed
+		if vim.tbl_contains(operators, vim.v.event.operator) then
+			local myMode = vim.api.nvim_get_mode().mode
+			if (myMode == "no") or (myMode == "n") then
+				vim.api.nvim_win_set_cursor(0, pre_yank_pos)
+			end
+		end
+	end,
+})
+
 -- https://github.com/folke/trouble.nvim/blob/main/docs/examples.md
 -- Open Trouble Quickfix when the qf list opens. Makes the regular quickfix list unusable.
 -- Look at the docs for a less extreme version.
