@@ -1,4 +1,4 @@
--- WARN: These keymaps are here so they only apply when the LSP attaches and don't clutter otherwise.
+-- WARN: Set things here so they only apply when the LSP attaches and don't clutter otherwise.
 
 local M = {}
 
@@ -33,26 +33,26 @@ M.on_attach = function(event)
 	-- Highlight references of the word under your cursor when your cursor rests there for a little
 	--  while.
 	-- See `:help CursorHold` for information about when this is executed
-	if client and client:supports_method("textDocument/documentHighlight", event.buf) then
-		local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
-		vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-			buffer = event.buf,
-			group = highlight_augroup,
-			callback = vim.lsp.buf.document_highlight,
-		})
-		vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-			buffer = event.buf,
-			group = highlight_augroup,
-			callback = vim.lsp.buf.clear_references,
-		})
-		vim.api.nvim_create_autocmd("LspDetach", {
-			group = vim.api.nvim_create_augroup("lsp-detach", { clear = true }),
-			callback = function(event2)
-				vim.lsp.buf.clear_references()
-				vim.api.nvim_clear_autocmds({ group = "lsp-highlight", buffer = event2.buf })
-			end,
-		})
-	end
+	-- if client and client:supports_method("textDocument/documentHighlight", event.buf) then
+	-- 	local highlight_augroup = vim.api.nvim_create_augroup("lsp-highlight", { clear = false })
+	-- 	vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
+	-- 		buffer = event.buf,
+	-- 		group = highlight_augroup,
+	-- 		callback = vim.lsp.buf.document_highlight,
+	-- 	})
+	-- 	vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
+	-- 		buffer = event.buf,
+	-- 		group = highlight_augroup,
+	-- 		callback = vim.lsp.buf.clear_references,
+	-- 	})
+	-- 	vim.api.nvim_create_autocmd("LspDetach", {
+	-- 		group = vim.api.nvim_create_augroup("lsp-detach", { clear = true }),
+	-- 		callback = function(event2)
+	-- 			vim.lsp.buf.clear_references()
+	-- 			vim.api.nvim_clear_autocmds({ group = "lsp-highlight", buffer = event2.buf })
+	-- 		end,
+	-- 	})
+	-- end
 end
 
 return M
