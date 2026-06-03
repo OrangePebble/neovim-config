@@ -52,7 +52,7 @@ return {
 						end,
 					},
 				},
-				lualine_x = {},
+				lualine_x = { "overseer" },
 				lualine_y = { "filetype" },
 				lualine_z = { "filename" },
 			},

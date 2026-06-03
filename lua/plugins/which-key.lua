@@ -150,7 +150,7 @@ return {
 			{ "<leader>dj", icon = { icon = "󰄠", color = "grey" } },
 			{ "<leader>dk", icon = { icon = "󰄝", color = "grey" } },
 			{ "<leader>dw", icon = { icon = "", color = "purple" } },
-			{ "<leader>dr", icon = { icon = "", color = "yellow" } },
+			{ "<leader>dr", icon = { icon = "", color = "yellow" } },
 			{ "<leader>du", icon = { icon = "󰙵", color = "yellow" } },
 
 			-- Git
@@ -181,7 +181,7 @@ return {
 			{ "<leader>sta", icon = "" },
 			{ "<leader>sf", icon = { icon = "󰈔", color = "green" } },
 			{ "<leader>si", icon = { icon = "󰘓", color = "green" } },
-			{ "<leader>sc", icon = { icon = "", color = "grey" } },
+			{ "<leader>sc", icon = { icon = "", color = "grey" } },
 			{ "<leader>sg", icon = { icon = "󰈞", color = "cyan" } },
 			{ "<leader>s/", icon = { icon = "󰈞", color = "cyan" } },
 			{ "<leader>sw", icon = { icon = "󰈞", color = "cyan" } },
@@ -228,13 +228,11 @@ return {
 			{ "<leader><leader>n", icon = { icon = "󰍝", color = "green" } },
 			{ "<leader><leader><leader>", icon = { icon = "", color = "cyan" } },
 
-			-- auto-session
+			-- Resession
 			{ "<leader>\\", group = "Session", icon = "" },
-			{ "<leader>\\\\", icon = { icon = "", color = "cyan" } },
+			{ "<leader>\\i", icon = { icon = "", color = "cyan" } },
 			{ "<leader>\\d", icon = { icon = "󰆴", color = "red" } },
-			{ "<leader>\\D", icon = { icon = "󰗩", color = "cyan" } },
-			{ "<leader>\\p", icon = { icon = "󱕖", color = "red" } },
-			{ "<leader>\\r", icon = { icon = "", color = "orange" } },
+			{ "<leader>\\l", icon = { icon = "", color = "orange" } },
 			{ "<leader>\\s", icon = { icon = "", color = "green" } },
 
 			-- Tests
@@ -252,6 +250,12 @@ return {
 			{ "<leader>Tts", icon = { icon = "", color = "cyan" } },
 			{ "<leader>TtS", icon = { icon = "", color = "green" } },
 			{ "<leader>Ttw", icon = { icon = "󰈈", color = "grey" } },
+
+			-- Resession
+			{ "<leader>o", group = "Overseer", icon = { icon = "󰈈", color = "green" } },
+			{ "<leader>oo", icon = { icon = "󰷐", color = "green" } },
+			{ "<leader>os", icon = { icon = "", color = "grey" } },
+			{ "<leader>oS", icon = { icon = "", color = "cyan" } },
 
 			-- Change
 			{ "<leader>c", group = "Change", icon = { icon = "", color = "green" } },

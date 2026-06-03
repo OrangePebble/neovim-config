@@ -227,14 +227,19 @@ end, { desc = "Previous todo" })
 vim.keymap.del("n", "]T")
 vim.keymap.del("n", "[T")
 
---== auto-session
-keymap("n", "<leader>\\\\", "<cmd>AutoSession search<CR>", { desc = "Search" })
-keymap("n", "<leader>\\s", "<cmd>AutoSession save<CR>", { desc = "Save" })
-keymap("n", "<leader>\\r", "<cmd>AutoSession restore<CR>", { desc = "Restore" })
-keymap("n", "<leader>\\d", "<cmd>AutoSession delete<CR>", { desc = "Delete" })
-keymap("n", "<leader>\\D", "<cmd>AutoSession deletePicker<CR>", { desc = "Delete picker" })
-keymap("n", "<leader>\\a", "<cmd>AutoSession toggle<CR>", { desc = "Toggle session autosave" })
-keymap("n", "<leader>\\p", "<cmd>AutoSession purgeOrphaned<CR>", { desc = "Purge orphaned" })
+--== Resession
+keymap("n", "<leader>\\s", function()
+	require("resession").save(vim.fn.getcwd())
+end, { desc = "Save" })
+keymap("n", "<leader>\\l", function()
+	require("resession").load(vim.fn.getcwd())
+end, { desc = "Load" })
+keymap("n", "<leader>\\d", function()
+	require("resession").delete(vim.fn.getcwd())
+end, { desc = "Delete" })
+keymap("n", "<leader>\\i", function()
+	vim.print(require("resession").get_current_session_info())
+end, { desc = "Get info" })
 
 --== Search
 keymap("n", "<leader>ss", "<cmd>FzfLua builtin<CR>", { desc = "..." }) -- All FzfLua options
@@ -574,6 +579,12 @@ keymap("n", "<leader>TtS", function()
 	require("neotest").status()
 end, { desc = "Signcolumn signs" })
 
+--== Overseer
+keymap("n", "<leader>oo", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
+keymap("n", "<leader>os", ":OverseerShell ", { desc = "Run shell command" })
+keymap("n", "<leader>oS", ":OverseerShell! ", { desc = "Add shell task" })
+keymap("n", "<leader>ot", "<CMD>OverseerToggle<CR>", { desc = "Toggle" })
+
 --== Change
 keymap(
 	"n",
@@ -604,6 +615,9 @@ keymap("n", "<leader>+e", "<cmd>ene<CR>", {
 })
 keymap("n", "<leader>+m", "<cmd>marks<CR>", {
 	desc = "[:marks] Show marks, use [m*] to add a mark to * and [`*]/['*] to go to the mark at the cursor/line",
+})
+keymap("n", "<leader>+r", "<cmd>registers<CR>", {
+	desc = "[:registers] Show registers",
 })
 keymap("n", "<leader>+N", "<C-a>", {
 	desc = "[<C-S-x>] Increment number under cursor. Original keymap is <C-a>.",
