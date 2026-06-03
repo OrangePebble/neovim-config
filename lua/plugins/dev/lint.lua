@@ -1,6 +1,10 @@
 -- Linting plugin.
 return {
 	"mfussenegger/nvim-lint",
+	dependencies = {
+		-- Adds the ability to automatically install LSPs, linters, etc.
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+	},
 	event = { "BufReadPre", "BufNewFile" },
 	config = function()
 		local lint = require("lint")
@@ -9,7 +13,6 @@ return {
 		--  https://github.com/mfussenegger/nvim-lint/tree/master/lua/lint/linters
 		-- INFO: Get all available filetypes at:
 		--  https://github.com/neovim/neovim/blob/master/runtime/lua/vim/filetype.lua
-		-- INFO: Make these auto-install using Mason on ../../utils/lsp-servers.lua
 		lint.linters_by_ft = {
 			lua = { "luacheck" },
 			nix = { "statix" },
@@ -31,6 +34,10 @@ return {
 			json = { "eslint_d" },
 			jsonc = { "eslint_d" },
 		}
+
+		require("utils.mason-installer").ensure_installed({
+			"luacheck",
+		})
 
 		-- Create autocommand which carries out the actual linting
 		-- on the specified events.

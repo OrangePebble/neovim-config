@@ -1,16 +1,28 @@
 -- Autoformat plugin.
 return {
 	"stevearc/conform.nvim",
+	dependencies = {
+		-- Adds the ability to automatically install LSPs, linters, etc.
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+	},
 	event = { "BufWritePre" },
 	cmd = { "ConformInfo" },
-	opts = {
+	init = function()
+		-- If you want the formatexpr, here is the place to set it
+		vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
 
+		require("utils.mason-installer").ensure_installed({
+			"stylua",
+			"beautysh",
+			"prettierd",
+		})
+	end,
+	opts = {
 		-- Define your formatters
 		-- INFO: Get all available formatters at:
 		--  https://github.com/stevearc/conform.nvim/tree/master/lua/conform/formatters
 		-- INFO: Get all available filetypes at:
 		--  https://github.com/neovim/neovim/blob/master/runtime/lua/vim/filetype.lua
-		-- INFO: Make these auto-install using Mason on ../../utils/lsp-servers.lua
 		formatters_by_ft = {
 			lua = { "stylua" },
 			python = { "black" },
@@ -69,8 +81,4 @@ return {
 			return { timeout_ms = 500, lsp_format = "fallback" }
 		end,
 	},
-	init = function()
-		-- If you want the formatexpr, here is the place to set it
-		vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
-	end,
 }

@@ -3,7 +3,7 @@
 
 -- INFO: To define which-key keymap groups and icons go to: ../plugins/which-key.lua
 -- INFO: To change descriptions for existing keymaps go to: ../plugins/which-key.lua
--- INFO: For LSP keymaps that depend on the buffer (buffer-local) go to: ../utils/lsp-on-attach.lua
+-- INFO: For LSP keymaps that depend on the buffer (buffer-local) go to: ../plugins/dev/lspconfig.lua
 -- INFO: For nvim-tree buffer-local keymaps go to: ../plugins/tree.lua
 -- INFO: For completion (cmp) mappings go to: ../plugins/cmp.lua
 
