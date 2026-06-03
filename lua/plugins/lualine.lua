@@ -26,7 +26,6 @@ return {
 			},
 			sections = {
 				lualine_b = {
-					"branch",
 					{
 						"diff",
 						symbols = {
@@ -45,14 +44,7 @@ return {
 						},
 					},
 				},
-				-- Putting "filename" on the right so it's always visible even with too many symbols.
 				lualine_c = {
-					{
-						"filename",
-						cond = function()
-							return not (symbols.has() and (vim.b.has_lsp == true))
-						end,
-					},
 					{
 						symbols.get,
 						cond = function()
@@ -60,16 +52,9 @@ return {
 						end,
 					},
 				},
-				lualine_x = {
-					{
-						"filename",
-						cond = function()
-							return symbols.has() and (vim.b.has_lsp == true)
-						end,
-					},
-				},
-				lualine_y = { "encoding", "fileformat", "filetype" },
-				lualine_z = { "progress", "location" },
+				lualine_x = {},
+				lualine_y = { "filetype" },
+				lualine_z = { "filename" },
 			},
 		})
 	end,
