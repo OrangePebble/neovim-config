@@ -19,6 +19,10 @@ return {
 				end,
 			},
 			keymap = {
+				builtin = {
+					["<C-d>"] = "preview-page-down",
+					["<C-u>"] = "preview-page-up",
+				},
 				-- These are actions native to fzf, run `man fzf` to find out more.
 				fzf = {
 					["ctrl-q"] = "select-all+accept",
