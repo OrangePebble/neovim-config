@@ -17,8 +17,7 @@ M.setup = function()
 	-- Language servers to enable and automatically install using Mason.
 	---@type table<string, vim.lsp.Config>
 	local servers_ensure_installed = {
-		-- lua
-		lua_ls = {
+		lua_ls = { -- lua
 			-- Recommended configuration for working in Neovim.
 			on_init = function(client)
 				if client.workspace_folders then
@@ -64,21 +63,10 @@ M.setup = function()
 				},
 			},
 		},
-		-- bash
-		bashls = {
+		bashls = { -- bash
 			filetypes = { "sh", "bash", "zsh" },
 		},
-		-- typescript
-		ts_ls = {
-			settings = {
-				typescript = {
-					indentStyle = "space",
-					indentSize = 4,
-				},
-			},
-		},
-		-- toml
-		tombi = {
+		tombi = { -- toml
 			settings = {
 				tombi = {
 					validate = true,
@@ -88,8 +76,7 @@ M.setup = function()
 				},
 			},
 		},
-		-- yaml
-		yamlls = {
+		yamlls = { -- yaml
 			settings = {
 				yaml = {
 					schemas = {
@@ -99,40 +86,49 @@ M.setup = function()
 					},
 					validate = true,
 					format = {
-						enable = true,
+						enable = false, -- Using 'prettierd' instead.
 					},
 				},
 			},
 		},
-		jsonls = {}, -- json
-		dockerls = {}, -- dockerfile
-		nil_ls = {}, -- nix
-		pyright = {}, -- pyright
-		qmlls = {}, -- qml
-		glsl_analyzer = {}, -- OpenGL shader language
+		jsonls = { -- json
+			init_oprions = {
+				provideFormatter = false, -- Using 'prettierd' instead.
+			},
+		},
 	}
 	-- Language servers to enable but not automatically install.
 	---@type table<string, vim.lsp.Config>
 	local servers = vim.tbl_extend("error", servers_ensure_installed, {
 		clangd = {}, -- c/c++
 		cmake = {}, -- CMakeLists.txt
+		dockerls = {}, -- dockerfile
+		nil_ls = {}, -- nix
+		pyright = {}, -- pyright
+		qmlls = {}, -- qml
+		glsl_analyzer = {}, -- OpenGL shader language
+		ts_ls = { -- typescript
+			settings = {
+				typescript = {
+					indentStyle = "space",
+					indentSize = 4,
+				},
+			},
+		},
 	})
 
 	local ensure_installed = vim.tbl_keys(servers_ensure_installed or {})
 	-- Other tools to be installed by Mason.
 	vim.list_extend(ensure_installed, {
 		-- Formatters
+		-- INFO: See expected formatters and the files they affect at: ../plugins/dev/conform.lua
 		"stylua",
 		"beautysh",
-		"black",
-		"kdlfmt",
 		"prettierd",
+
 		-- Linters
+		-- INFO: See expected linters and the files they affect at: ../plugins/dev/lint.lua
 		"luacheck",
-		"shellcheck",
-		"flake8",
-		"hadolint",
-		"eslint_d",
 	})
 	require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 

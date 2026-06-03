@@ -55,7 +55,8 @@ vim.opt.swapfile = false -- Don't create swap files
 vim.opt.undofile = true -- Persistent undo
 vim.opt.updatetime = 300 -- Time in ms to trigger CursorHold
 vim.opt.timeoutlen = 300 -- Time in ms to wait for mapped sequence
-vim.opt.ttimeoutlen = 0 -- No wait for key code sequences
+-- This causes problems in Windows where neovim writes something on every file opened in a buffer.
+-- vim.opt.ttimeoutlen = 0 -- No wait for key code sequences
 vim.opt.autoread = true -- Auto-reload file if changed outside
 vim.opt.autowrite = false -- Don't auto-save on some events
 vim.opt.diffopt:append("vertical") -- Vertical diff splits

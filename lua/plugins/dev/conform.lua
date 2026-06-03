@@ -34,6 +34,10 @@ return {
 			svelte = { "prettierd" },
 			vue = { "prettierd" },
 
+			json = { "prettierd" },
+			jsonc = { "prettierd" },
+			yaml = { "prettierd" },
+
 			-- Add 'stop_after_first' to stop after using the first valid formatter.
 			-- javascript = { "prettierd", "prettier", stop_after_first = true },
 		},
