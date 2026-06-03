@@ -11,11 +11,10 @@ return {
 			},
 			winopts = {
 				on_create = function()
-					local MiniNotify = require("mini.notify")
-					local id = MiniNotify.add("Press <F1> for fzf-lua keymaps.", "INFO")
+					-- Delay for half a second so the notification appears above the fzf-lua popup.
 					vim.defer_fn(function()
-						MiniNotify.remove(id)
-					end, 3000)
+						vim.notify("Press <F1> for fzf-lua keymaps.", "INFO", { hide_from_history = true })
+					end, 500)
 				end,
 			},
 			keymap = {

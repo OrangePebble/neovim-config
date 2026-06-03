@@ -40,8 +40,6 @@ return {
 	{ "echasnovski/mini.trailspace", version = "*", opts = {} },
 	-- Buffer removing (unshow, delete, wipeout), which saves window layout.
 	{ "echasnovski/mini.bufremove", version = "*", opts = {} },
-	-- Prettier notifications.
-	{ "echasnovski/mini.notify", version = "*", opts = {} },
 	-- Icons for other plugins + colors for which-key.
 	{
 		"echasnovski/mini.icons",

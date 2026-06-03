@@ -40,7 +40,6 @@ return {
 			{ "<leader>r", icon = { icon = "󰑕", color = "grey" } },
 			{ "<leader>u", icon = { icon = "", color = "yellow" } },
 			{ "<leader>e", icon = { icon = "", color = "yellow" } },
-			{ "<leader>n", icon = { icon = "󰵅", color = "green" } },
 			{ "]t", icon = { icon = "󰷐", color = "grey" } },
 			{ "[t", icon = { icon = "󰷐", color = "grey" } },
 
@@ -187,13 +186,14 @@ return {
 			{ "<leader>s/", icon = { icon = "󰈞", color = "cyan" } },
 			{ "<leader>sw", icon = { icon = "󰈞", color = "cyan" } },
 			{ "<leader>sh", icon = { icon = "󰞋", color = "grey" } },
-			{ "<leader>sn", icon = { icon = "", color = "grey" } },
+			{ "<leader>sN", icon = { icon = "", color = "grey" } },
 			{ "<leader>sr", icon = "" },
 			{ "<leader>so", icon = { icon = "", color = "green" } },
 			{ "<leader>sb", icon = { icon = "", color = "green" } },
 			{ "<leader>sd", icon = { icon = "󰃤", color = "red" } },
 			{ "<leader>sq", icon = { icon = "󰺧", color = "yellow" } },
 			{ "<leader>ss", icon = "" },
+			{ "<leader>sn", icon = { icon = "󰵅", color = "grey" } },
 
 			-- Window
 			{ "<leader>w", group = "Window", icon = { icon = "", color = "grey" } },

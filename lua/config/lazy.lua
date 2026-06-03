@@ -48,5 +48,9 @@ require("lazy").setup({
 			"carbonfox",
 		},
 	},
-	checker = { enabled = true, notify = false },
+	checker = {
+		enabled = true, -- check for updates
+		notify = false, -- don't send notification of existing updates
+		frequency = 604800, -- check every week
+	},
 })

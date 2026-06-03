@@ -199,11 +199,6 @@ keymap("n", "<leader>u", function()
 	vim.cmd.UndotreeFocus()
 end, { desc = "Undotree" })
 
---== mini.notify
-keymap("n", "<leader>n", function()
-	require("mini.notify").show_history()
-end, { desc = "Show notification history" })
-
 --== TODO
 
 -- 'to_fix_keywords' are the relevant keywords I usually care about.
@@ -252,7 +247,7 @@ keymap("n", "<leader>sf", function()
 		fd_opts = [[--color=never --type f --type l -L --exclude .git $(git config --file .gitmodules --get-regexp path | awk 'BEGIN { ORS=" " }; { print "--exclude " $2 }')]],
 	})
 end, { desc = "Files" })
-keymap("n", "<leader>sn", function()
+keymap("n", "<leader>sN", function()
 	require("fzf-lua").files({
 		cwd = vim.fn.stdpath("config"),
 	})
@@ -273,6 +268,9 @@ keymap("n", "<leader>sh", "<cmd>FzfLua helptags<CR>", { desc = "Help" })
 keymap("n", "<leader>sc", "<cmd>FzfLua command_history<CR>", { desc = "Command history" })
 keymap("n", "<leader>sd", "<cmd>FzfLua dap_breakpoints<CR>", { desc = "Debug breakpoints" })
 keymap("n", "<leader>sq", "<cmd>FzfLua quickfix<CR>", { desc = "Quickfix list" })
+keymap("n", "<leader>sn", function()
+	require("notify.integrations").pick()
+end, { desc = "Notifications" })
 
 --== Trouble
 keymap("n", "<leader>tq", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix list" })
@@ -615,4 +613,7 @@ keymap("n", "<leader>+n", "<C-x>", {
 })
 keymap("n", "<leader>+s", ":Sops ", {
 	desc = "[:Sops ] Edit/encrypt/decrypt/... files with sops.",
+})
+keymap("n", "<leader>+M", "<cmd>mes<CR>", {
+	desc = "[:mes] Show all messages.",
 })
