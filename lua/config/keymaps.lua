@@ -38,7 +38,7 @@ keymap("v", "<leader>p", '"_dP', { desc = "Paste without yanking" })
 keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- Change increment number under cursor
-keymap("n", "<C-S-x>", "<C-a>")
+keymap("n", "<C-c>", "<C-a>")
 
 -- Exit from Terminal insert mode by using escape.
 keymap("t", "<Esc>", "<C-\\><C-n>")
@@ -624,7 +624,7 @@ keymap("n", "<leader>+r", "<cmd>registers<CR>", {
 	desc = "[:registers] Show registers, use [\"#p] to paste the '#' register (alternate file)",
 })
 keymap("n", "<leader>+N", "<C-a>", {
-	desc = "[<C-S-x>] Increment number under cursor. Original keymap is <C-a>.",
+	desc = "[<C-c>] Increment number under cursor. Original keymap is <C-a>.",
 })
 keymap("n", "<leader>+n", "<C-x>", {
 	desc = "[<C-x>] Decrement number under cursor.",
