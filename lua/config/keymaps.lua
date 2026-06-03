@@ -618,7 +618,7 @@ keymap("n", "<leader>+m", "<cmd>marks<CR>", {
 	desc = "[:marks] Show marks, use [m*] to add a mark to * and [`*]/['*] to go to the mark at the cursor/line",
 })
 keymap("n", "<leader>+r", "<cmd>registers<CR>", {
-	desc = "[:registers] Show registers",
+	desc = "[:registers] Show registers, use [\"#p] to paste the '#' register (alternate file)",
 })
 keymap("n", "<leader>+N", "<C-a>", {
 	desc = "[<C-S-x>] Increment number under cursor. Original keymap is <C-a>.",
