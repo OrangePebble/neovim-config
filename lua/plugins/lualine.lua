@@ -52,7 +52,11 @@ return {
 						end,
 					},
 				},
-				lualine_x = { "overseer" },
+				lualine_x = {
+					{ "overseer", symbols = {
+						[require("overseer").STATUS.PENDING] = "󱎫 ",
+					} },
+				},
 				lualine_y = { "filetype" },
 				lualine_z = { "filename" },
 			},

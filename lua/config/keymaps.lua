@@ -40,6 +40,9 @@ keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
 -- Change increment number under cursor
 keymap("n", "<C-S-x>", "<C-a>")
 
+-- Exit from Terminal insert mode by using escape.
+keymap("t", "<Esc>", "<C-\\><C-n>")
+
 --== Toggles
 keymap("n", "<leader>tw", "<cmd>set wrap!<CR>", { desc = "Line wrap" })
 keymap("n", "<leader>tr", function()

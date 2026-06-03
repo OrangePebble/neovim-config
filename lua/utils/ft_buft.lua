@@ -20,6 +20,8 @@ M.special_filetypes = {
 	"lspinfo",
 	"oil",
 	"trouble",
+	"OverseerList",
+	"OverseerOutput",
 	-- Add more as needed
 }
 

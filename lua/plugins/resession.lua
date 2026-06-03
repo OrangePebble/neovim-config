@@ -4,7 +4,9 @@ return {
 		local resession = require("resession")
 		resession.setup({
 			extensions = {
-				overseer = {},
+				overseer = {
+					autostart_on_load = false,
+				},
 				alternate = {},
 			},
 		})
