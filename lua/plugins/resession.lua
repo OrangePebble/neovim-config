@@ -3,11 +3,6 @@ return {
 	config = function()
 		local resession = require("resession")
 		resession.setup({
-			autosave = {
-				enabled = true,
-				interval = 300, -- seconds
-				notify = true,
-			},
 			extensions = {
 				overseer = {},
 				alternate = {},
@@ -36,5 +31,16 @@ return {
 				vim.g.using_stdin = true
 			end,
 		})
+
+		-- Autosave every 5mins. The plugin has an autosave included but the notifications are saved
+		--  in history.
+		local function autosave()
+			vim.defer_fn(function()
+				resession.save(vim.fn.getcwd(), { notify = false })
+				vim.notify(string.format('Saved session "%s"', vim.fn.getcwd()), "INFO", { hide_from_history = true })
+				autosave()
+			end, 300000)
+		end
+		autosave()
 	end,
 }
