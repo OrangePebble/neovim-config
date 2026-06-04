@@ -134,7 +134,35 @@ return {
 			-- Language servers to enable but not automatically install.
 			---@type table<string, vim.lsp.Config>
 			local servers = vim.tbl_extend("error", servers_ensure_installed, {
-				clangd = {}, -- c/c++
+				clangd = {
+					-- https://github.com/neovim/nvim-lspconfig/wiki/Running-language-servers-in-containers
+					-- If this isn't enough check out existing lsp container and devcontainer plugins like:
+					--  https://github.com/lspcontainers/lspcontainers.nvim
+					before_init = function(params)
+						params.processId = vim.NIL
+					end,
+					on_init = function(client)
+						if client.workspace_folders then
+							local workspace_path = client.workspace_folders[1].name
+							local workspace_name = vim.fn.fnamemodify(workspace_path, ":t")
+							-- Using regex match to check multiple names and patterns
+							-- 'baibe' for my work's training project
+							if string.match(workspace_name, "(.*baibe.*)") then
+								client.config = vim.tbl_deep_extend("force", client.config, {
+									cmd = {
+										"docker",
+										"exec",
+										"-i",
+										"baibe-app",
+										"clangd-19",
+										"--background-index",
+										"2>/dev/null",
+									},
+								})
+							end
+						end
+					end,
+				}, -- c/c++
 				cmake = {}, -- CMakeLists.txt
 				dockerls = {}, -- dockerfile
 				nil_ls = {}, -- nix
