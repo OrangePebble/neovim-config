@@ -97,7 +97,7 @@ vim.opt.guicursor = {
 }
 
 -- Folding Settings
--- INFO: foldmethod and foldexpr are set at ../plugins/dev/treesitter.lua
+-- INFO: foldmethod and foldexpr are set at ../plugins/ufo.lua
 vim.opt.foldlevel = 99 -- Keep all folds open by default
 vim.o.foldlevelstart = 99
 
