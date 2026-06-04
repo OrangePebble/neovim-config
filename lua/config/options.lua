@@ -99,6 +99,7 @@ vim.opt.guicursor = {
 -- Folding Settings
 -- INFO: foldmethod and foldexpr are set at ../plugins/dev/treesitter.lua
 vim.opt.foldlevel = 99 -- Keep all folds open by default
+vim.o.foldlevelstart = 99
 
 -- Split Behavior
 vim.opt.splitbelow = true -- Horizontal splits open below

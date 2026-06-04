@@ -5,9 +5,6 @@ return {
 		priority = 999, -- One of the first to be loaded.
 		config = function()
 			require("nightfox").setup({
-				-- TODO: Look into making nvim and the terminal transparent.
-				-- options = { transparent = true, },
-				-- groups = { carbonfox = { Visual = { bg = "palette.bg1" }, }, },
 				groups = {
 					carbonfox = {
 						WinSeparator = { fg = "palette.bg0", bg = "palette.bg0" },

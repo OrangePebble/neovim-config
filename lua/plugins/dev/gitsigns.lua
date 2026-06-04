@@ -1,1 +1,7 @@
-return { "lewis6991/gitsigns.nvim", opts = {} }
+return {
+	"lewis6991/gitsigns.nvim",
+	opts = {
+		signcolumn = false,
+		numhl = true,
+	},
+}

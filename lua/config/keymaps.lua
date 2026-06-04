@@ -49,7 +49,7 @@ keymap("n", "<leader>tr", function()
 	vim.opt.relativenumber = not vim.opt.relativenumber._value
 	vim.g.togglerelativenumber = not vim.g.togglerelativenumber
 end, { desc = "Relative line numbers" })
-keymap("n", "<leader>tf", function()
+keymap("n", "<leader>tF", function()
 	vim.g.autoformat = not vim.g.autoformat
 end, { desc = "Formatting on save" })
 keymap("n", "<leader>th", function()
@@ -64,6 +64,22 @@ keymap("n", "<leader>tC", function()
 end, { desc = "Conceal level (0<->2)" })
 keymap("n", "<leader>tc", "<cmd>HighlightColors Toggle<cr>", { desc = "Color highlighting" })
 keymap("n", "<leader>tl", "<cmd>Twilight<CR>", { desc = "Twilight" })
+keymap("n", "<leader>ts", function()
+	if vim.opt.signcolumn._value == "yes" then
+		vim.opt.signcolumn = "no"
+	else
+		vim.opt.signcolumn = "yes"
+	end
+end, { desc = "Sign column" })
+keymap("n", "<leader>tf", function()
+	if vim.opt.foldcolumn._value == "1" then
+		vim.opt.foldcolumn = "0"
+	else
+		vim.opt.foldcolumn = "1"
+		-- I need to set numberwidth again because statuscol.nvim doesn't handle toggling fold columns well.
+		vim.opt.numberwidth = 3
+	end
+end, { desc = "Fold column" })
 
 --== smart-splits and native window keymaps
 keymap("n", "<leader>wh", function()
@@ -331,13 +347,13 @@ end, { desc = "Open list" })
 
 --== Git
 keymap("n", "]g", "<cmd>Gitsigns nav_hunk next<CR>", { desc = "Next git hunk" })
-keymap("n", "<leader>gn", "<cmd>Gitsigns nav_hunk next<CR>", { desc = "']g' Next hunk" })
+keymap("n", "<leader>g]", "<cmd>Gitsigns nav_hunk next<CR>", { desc = "']g' Next hunk" })
 keymap("n", "[g", "<cmd>Gitsigns nav_hunk prev<CR>", { desc = "Previous git hunk" })
-keymap("n", "<leader>gp", "<cmd>Gitsigns nav_hunk prev<CR>", { desc = "'[g' Previous hunk" })
+keymap("n", "<leader>g[", "<cmd>Gitsigns nav_hunk prev<CR>", { desc = "'[g' Previous hunk" })
 keymap("n", "]G", "<cmd>Gitsigns nav_hunk last<CR>", { desc = "Last git hunk" })
-keymap("n", "<leader>gN", "<cmd>Gitsigns nav_hunk Last<CR>", { desc = "']G' Last hunk" })
+keymap("n", "<leader>g}", "<cmd>Gitsigns nav_hunk Last<CR>", { desc = "']G' Last hunk" })
 keymap("n", "[G", "<cmd>Gitsigns nav_hunk first<CR>", { desc = "First git hunk" })
-keymap("n", "<leader>gP", "<cmd>Gitsigns nav_hunk first<CR>", { desc = "'[G' First hunk" })
+keymap("n", "<leader>g{", "<cmd>Gitsigns nav_hunk first<CR>", { desc = "'[G' First hunk" })
 
 keymap("n", "<leader>gs", "<cmd>Gitsigns stage_hunk<CR>", { desc = "Stage hunk" })
 keymap("n", "<leader>gS", "<cmd>Gitsigns stage_buffer<CR>", { desc = "Stage buffer" })
@@ -345,6 +361,7 @@ keymap("n", "<leader>gr", "<cmd>Gitsigns reset_hunk<CR>", { desc = "Reset hunk" 
 keymap("n", "<leader>gR", "<cmd>Gitsigns reset_buffer<CR>", { desc = "Reset buffer" })
 keymap("n", "<leader>gu", "<cmd>Gitsigns undo_stage_hunk<CR>", { desc = "Undo stage hunk" })
 
+keymap("n", "<leader>gp", "<cmd>Gitsigns preview_hunk_inline<CR>", { desc = "Preview hunk" })
 keymap("n", "<leader>gd", "<cmd>Gitsigns diffthis<CR>", { desc = "Diff" })
 keymap("n", "<leader>gD", "<cmd>Gitsigns diffthis @<CR>", { desc = "Diff (last commit)" })
 
@@ -354,6 +371,7 @@ keymap("n", "<leader>gts", "<cmd>Gitsigns toggle_signs<CR>", { desc = "Signs" })
 keymap("n", "<leader>gtd", "<cmd>Gitsigns toggle_deleted<CR>", { desc = "Deleted" })
 keymap("n", "<leader>gtw", "<cmd>Gitsigns toggle_word_diff<CR>", { desc = "Word diff" })
 keymap("n", "<leader>gtl", "<cmd>Gitsigns toggle_linehl<CR>", { desc = "Line highlight" })
+keymap("n", "<leader>gtn", "<cmd>Gitsigns toggle_numhl<CR>", { desc = "Number highlight" })
 keymap("n", "<leader>gtb", "<cmd>Gitsigns toggle_current_line_blame<CR>", { desc = "Current line blame" })
 
 keymap({ "o", "x" }, "ig", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
