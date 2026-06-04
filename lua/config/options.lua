@@ -97,8 +97,7 @@ vim.opt.guicursor = {
 }
 
 -- Folding Settings
-vim.opt.foldmethod = "expr" -- Use expression for folding
-vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()" -- Use treesitter for folding
+-- INFO: foldmethod and foldexpr are set at ../plugins/dev/treesitter.lua
 vim.opt.foldlevel = 99 -- Keep all folds open by default
 
 -- Split Behavior

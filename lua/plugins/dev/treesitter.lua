@@ -45,6 +45,10 @@ return {
 				-- checks if a parser exists for the current language
 				local language = vim.treesitter.language.get_lang(filetype) or filetype
 				if not vim.treesitter.language.add(language) then
+					-- disable folding using treesitter for files that don't support it
+					-- needs to be done like this unlike 'indentexpr' because 'foldmethod' is
+					-- 'vim.wo' and not 'vim.bo'
+					vim.wo.foldmethod = "manual"
 					return
 				end
 
