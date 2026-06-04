@@ -589,6 +589,40 @@ keymap("n", "<leader>os", ":OverseerShell ", { desc = "Run shell command" })
 keymap("n", "<leader>oS", ":OverseerShell! ", { desc = "Add shell task" })
 keymap("n", "<leader>ot", "<CMD>OverseerToggle<CR>", { desc = "Toggle" })
 
+--== OpenCode
+keymap({ "n", "x" }, "<leader>aa", function()
+	require("opencode").ask("@this ", { submit = true })
+end, { desc = "Ask" })
+keymap({ "n", "x" }, "<leader>as", function()
+	require("opencode").select()
+end, { desc = "Select action" })
+keymap({ "n", "x" }, "<leader>ar", function()
+	return require("opencode").operator("@this ")
+end, { desc = "Add range", expr = true })
+keymap("n", "<leader>al", function()
+	return require("opencode").operator("@this ") .. "_"
+end, { desc = "Add line", expr = true })
+keymap("n", "<leader>ab", function()
+	return require("opencode").operator("@buffer ") .. "_"
+end, { desc = "Add buffer", expr = true })
+keymap("n", "<leader>ax", function()
+	if #vim.diagnostic.get(0) > 0 then
+		return require("opencode").operator("@diagnostics ") .. "_"
+	end
+	vim.defer_fn(function()
+		vim.notify("No diagnostics found.", "ERROR", { hide_from_history = true })
+	end, 0)
+end, { desc = "Add diagnostics", expr = true })
+keymap("n", "<leader>aq", function()
+	if #vim.fn.getqflist() > 0 then
+		return require("opencode").operator("@quickfix ") .. "_"
+	else
+		vim.defer_fn(function()
+			vim.notify("The quickfix list is empty.", "ERROR", { hide_from_history = true })
+		end, 0)
+	end
+end, { desc = "Add quickfix list", expr = true })
+
 --== Change
 keymap(
 	"n",
@@ -601,6 +635,9 @@ keymap("n", "<leader>cf", "<cmd>FzfLua filetypes<CR>", { desc = "File type" })
 --== Extras
 keymap("n", "<leader>+q", ":cdo ", {
 	desc = "[:cdo ] Do something for each quickfix item, like 's/' (use '/gc' flags as 'c' asks you every item if it is to apply)",
+})
+keymap("n", "<leader>+q", "<CMD>cgetexpr []<CR>", {
+	desc = "[:cgetexpr []] Clear the quickfix list",
 })
 keymap("n", "<leader>+:", "q: ", {
 	desc = "[q:] Open cmd window where you can see the history and use modes (insert, visual, ...). Open window in regular cmd with <C-f>",
@@ -634,4 +671,10 @@ keymap("n", "<leader>+s", ":Sops ", {
 })
 keymap("n", "<leader>+M", "<cmd>mes<CR>", {
 	desc = "[:mes] Show all messages.",
+})
+keymap("n", "<leader>+t", "gt", {
+	desc = "[gt] Go to next tab.",
+})
+keymap("n", "<leader>+T", "gT", {
+	desc = "[gT] Go to previous tab.",
 })

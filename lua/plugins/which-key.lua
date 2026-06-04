@@ -75,6 +75,8 @@ return {
 			{ "]X", icon = { icon = "󱖫", color = "red" } },
 			{ "[x", icon = { icon = "󱖫", color = "red" } },
 			{ "[X", icon = { icon = "󱖫", color = "red" } },
+			{ "]c", desc = "Next change (diff)", icon = { icon = "", color = "orange" } },
+			{ "[c", desc = "Previous change (diff)", icon = { icon = "", color = "orange" } },
 
 			-- mini.indentscope new descriptions and icons
 			{ "ii", mode = "ox", desc = "Indent (Object scope)", icon = { icon = "󰉶", color = "grey" } },
@@ -256,6 +258,16 @@ return {
 			{ "<leader>oo", icon = { icon = "󰷐", color = "green" } },
 			{ "<leader>os", icon = { icon = "", color = "grey" } },
 			{ "<leader>oS", icon = { icon = "", color = "cyan" } },
+
+			-- OpenCode
+			{ "<leader>a", mode = "nx", group = "AI", icon = { icon = "󰚩", color = "green" } },
+			{ "<leader>aa", mode = "nx", icon = { icon = "", color = "green" } },
+			{ "<leader>as", mode = "nx", icon = { icon = "󰷐", color = "blue" } },
+			{ "<leader>ar", mode = "nx", icon = { icon = "󰅪", color = "grey" } },
+			{ "<leader>al", icon = { icon = "", color = "grey" } },
+			{ "<leader>ab", icon = { icon = "", color = "grey" } },
+			{ "<leader>ax", icon = { icon = "󱖫", color = "grey" } },
+			{ "<leader>aq", icon = { icon = "󰺧", color = "grey" } },
 
 			-- Change
 			{ "<leader>c", group = "Change", icon = { icon = "", color = "green" } },
