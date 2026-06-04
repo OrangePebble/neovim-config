@@ -19,8 +19,8 @@ return {
 			sh = { "shellcheck" },
 			bash = { "shellcheck" },
 			python = { "flake8" },
-			c = { "clangtidy" },
-			cpp = { "clangtidy" },
+			-- c = { "clangtidy" },
+			-- cpp = { "clangtidy" },
 			dockerfile = { "hadolint" },
 			cmake = { "cmakelint" },
 

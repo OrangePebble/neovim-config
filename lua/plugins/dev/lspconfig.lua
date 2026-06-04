@@ -154,6 +154,10 @@ return {
 			-- https://github.com/neovim/nvim-lspconfig/wiki/Running-language-servers-in-containers
 			-- If this isn't enough check out existing lsp container and devcontainer plugins like:
 			--  https://github.com/lspcontainers/lspcontainers.nvim
+			-- INFO: I've tried doing this like lua_ls above but it seemed to use the regular cmd, maybe
+			--  only when the new one failed but I couldn't tell.
+			-- WARN: For clangd to find the built files, the workspace inside the container has to be
+			--  the same as outside (the project directory).
 			local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 			-- Using regex match to check multiple names and patterns
 			-- 'baibe' for my work's training project
@@ -163,7 +167,7 @@ return {
 						"docker",
 						"exec",
 						"-i",
-						"baibe-app",
+						"workspace",
 						"clangd-19",
 						"--background-index",
 					},
