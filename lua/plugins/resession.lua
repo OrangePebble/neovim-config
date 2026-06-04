@@ -24,7 +24,9 @@ return {
 		})
 		vim.api.nvim_create_autocmd("VimLeavePre", {
 			callback = function()
-				resession.save(vim.fn.getcwd(), { notify = false })
+				if not vim.g.resession_deleted then
+					resession.save(vim.fn.getcwd(), { notify = false })
+				end
 			end,
 		})
 		vim.api.nvim_create_autocmd("StdinReadPre", {

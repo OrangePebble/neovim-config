@@ -240,6 +240,7 @@ keymap("n", "<leader>\\l", function()
 end, { desc = "Load" })
 keymap("n", "<leader>\\d", function()
 	require("resession").delete(vim.fn.getcwd())
+	vim.g.resession_deleted = true
 end, { desc = "Delete" })
 keymap("n", "<leader>\\i", function()
 	vim.print(require("resession").get_current_session_info())
