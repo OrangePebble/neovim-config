@@ -417,6 +417,10 @@ keymap("n", "<leader>gtb", "<cmd>Gitsigns toggle_current_line_blame<CR>", { desc
 keymap({ "o", "x" }, "ig", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
 keymap({ "o", "x" }, "ag", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
 
+keymap("n", "<leader>gl", function()
+	Snacks.lazygit()
+end, { desc = "Lazygit" })
+
 --== LSP
 
 -- Rename the variable under the cursor.

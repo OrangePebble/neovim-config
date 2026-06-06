@@ -178,6 +178,7 @@ return {
 			{ "<leader>gtn", icon = { icon = "󰉻", color = "yellow" } },
 			{ "<leader>gtw", icon = { icon = "", color = "yellow" } },
 			{ "<leader>gtd", icon = { icon = "󰆴", color = "red" } },
+			{ "<leader>gl", icon = { icon = "󰋣", color = "yellow" } },
 
 			-- Search
 			{ "<leader>s", group = "Search", icon = { icon = "", color = "cyan" } },

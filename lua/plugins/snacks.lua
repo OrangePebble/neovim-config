@@ -8,6 +8,7 @@ return {
 	opts = {
 		picker = { enabled = true },
 		dim = { enabled = true },
+		lazygit = { configure = true },
 		indent = {
 			enabled = true,
 			animate = { enabled = false },
