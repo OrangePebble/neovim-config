@@ -18,6 +18,23 @@ return {
 			-- Adds the ability to automatically install LSPs, linters, etc.
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 			"hrsh7th/cmp-nvim-lsp", -- nvim-cmp source for LSP-based completion
+			{
+				-- Automatically configure lua_ls to work with my Neovim configuration and plugins.
+				-- Needs a `require()` or a `---@module` to load libraries in a file, or for the plugin
+				--  to be included in `opts.libary` below.
+				-- The plugin loations can be found at ~/.local/share/nvim/lazy
+				"folke/lazydev.nvim",
+				ft = "lua", -- only load on lua files
+				opts = {
+					library = {
+						-- See the configuration section for more details:
+						--  https://github.com/folke/lazydev.nvim#%EF%B8%8F-configuration
+
+						-- Load luvit types when the `vim.uv` word is found
+						{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+					},
+				},
+			},
 		},
 		config = function()
 			--== Configure diagnostics format
@@ -49,54 +66,7 @@ return {
 			-- Language servers to enable and automatically install using Mason.
 			---@type table<string, vim.lsp.Config>
 			local servers_ensure_installed = {
-				lua_ls = { -- lua
-					-- Recommended configuration for working in Neovim.
-					on_init = function(client)
-						if client.workspace_folders then
-							local path = client.workspace_folders[1].name
-							if
-								path ~= vim.fn.stdpath("config")
-								and path ~= "/home/pebble/home/nix-config/modules/terminal/neovim/config"
-								and vim.fn.fnamemodify(path, ":t") ~= "neovim-config"
-								and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
-							then
-								return
-							end
-						end
-
-						client.config.settings.Lua = vim.tbl_deep_extend("force", client.config.settings.Lua, {
-							runtime = {
-								-- Tell the language server which version of Lua you're using (most
-								-- likely LuaJIT in the case of Neovim)
-								version = "LuaJIT",
-								-- Tell the language server how to find Lua modules same way as Neovim
-								-- (see `:h lua-module-load`)
-								path = {
-									"lua/?.lua",
-									"lua/?/init.lua",
-								},
-							},
-							-- Make the server aware of Neovim runtime files
-							workspace = {
-								checkThirdParty = false,
-								library = {
-									vim.env.VIMRUNTIME,
-									-- For LSP Settings Type Annotations: https://github.com/neovim/nvim-lspconfig#lsp-settings-type-annotations
-									vim.api.nvim_get_runtime_file("lua/lspconfig", false)[1],
-									-- Depending on the usage, you might want to add additional paths
-									-- here.
-									-- '${3rd}/luv/library',
-									-- '${3rd}/busted/library',
-								},
-							},
-						})
-					end,
-					settings = {
-						Lua = {
-							format = { enable = false },
-						},
-					},
-				},
+				lua_ls = {}, -- lua
 				bashls = { -- bash
 					filetypes = { "sh", "bash", "zsh" },
 				},
