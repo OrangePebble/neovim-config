@@ -8,11 +8,11 @@ return {
 		-- Setting treesitter as the provider here instead of using the regular method elsewhere
 		--  because this is supposedly faster and lets me manually add folds beside the treesitter
 		--  ones.
-		-- require("ufo").setup({
-		-- 	provider_selector = function(bufnr, filetype, buftype)
-		-- 		return { "treesitter", "indent" }
-		-- 	end,
-		-- })
+		require("ufo").setup({
+			provider_selector = function(bufnr, filetype, buftype)
+				return { "treesitter", "indent" }
+			end,
+		})
 		-- TODO: THIS DOESN'T EVEN LOOK LIKE IT WORKS DURING DIFFMODE SO I GUESS IT'S USELESS?
 		--  and I should just manually change the virtual text, and figure out how to enable
 		--  manual folds after the lsp/treesitter are set
@@ -28,6 +28,7 @@ return {
 		-- TODO: add toggles for showing whitespace characters like tab
 		-- TODO: move these keymaps to the keymap file
 		-- TODO: change TMUX to remove the > separator from tabs without name
+		-- TODO: change fold column toggle to just change fillchars
 
 		-- TODO: https://github.com/neovim/neovim/discussions/34246
 		-- TODO: look into foldenable: https://stackoverflow.com/a/79405264

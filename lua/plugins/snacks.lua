@@ -7,6 +7,7 @@ return {
 	---@type snacks.Config
 	opts = {
 		picker = { enabled = true },
+		dim = { enabled = true },
 		indent = {
 			enabled = true,
 			animate = { enabled = false },
@@ -35,6 +36,8 @@ return {
 		},
 	},
 	init = function()
+		vim.g.snacks_dim = false
+
 		--- Advanced LSP progress notification from https://github.com/folke/snacks.nvim/blob/main/docs/notifier.md#-examples
 		---@type table<number, {token:lsp.ProgressToken, msg:string, done:boolean}[]>
 		local progress = vim.defaulttable()
@@ -42,8 +45,8 @@ return {
 			---@param ev {data: {client_id: integer, params: lsp.ProgressParams}}
 			callback = function(ev)
 				local client = vim.lsp.get_client_by_id(ev.data.client_id)
-				local value = ev.data.params.value --[[@as {percentage?: number, title?: string, message?: string, kind: "begin" | "report" | "end"}]]
 				if not client or type(value) ~= "table" then
+					local value = ev.data.params.value --[[@as {percentage?: number, title?: string, message?: string, kind: "begin" | "report" | "end"}]]
 					return
 				end
 				local p = progress[client.id]

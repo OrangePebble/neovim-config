@@ -94,7 +94,7 @@ return {
 			{ "<leader>tta", icon = "" },
 			{ "<leader>tq", icon = { icon = "󰺧", color = "yellow" } },
 			{ "<leader>te", icon = { icon = "󰈔", color = "green" } },
-			{ "<leader>tl", icon = { icon = "󰉄", color = "grey" } },
+			{ "<leader>td", icon = { icon = "󰉄", color = "grey" } },
 			{ "<leader>tr", icon = { icon = "󰉻", color = "grey" } },
 			{ "<leader>th", icon = { icon = "", color = "grey" } },
 			{ "<leader>tc", icon = { icon = "󰏘", color = "grey" } },

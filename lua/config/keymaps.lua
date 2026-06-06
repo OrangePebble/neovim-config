@@ -63,7 +63,14 @@ keymap("n", "<leader>tC", function()
 	end
 end, { desc = "Conceal level (0<->2)" })
 keymap("n", "<leader>tc", "<cmd>HighlightColors Toggle<cr>", { desc = "Color highlighting" })
-keymap("n", "<leader>tl", "<cmd>Twilight<CR>", { desc = "Twilight" })
+keymap("n", "<leader>td", function()
+	vim.g.snacks_dim = not vim.g.snacks_dim
+	if vim.g.snacks_dim then
+		Snacks.dim.enable()
+	else
+		Snacks.dim.disable()
+	end
+end, { desc = "Dim" })
 keymap("n", "<leader>ts", function()
 	if vim.opt.signcolumn._value == "yes" then
 		vim.opt.signcolumn = "no"
