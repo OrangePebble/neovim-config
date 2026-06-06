@@ -28,7 +28,6 @@ return {
 		-- TODO: add toggles for showing whitespace characters like tab
 		-- TODO: move these keymaps to the keymap file
 		-- TODO: change TMUX to remove the > separator from tabs without name
-		-- TODO: add extra which-key for turning characters UPPER/lower case
 
 		-- TODO: https://github.com/neovim/neovim/discussions/34246
 		-- TODO: look into foldenable: https://stackoverflow.com/a/79405264

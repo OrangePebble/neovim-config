@@ -749,3 +749,9 @@ keymap("n", "<leader>+t", "gt", {
 keymap("n", "<leader>+T", "gT", {
 	desc = "[gT] Go to previous tab.",
 })
+keymap("n", "<leader>+u", "gu", {
+	desc = "[gu] Change to lowercase.",
+})
+keymap("n", "<leader>+U", "gU", {
+	desc = "[gU] Change to uppercase.",
+})
