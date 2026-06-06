@@ -17,7 +17,6 @@ return {
 			} },
 			-- Adds the ability to automatically install LSPs, linters, etc.
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
-			"hrsh7th/cmp-nvim-lsp", -- nvim-cmp source for LSP-based completion
 			{
 				-- Automatically configure lua_ls to work with my Neovim configuration and plugins.
 				-- Needs a `require()` or a `---@module` to load libraries in a file, or for the plugin
@@ -161,10 +160,8 @@ return {
 				end
 			end
 
-			-- cmp.nvim recommends setting capabilities on all LSPs.
-			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			for name, server in pairs(servers) do
-				vim.lsp.config(name, vim.tbl_extend("force", server, { capabilities = capabilities }))
+				vim.lsp.config(name, server)
 				vim.lsp.enable(name)
 			end
 		end,

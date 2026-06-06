@@ -1,9 +1,7 @@
----@module "snacks"
-
----@type LazySpec
 return {
 	"folke/snacks.nvim",
 	lazy = false,
+	---@module "snacks"
 	---@type snacks.Config
 	opts = {
 		picker = { enabled = true },
@@ -46,8 +44,8 @@ return {
 			---@param ev {data: {client_id: integer, params: lsp.ProgressParams}}
 			callback = function(ev)
 				local client = vim.lsp.get_client_by_id(ev.data.client_id)
+				local value = ev.data.params.value --[[@as {percentage?: number, title?: string, message?: string, kind: "begin" | "report" | "end"}]]
 				if not client or type(value) ~= "table" then
-					local value = ev.data.params.value --[[@as {percentage?: number, title?: string, message?: string, kind: "begin" | "report" | "end"}]]
 					return
 				end
 				local p = progress[client.id]
