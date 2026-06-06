@@ -55,9 +55,18 @@ return {
 		-- Show the possible function arguments while typing inside the ().
 		signature = { enabled = true },
 
-		-- INFO: This would be nice to have but causes a problem where the cmdline contents are printed
-		--  multiple times whenever a line wrap occurs. Maybe if I switch to noice.nvim...
-		cmdline = { enabled = false },
+		cmdline = {
+			completion = {
+				menu = {
+					-- Only automatically show for some cmds.
+					auto_show = function(ctx)
+						return vim.fn.getcmdtype() == ":"
+						-- enable for inputs as well, with:
+						-- or vim.fn.getcmdtype() == '@'
+					end,
+				},
+			},
+		},
 
 		-- Use the Rust fuzzy matcher if available, fall back to the Lua implementation.
 		fuzzy = { implementation = "prefer_rust_with_warning" },

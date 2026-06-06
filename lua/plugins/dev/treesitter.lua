@@ -29,6 +29,7 @@ return {
 			"json",
 			"toml",
 			"diff",
+			"regex",
 		})
 		-- So treesitter has had a massive revamp and removed a bunch of features so that they
 		--  become just the foundation for the features and is therefore easier to maintain.

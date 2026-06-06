@@ -26,14 +26,7 @@ return {
 			},
 			sections = {
 				lualine_b = {
-					{
-						"diff",
-						symbols = {
-							added = " ",
-							modified = " ",
-							removed = " ",
-						},
-					},
+					"diff",
 					{
 						"diagnostics",
 						symbols = {
@@ -43,6 +36,9 @@ return {
 							hint = " ",
 						},
 					},
+					{ "overseer", symbols = {
+						[require("overseer").STATUS.PENDING] = "󱎫 ",
+					} },
 				},
 				lualine_c = {
 					{
@@ -52,14 +48,22 @@ return {
 						end,
 					},
 				},
-				lualine_x = {
-					{ "overseer", symbols = {
-						[require("overseer").STATUS.PENDING] = "󱎫 ",
-					} },
-				},
+				lualine_x = {},
 				lualine_y = { "filetype" },
 				lualine_z = { "filename" },
 			},
+		})
+
+		-- This somewhat reduces the problem of cmdline printing its contents multiple times whenever
+		--  a line wrap occurs, it now flickers instead by redrawing on every new character.
+		-- This problem is caused by plugins that modify the cmdline like lualine and blink-cmp (if
+		--  I don't disable cmdline functionality).
+		-- This fix should be enough because line wrapping on the cmdline doesn't happen often, I've
+		--  only noticed when I started using the OpenCode plugin.
+		vim.api.nvim_create_autocmd("CmdlineChanged", {
+			callback = function()
+				vim.cmd("redraw")
+			end,
 		})
 	end,
 	dependencies = { "echasnovski/mini.icons" },
