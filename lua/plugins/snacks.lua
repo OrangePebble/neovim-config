@@ -62,6 +62,7 @@ return {
 						notif.icon = #progress[client.id] == 0 and " "
 							or spinner[math.floor(vim.uv.hrtime() / (1e6 * 80)) % #spinner + 1]
 					end,
+					timeout = 500,
 				})
 			end,
 		})

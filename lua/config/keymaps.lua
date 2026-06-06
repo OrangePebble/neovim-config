@@ -251,7 +251,7 @@ vim.keymap.del("n", "[T")
 --== Resession
 keymap("n", "<leader>\\s", function()
 	require("resession").save(vim.fn.getcwd(), { notify = false })
-	vim.notify(string.format('Saved session "%s"', vim.fn.getcwd()), "INFO", { history = false })
+	vim.notify(string.format('Saved session "%s"', vim.fn.getcwd()), "INFO", { history = false, timeout = 1000 })
 end, { desc = "Save" })
 keymap("n", "<leader>\\l", function()
 	require("resession").load(vim.fn.getcwd())

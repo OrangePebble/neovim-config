@@ -45,7 +45,11 @@ return {
 				-- end
 				if event.type == "permission.asked" and event.properties.permission == "edit" then
 					vim.defer_fn(function()
-						vim.notify("Press '<leader>?l' to see local keymaps.", "INFO", { history = false })
+						vim.notify(
+							"Press '<leader>?l' to see local keymaps.",
+							"INFO",
+							{ history = false, timeout = 1000 }
+						)
 					end, 5000)
 				end
 				-- if event.type == "server.heartbeat" then
