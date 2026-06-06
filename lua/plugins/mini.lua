@@ -34,8 +34,6 @@ return {
 			require("mini.cursorword").setup()
 		end,
 	},
-	-- Visualize and work with indent scope.
-	{ "echasnovski/mini.indentscope", version = "*", opts = {} },
 	-- Highlight trailing whitespace.
 	{ "echasnovski/mini.trailspace", version = "*", opts = {} },
 	-- Buffer removing (unshow, delete, wipeout), which saves window layout.

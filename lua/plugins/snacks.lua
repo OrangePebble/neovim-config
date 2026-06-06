@@ -7,6 +7,20 @@ return {
 	---@type snacks.Config
 	opts = {
 		picker = { enabled = true },
+		indent = {
+			enabled = true,
+			animate = { enabled = false },
+			indent = { char = "" },
+			scope = { hl = "SnacksIndent" },
+			chunk = {
+				enabled = true,
+				char = {
+					horizontal = "",
+					arrow = "",
+				},
+				hl = "SnacksIndent",
+			},
+		},
 		notifier = {
 			enabled = true,
 			-- Same as the default "compact" but with left aligned title.
