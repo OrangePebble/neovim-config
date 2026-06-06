@@ -13,13 +13,13 @@ return {
 			},
 			server = {
 				start = function()
-					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { hide_from_history = true })
+					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { history = false })
 				end,
 				stop = function()
-					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { hide_from_history = true })
+					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { history = false })
 				end,
 				toggle = function()
-					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { hide_from_history = true })
+					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { history = false })
 				end,
 			},
 		}
@@ -34,18 +34,18 @@ return {
 				-- vim.notify(vim.inspect(event), "DEBUG")
 
 				if event.type == "session.idle" then
-					vim.notify("OpenCode finished responding.", "INFO", { hide_from_history = true })
+					vim.notify("OpenCode finished responding.", "INFO", { history = false })
 				end
 				-- if event.type == "server.connected" then
 				-- 	vim.notify(
 				-- 		"End the prompt with a space to append instead of submit.",
 				-- 		"INFO",
-				-- 		{ hide_from_history = true }
+				-- 		{ history = false }
 				-- 	)
 				-- end
 				if event.type == "permission.asked" and event.properties.permission == "edit" then
 					vim.defer_fn(function()
-						vim.notify("Press '<leader>?l' to see local keymaps.", "INFO", { hide_from_history = true })
+						vim.notify("Press '<leader>?l' to see local keymaps.", "INFO", { history = false })
 					end, 5000)
 				end
 				-- if event.type == "server.heartbeat" then

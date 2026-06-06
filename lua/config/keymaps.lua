@@ -251,7 +251,7 @@ vim.keymap.del("n", "[T")
 --== Resession
 keymap("n", "<leader>\\s", function()
 	require("resession").save(vim.fn.getcwd(), { notify = false })
-	vim.notify(string.format('Saved session "%s"', vim.fn.getcwd()), "INFO", { hide_from_history = true })
+	vim.notify(string.format('Saved session "%s"', vim.fn.getcwd()), "INFO", { history = false })
 end, { desc = "Save" })
 keymap("n", "<leader>\\l", function()
 	require("resession").load(vim.fn.getcwd())
@@ -675,7 +675,7 @@ keymap("n", "<leader>ax", function()
 		return require("opencode").operator("@diagnostics ") .. "_"
 	end
 	vim.defer_fn(function()
-		vim.notify("No diagnostics found.", "ERROR", { hide_from_history = true })
+		vim.notify("No diagnostics found.", "ERROR", { history = false })
 	end, 0)
 end, { desc = "Add diagnostics", expr = true })
 keymap("n", "<leader>aq", function()
@@ -683,7 +683,7 @@ keymap("n", "<leader>aq", function()
 		return require("opencode").operator("@quickfix ") .. "_"
 	else
 		vim.defer_fn(function()
-			vim.notify("The quickfix list is empty.", "ERROR", { hide_from_history = true })
+			vim.notify("The quickfix list is empty.", "ERROR", { history = false })
 		end, 0)
 	end
 end, { desc = "Add quickfix list", expr = true })

@@ -95,7 +95,7 @@ vim.api.nvim_create_autocmd("QuitPre", {
 vim.api.nvim_create_autocmd("User", {
 	pattern = "LuasnipPreExpand",
 	callback = function()
-		vim.notify("Use <C-l> and <C-h> to navigate snippet fields.", "INFO", { hide_from_history = true })
+		vim.notify("Use <C-l> and <C-h> to navigate snippet fields.", "INFO", { history = false })
 	end,
 })
 
