@@ -13,11 +13,26 @@ return {
 				return { "treesitter", "indent" }
 			end,
 		})
+		-- TODO: THIS DOESN'T EVEN LOOK LIKE IT WORKS DURING DIFFMODE SO I GUESS IT'S USELESS?
+		--  and I should just manually change the virtual text, and figure out how to enable
+		--  manual folds after the lsp/treesitter are set
+		-- maybe i can even set lsp, set treesitter, then set to manual
+		-- TODO: figure out why the fold column is visible during diff mode
+		-- TODO: figure out how to save folds between window/buffer change and session restore
+
 		-- TODO: figure out if I want to keep these as these seem to have different functionality
 		--  I never use them so I might as well keep the defaults
 		-- TODO: add the 'K' keymap in the readme
 		-- TODO: set which-key icon to the 'K' keymap
 		-- TODO: set which-key icons to the fold keymaps
+		-- TODO: add toggles for showing whitespace characters like tab
+		-- TODO: move these keymaps to the keymap file
+		-- TODO: decrease notification time
+		-- TODO: change TMUX to remove the > separator from tabs without name
+		-- TODO: add extra which-key for turning characters UPPER/lower case
+
+		-- TODO: https://github.com/neovim/neovim/discussions/34246
+		-- TODO: look into foldenable: https://stackoverflow.com/a/79405264
 
 		-- These are the default keymaps but they keep the foldlevel and use internal ufo API.
 		-- If not set folds are reset on leaving and entering the buffer.

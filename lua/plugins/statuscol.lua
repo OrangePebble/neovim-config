@@ -1,3 +1,5 @@
+-- Better number/sign/fold column.
+-- Adds more customization and click handlers.
 return {
 	"luukvbaal/statuscol.nvim",
 	config = function()

@@ -610,7 +610,7 @@ keymap("n", "<leader>ot", "<CMD>OverseerToggle<CR>", { desc = "Toggle" })
 
 --== OpenCode
 keymap({ "n", "x" }, "<leader>aa", function()
-	require("opencode").ask("@this ", { submit = true })
+	require("opencode").ask("", { submit = true })
 end, { desc = "Ask" })
 keymap({ "n", "x" }, "<leader>as", function()
 	require("opencode").select()

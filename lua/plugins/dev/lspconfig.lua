@@ -56,6 +56,8 @@ return {
 							local path = client.workspace_folders[1].name
 							if
 								path ~= vim.fn.stdpath("config")
+								and path ~= "/home/pebble/home/nix-config/modules/terminal/neovim/config"
+								and vim.fn.fnamemodify(path, ":t") ~= "neovim-config"
 								and (vim.uv.fs_stat(path .. "/.luarc.json") or vim.uv.fs_stat(path .. "/.luarc.jsonc"))
 							then
 								return
@@ -162,20 +164,27 @@ return {
 			-- Using regex match to check multiple names and patterns
 			-- 'baibe' for my work's training project
 			if string.match(cwd_name, "(.*baibe.*)") then
-				servers.clangd = vim.tbl_deep_extend("force", servers.clangd, {
-					cmd = {
-						"docker",
-						"exec",
-						"-i",
-						"workspace",
-						"clangd-19",
-						"--background-index",
-					},
-					before_init = function(params)
-						-- The processId inside a container is different so we ignore it.
-						params.processId = vim.NIL
-					end,
-				})
+				if vim.system({ "docker", "exec", "workspace", "true" }):wait().code == 0 then
+					servers.clangd = vim.tbl_deep_extend("force", servers.clangd, {
+						cmd = {
+							"docker",
+							"exec",
+							"-i",
+							"workspace",
+							"clangd-19",
+							"--background-index",
+						},
+						before_init = function(params)
+							-- The processId inside a container is different so we ignore it.
+							params.processId = vim.NIL
+						end,
+					})
+				else
+					-- Dlay so neovim has time to load notification plugin.
+					vim.defer_fn(function()
+						vim.notify("clangd: docker exec failed (container not running?)", "WARN")
+					end, 1000)
+				end
 			end
 
 			-- cmp.nvim recommends setting capabilities on all LSPs.
