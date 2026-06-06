@@ -25,7 +25,10 @@ return {
 		vim.api.nvim_create_autocmd("VimLeavePre", {
 			callback = function()
 				if not vim.g.resession_deleted then
-					resession.save(vim.fn.getcwd(), { notify = false })
+					-- Only save the session if nvim was started with no args and without reading from stdin
+					if vim.fn.argc(-1) == 0 and not vim.g.using_stdin then
+						resession.save(vim.fn.getcwd(), { notify = false })
+					end
 				end
 			end,
 		})

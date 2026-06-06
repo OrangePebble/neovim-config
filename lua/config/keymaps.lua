@@ -225,9 +225,11 @@ local to_fix_keywords = { "TODO", "FIX", "FIXME" }
 
 -- Search and toggle workspace TODOs
 keymap("n", "<leader>stt", function()
-	require("todo-comments.fzf").todo({ keywords = to_fix_keywords })
+	Snacks.picker.todo_comments({ keywords = to_fix_keywords })
 end, { desc = "To do and fix" })
-keymap("n", "<leader>sta", "<cmd>TodoFzfLua<CR>", { desc = "All" })
+keymap("n", "<leader>sta", function()
+	Snacks.picker.todo_comments()
+end, { desc = "All" })
 keymap("n", "<leader>ttt", function()
 	require("trouble").toggle({ mode = "todo", filter = { tag = to_fix_keywords } })
 end, { desc = "To do and fix" })
@@ -263,39 +265,70 @@ keymap("n", "<leader>\\i", function()
 end, { desc = "Get info" })
 
 --== Search
-keymap("n", "<leader>ss", "<cmd>FzfLua builtin<CR>", { desc = "..." }) -- All FzfLua options
-keymap("n", "<leader>sr", "<cmd>FzfLua resume<CR>", { desc = "Resume search" })
+keymap("n", "<leader>ss", function()
+	Snacks.picker()
+end, { desc = "..." })
+keymap("n", "<leader>sR", function()
+	Snacks.picker.resume()
+end, { desc = "Resume search" })
 keymap("n", "<leader>sf", function()
-	require("fzf-lua").files({
+	---@type snacks.picker.files.Config
+	Snacks.picker.files({
+		-- Follow symlinks.
+		follow = true,
 		-- Remove git submodules from search results.
-		-- Default value:
-		--  https://github.com/ibhagwan/fzf-lua/blob/d59f857c76eb474ec00debcf043f14fd001805cc/lua/fzf-lua/defaults.lua#L523
-		fd_opts = [[--color=never --type f --type l -L --exclude .git $(git config --file .gitmodules --get-regexp path | awk 'BEGIN { ORS=" " }; { print "--exclude " $2 }')]],
+		exclude = vim.tbl_map(function(l)
+			return l:match(" (%S+)$")
+		end, vim.fn.systemlist("git config --file .gitmodules --get-regexp path 2>/dev/null")),
 	})
 end, { desc = "Files" })
 keymap("n", "<leader>sN", function()
-	require("fzf-lua").files({
-		cwd = vim.fn.stdpath("config"),
+	---@type snacks.picker.files.Config
+	Snacks.picker.files({
+		-- Follow symlinks.
+		follow = true,
+		dirs = { vim.fn.stdpath("config") },
 	})
 end, { desc = "Neovim config" })
 keymap("n", "<leader>si", function()
-	require("fzf-lua").files({
-		-- Basically add '--no-ignore' to the default value in
-		--  https://github.com/ibhagwan/fzf-lua/blob/d59f857c76eb474ec00debcf043f14fd001805cc/lua/fzf-lua/defaults.lua#L523
-		fd_opts = [[--color=never --type f --type l -L --exclude .git --no-ignore]],
+	---@type snacks.picker.files.Config
+	Snacks.picker.files({
+		-- Follow symlinks.
+		follow = true,
+		-- Search hidden and gitignored files.
+		ignored = true,
+		hidden = true,
 	})
 end, { desc = "Files (including ignored)" })
-keymap("n", "<leader>so", "<cmd>FzfLua oldfiles<CR>", { desc = "Oldfiles" })
-keymap("n", "<leader>sg", "<cmd>FzfLua live_grep<CR>", { desc = "Live grep" })
-keymap("n", "<leader>s/", "<cmd>FzfLua lgrep_curbuf<CR>", { desc = "Live grep current buffer" })
-keymap("n", "<leader>sw", "<cmd>FzfLua grep_cword<CR>", { desc = "Grep word on cursor" })
-keymap("n", "<leader>sb", "<cmd>FzfLua buffers<CR>", { desc = "Buffers" })
-keymap("n", "<leader>sh", "<cmd>FzfLua helptags<CR>", { desc = "Help" })
-keymap("n", "<leader>sc", "<cmd>FzfLua command_history<CR>", { desc = "Command history" })
-keymap("n", "<leader>sd", "<cmd>FzfLua dap_breakpoints<CR>", { desc = "Debug breakpoints" })
-keymap("n", "<leader>sq", "<cmd>FzfLua quickfix<CR>", { desc = "Quickfix list" })
+keymap("n", "<leader>sr", function()
+	Snacks.picker.recent()
+end, { desc = "Recent files" })
+keymap("n", "<leader>sg", function()
+	Snacks.picker.grep()
+end, { desc = "Live grep" })
+keymap("n", "<leader>s/", function()
+	Snacks.picker.lines()
+end, { desc = "Live grep current buffer" })
+keymap({ "n", "x" }, "<leader>sw", function()
+	Snacks.picker.grep_word()
+end, { desc = "Grep word on cursor" })
+keymap("n", "<leader>sb", function()
+	Snacks.picker.buffers()
+end, { desc = "Buffers" })
+keymap("n", "<leader>sh", function()
+	Snacks.picker.help()
+end, { desc = "Help" })
+keymap("n", "<leader>sc", function()
+	Snacks.picker.command_history()
+end, { desc = "Command history" })
+keymap("n", "<leader>sH", function()
+	Snacks.picker.search_history()
+end, { desc = "Search history" })
+keymap("n", "<leader>sq", function()
+	Snacks.picker.qflist()
+end, { desc = "Quickfix list" })
 keymap("n", "<leader>sn", function()
-	require("notify.integrations").pick()
+	Snacks.picker.notifications()
 end, { desc = "Notifications" })
 
 --== Trouble
@@ -389,39 +422,52 @@ keymap("n", "<leader>lo", function()
 	vim.lsp.buf.code_action({ context = { only = { "source.organizeImports" } }, apply = true })
 end, { desc = "Organize imports" })
 
--- A combination of many of the keymaps below.
-keymap("n", "<leader>lf", "<cmd>FzfLua lsp_finder<CR>", { desc = "Finder (definitions, references, ...)" })
-
 -- Jump to the definition of the word under the cursor. This is where
 --  a variable was first declared, or where a function is defined, etc.
-keymap("n", "<leader>ld", "<cmd>FzfLua lsp_definitions<CR>", { desc = "Definitions" })
+keymap("n", "<leader>ld", function()
+	Snacks.picker.lsp_definitions()
+end, { desc = "Definitions" })
 
 -- Find references for the word under the cursor.
-keymap("n", "<leader>lr", "<cmd>FzfLua lsp_references<CR>", { desc = "References" })
+keymap("n", "<leader>lr", function()
+	Snacks.picker.lsp_references()
+end, { desc = "References" })
 
 -- Jump to the implementation of the word under the cursor.
 -- Useful when the language has ways of declaring types without an actual implementation.
-keymap("n", "<leader>li", "<cmd>FzfLua lsp_implementations<CR>", { desc = "Implementations" })
+keymap("n", "<leader>li", function()
+	Snacks.picker.lsp_implementations()
+end, { desc = "Implementations" })
 
 -- Jump to the type of the word under the cursor
 -- Useful when I'm not sure what type a variable is and I want to see
 --  the definition of its type, not where it was defined.
-keymap("n", "<leader>lT", "<cmd>FzfLua lsp_typedefs<CR>", { desc = "Type definitions" })
+keymap("n", "<leader>lT", function()
+	Snacks.picker.lsp_type_definitions()
+end, { desc = "Type definitions" })
 
 -- Fuzzy find all the symbols in the current document.
 --  Symbols are things like variables, functions, types, etc.
-keymap("n", "<leader>ls", "<cmd>FzfLua lsp_document_symbols<CR>", { desc = "Document symbols" })
+keymap("n", "<leader>ls", function()
+	Snacks.picker.lsp_symbols()
+end, { desc = "Document symbols" })
 
 -- Fuzzy find all the symbols in the current workspace.
 --  Similar to document symbols, except it searches over the entire project.
-keymap("n", "<leader>lS", "<cmd>FzfLua lsp_workspace_symbols<CR>", { desc = "Workspace symbols" })
+keymap("n", "<leader>lS", function()
+	Snacks.picker.lsp_workspace_symbols()
+end, { desc = "Workspace symbols" })
 
 -- Execute a code action (to fix an error or other). Usually the cursor needs to be on top of an
 --  error or a suggestion from the LSP for this to activate.
-keymap("n", "<leader>la", "<cmd>FzfLua lsp_code_actions<CR>", { desc = "Code action" })
+keymap("n", "<leader>la", function()
+	vim.lsp.buf.code_action()
+end, { desc = "Code action" })
 
 --  In C this would take me to the header
-keymap("n", "<leader>lD", "<cmd>FzfLua lsp_declarations<CR>", { desc = "Declarations" })
+keymap("n", "<leader>lD", function()
+	Snacks.picker.lsp_declarations()
+end, { desc = "Declarations" })
 
 -- Toggles
 keymap(
@@ -460,10 +506,10 @@ keymap("n", "<leader>xl", function()
 	vim.diagnostic.open_float({ scope = "line" })
 end, { desc = "Line diagnostics" })
 keymap("n", "<leader>xd", function()
-	require("fzf-lua").diagnostics_document()
+	Snacks.picker.diagnostics_buffer()
 end, { desc = "Search document diagnostics" })
 keymap("n", "<leader>xw", function()
-	require("fzf-lua").diagnostics_workspace()
+	Snacks.picker.diagnostics()
 end, { desc = "Search workspace diagnostics" })
 keymap("n", "<leader>xtv", require("utils.diagnostics").toggle_virtual_lines, { desc = "Virtual lines" })
 keymap("n", "<leader>xtd", "<cmd>Trouble diagnostics toggle filter.buf=0<cr>", { desc = "Document diagnostics" })
@@ -649,7 +695,13 @@ keymap(
 	":set tabstop=",
 	{ desc = "How many spaces a tab is represented by, and the number of spaces pressing tab writes" }
 )
-keymap("n", "<leader>cf", "<cmd>FzfLua filetypes<CR>", { desc = "File type" })
+keymap("n", "<leader>cf", function()
+	Snacks.picker.select(vim.fn.getcompletion("", "filetype"), { prompt = "File type:" }, function(ft)
+		if ft then
+			vim.bo.filetype = ft
+		end
+	end)
+end, { desc = "File type" })
 
 --== Extras
 keymap("n", "<leader>+q", ":cdo ", {

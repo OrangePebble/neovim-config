@@ -22,7 +22,6 @@ return {
 				-- Automatically configure lua_ls to work with my Neovim configuration and plugins.
 				-- Needs a `require()` or a `---@module` to load libraries in a file, or for the plugin
 				--  to be included in `opts.libary` below.
-				-- The plugin loations can be found at ~/.local/share/nvim/lazy
 				"folke/lazydev.nvim",
 				ft = "lua", -- only load on lua files
 				opts = {
@@ -32,6 +31,11 @@ return {
 
 						-- Load luvit types when the `vim.uv` word is found
 						{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+
+						-- The plugin loations can be found at ~/.local/share/nvim/lazy
+						-- So I don't have to import the "lazy" module everytime I want to use `LazySpec` type.
+						"lazy.nvim",
+						"snacks.nvim",
 					},
 				},
 			},
