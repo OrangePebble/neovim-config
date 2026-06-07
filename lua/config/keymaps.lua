@@ -510,6 +510,11 @@ keymap("n", "<leader>lD", function()
 	Snacks.picker.lsp_declarations()
 end, { desc = "Declarations" })
 
+-- The other keymaps aren't buffer-local so this might as well become global.
+vim.keymap.set("n", "K", function()
+	vim.lsp.buf.hover()
+end, { desc = "LSP Hover" })
+
 -- Toggles
 keymap(
 	"n",
@@ -745,16 +750,16 @@ keymap("n", "<leader>cf", function()
 end, { desc = "File type" })
 
 --== Extras
-keymap("n", "<leader>+q", ":cdo ", {
+keymap("n", "<leader>+:q", ":cdo ", {
 	desc = "[:cdo ] Do something for each quickfix item, like 's/' (use '/gc' flags as 'c' asks you every item if it is to apply)",
 })
-keymap("n", "<leader>+q", "<CMD>cgetexpr []<CR>", {
+keymap("n", "<leader>+:q", "<CMD>cgetexpr []<CR>", {
 	desc = "[:cgetexpr []] Clear the quickfix list",
 })
-keymap("n", "<leader>+:", "q: ", {
+keymap("n", "<leader>+::", "q: ", {
 	desc = "[q:] Open cmd window where you can see the history and use modes (insert, visual, ...). Open window in regular cmd with <C-f>",
 })
-keymap("n", "<leader>+w", "<cmd>W<CR>", {
+keymap("n", "<leader>+:w", "<cmd>W<CR>", {
 	desc = "[:W] Custom command to save without formatting",
 })
 keymap("n", "<leader>+i", "<C-i>", {
@@ -763,13 +768,13 @@ keymap("n", "<leader>+i", "<C-i>", {
 keymap("n", "<leader>+o", "<C-o>", {
 	desc = "[<C-o>] Jump to last cursor position",
 })
-keymap("n", "<leader>+e", "<cmd>ene<CR>", {
+keymap("n", "<leader>+:e", "<cmd>ene<CR>", {
 	desc = "[:ene] Edit new and unnamed buffer",
 })
-keymap("n", "<leader>+m", "<cmd>marks<CR>", {
+keymap("n", "<leader>+:m", "<cmd>marks<CR>", {
 	desc = "[:marks] Show marks, use [m*] to add a mark to * and [`*]/['*] to go to the mark at the cursor/line",
 })
-keymap("n", "<leader>+r", "<cmd>registers<CR>", {
+keymap("n", "<leader>+:r", "<cmd>registers<CR>", {
 	desc = "[:registers] Show registers, use [\"#p] to paste the '#' register (alternate file)",
 })
 keymap("n", "<leader>+N", "<C-a>", {
@@ -778,30 +783,30 @@ keymap("n", "<leader>+N", "<C-a>", {
 keymap("n", "<leader>+n", "<C-x>", {
 	desc = "[<C-x>] Decrement number under cursor.",
 })
-keymap("n", "<leader>+s", ":Sops ", {
+keymap("n", "<leader>+:s", ":Sops ", {
 	desc = "[:Sops ] Edit/encrypt/decrypt/... files with sops.",
 })
-keymap("n", "<leader>+M", "<cmd>mes<CR>", {
+keymap("n", "<leader>+:M", "<cmd>mes<CR>", {
 	desc = "[:mes] Show all messages.",
 })
-keymap("n", "<leader>+t", "gt", {
+keymap("n", "<leader>+gt", "gt", {
 	desc = "[gt] Go to next tab.",
 })
-keymap("n", "<leader>+T", "gT", {
+keymap("n", "<leader>+gT", "gT", {
 	desc = "[gT] Go to previous tab.",
 })
-keymap("n", "<leader>+u", "gu", {
+keymap("n", "<leader>+gu", "gu", {
 	desc = "[gu] Change to lowercase.",
 })
-keymap("n", "<leader>+U", "gU", {
+keymap("n", "<leader>+gU", "gU", {
 	desc = "[gU] Change to uppercase.",
 })
 -- TODO: add g< to which-key
 -- TODO: figure if g< has a history I can search with a picker
-keymap("n", "<leader>+<", "g<", {
+keymap("n", "<leader>+g<", "g<", {
 	desc = "[g<] Reopen last command output.",
 })
-keymap("n", "<leader>+v", "gv", {
+keymap("n", "<leader>+gv", "gv", {
 	desc = "[gv] Reselect last visual selection.",
 })
 -- Useful because lualine doesn't print the full buffer name.
@@ -809,4 +814,10 @@ keymap("n", "<leader>+b", function()
 	vim.print(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()))
 end, {
 	desc = "Print the current buffer's name.",
+})
+keymap("n", "<leader>+l", "<C-l>", {
+	desc = "[<C-l>] Move to previous snippet field.",
+})
+keymap("n", "<leader>+h", "<C-h>", {
+	desc = "[<C-h>] Move to next snippet field.",
 })

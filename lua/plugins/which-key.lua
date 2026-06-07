@@ -277,6 +277,23 @@ return {
 			{ "<leader>c", group = "Change", icon = { icon = "", color = "green" } },
 			{ "<leader>cf", icon = { icon = "󰈮", color = "green" } },
 			{ "<leader>ct", icon = { icon = "󰌒", color = "green" } },
+
+			-- TODO: figure out why the fold column is visible during diff mode
+			-- TODO: figure out how to save folds between window/buffer change and session restore
+
+			-- TODO: figure out if I want to keep these as these seem to have different functionality
+			--  I never use them so I might as well keep the defaults
+			-- TODO: add the 'K' keymap in the readme
+			-- TODO: set which-key icon to the 'K' keymap
+			-- TODO: set which-key icons to the fold keymaps
+			-- TODO: add toggles for showing whitespace characters like tab
+			-- TODO: move these keymaps to the keymap file
+			-- TODO: change TMUX to remove the > separator from tabs without name
+			-- TODO: change fold column toggle to just change fillchars
+
+			-- TODO: https://github.com/neovim/neovim/discussions/34246
+			-- TODO: look into foldenable: https://stackoverflow.com/a/79405264
+			-- TODO: add @type and @method lsp hints to places
 		})
 	end,
 }

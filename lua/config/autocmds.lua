@@ -2,19 +2,6 @@
 
 -- INFO: For LSP buffer-local autocmds go to: ../plugins/dev/lspconfig.lua
 
--- Restore last cursor position when reopening a file
-local last_cursor_group = vim.api.nvim_create_augroup("LastCursorGroup", {})
-vim.api.nvim_create_autocmd("BufReadPost", {
-	group = last_cursor_group,
-	callback = function()
-		local mark = vim.api.nvim_buf_get_mark(0, '"')
-		local lcount = vim.api.nvim_buf_line_count(0)
-		if mark[1] > 0 and mark[1] <= lcount then
-			pcall(vim.api.nvim_win_set_cursor, 0, mark)
-		end
-	end,
-})
-
 -- Highlight the yanked text for 200ms
 local highlight_yank_group = vim.api.nvim_create_augroup("HighlightYank", {})
 vim.api.nvim_create_autocmd("TextYankPost", {
@@ -91,14 +78,6 @@ vim.api.nvim_create_autocmd("QuitPre", {
 	end,
 })
 
--- Show notification explaining keymaps when a snipped autocompletion is selected.
-vim.api.nvim_create_autocmd("User", {
-	pattern = "LuasnipPreExpand",
-	callback = function()
-		vim.notify("Use <C-l> and <C-h> to navigate snippet fields.", "INFO", { history = false })
-	end,
-})
-
 -- https://github.com/sitiom/nvim-numbertoggle
 -- Toggles relativenumber when entering insert mode.
 vim.g.togglerelativenumber = vim.o.nu
@@ -130,5 +109,13 @@ vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEn
 				vim.cmd("redraw")
 			end
 		end
+	end,
+})
+
+-- Entering diff view sets foldcolumn to 2, so every time we enter it we set it back to 1.
+vim.api.nvim_create_autocmd("OptionSet", {
+	pattern = "diff",
+	callback = function()
+		vim.o.foldcolumn = "1"
 	end,
 })
