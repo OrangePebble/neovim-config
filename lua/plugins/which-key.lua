@@ -278,6 +278,9 @@ return {
 			{ "<leader>cf", icon = { icon = "󰈮", color = "green" } },
 			{ "<leader>ct", icon = { icon = "󰌒", color = "green" } },
 
+			-- g*
+			{ "gx", desc = "Open with system app" },
+
 			-- TODO: figure out why the fold column is visible during diff mode
 			-- TODO: figure out how to save folds between window/buffer change and session restore
 
@@ -290,6 +293,9 @@ return {
 			-- TODO: move these keymaps to the keymap file
 			-- TODO: change TMUX to remove the > separator from tabs without name
 			-- TODO: change fold column toggle to just change fillchars
+			-- TODO: remove g* keybinds I don't use like LSP. while it could be nice to keep defaults
+			--  for those if like someone else uses my config, it just gets in the way of finding
+			--  keybinds I actually want to use
 
 			-- TODO: https://github.com/neovim/neovim/discussions/34246
 			-- TODO: look into foldenable: https://stackoverflow.com/a/79405264
