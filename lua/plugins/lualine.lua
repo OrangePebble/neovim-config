@@ -50,12 +50,25 @@ return {
 				},
 				lualine_x = {},
 				lualine_y = { "filetype" },
-				lualine_z = { "filename" },
+				lualine_z = {
+					-- Added this so I can easily tell if I've closed the wrong file during a git diff but
+					--  it might also be useful in other occasions.
+					{
+						function()
+							return vim.bo.buftype
+						end,
+						cond = function()
+							return vim.bo.buftype ~= ""
+						end,
+					},
+					"filename",
+				},
 			},
 		})
 
 		-- This somewhat reduces the problem of cmdline printing its contents multiple times whenever
-		--  a line wrap occurs, it now flickers instead by redrawing on every new character.
+		--  the line fills as this clears the prints when a character is removed/added. It now flickers
+		--  instead.
 		-- This problem is caused by plugins that modify the cmdline like lualine and blink-cmp (if
 		--  I don't disable cmdline functionality).
 		-- This fix should be enough because line wrapping on the cmdline doesn't happen often, I've

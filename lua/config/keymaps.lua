@@ -766,3 +766,11 @@ keymap("n", "<leader>+u", "gu", {
 keymap("n", "<leader>+U", "gU", {
 	desc = "[gU] Change to uppercase.",
 })
+-- TODO: add g< to which-key
+-- TODO: figure if g< has a history I can search with a picker
+keymap("n", "<leader>+<", "g<", {
+	desc = "[g<] Reopen last command output.",
+})
+keymap("n", "<leader>+v", "gv", {
+	desc = "[gv] Reselect last visual selection.",
+})
