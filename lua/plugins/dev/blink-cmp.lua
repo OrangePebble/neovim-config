@@ -55,6 +55,7 @@ return {
 		-- Show the possible function arguments while typing inside the ().
 		signature = { enabled = true },
 
+    -- TODO: make tab autocomplete
 		cmdline = {
 			completion = {
 				menu = {

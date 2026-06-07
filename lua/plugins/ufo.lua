@@ -4,7 +4,8 @@ return {
 		"kevinhwang91/promise-async",
 	},
 	config = function()
-		vim.o.fillchars = "eob: ,fold: ,foldopen:,foldsep: ,foldinner: ,foldclose:"
+		vim.o.foldcolumn = "1"
+		vim.o.fillchars = "eob: ,fold: ,foldopen: ,foldsep: ,foldinner: ,foldclose:󰅂"
 		-- Setting treesitter as the provider here instead of using the regular method elsewhere
 		--  because this is supposedly faster and lets me manually add folds beside the treesitter
 		--  ones.

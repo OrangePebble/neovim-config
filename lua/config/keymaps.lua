@@ -79,12 +79,10 @@ keymap("n", "<leader>ts", function()
 	end
 end, { desc = "Sign column" })
 keymap("n", "<leader>tf", function()
-	if vim.opt.foldcolumn._value == "1" then
-		vim.opt.foldcolumn = "0"
+	if vim.opt.fillchars._value == "eob: ,fold: ,foldopen:󰅀,foldsep: ,foldinner: ,foldclose:󰅂" then
+		vim.o.fillchars = "eob: ,fold: ,foldopen: ,foldsep: ,foldinner: ,foldclose:󰅂"
 	else
-		vim.opt.foldcolumn = "1"
-		-- I need to set numberwidth again because statuscol.nvim doesn't handle toggling fold columns well.
-		vim.opt.numberwidth = 3
+		vim.o.fillchars = "eob: ,fold: ,foldopen:󰅀,foldsep: ,foldinner: ,foldclose:󰅂"
 	end
 end, { desc = "Fold column" })
 
@@ -420,6 +418,38 @@ keymap({ "o", "x" }, "ag", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" 
 keymap("n", "<leader>gl", function()
 	Snacks.lazygit()
 end, { desc = "Lazygit" })
+
+-- https://github.com/Muizzyranking/dot-files/blob/2681a4dd0ba7ed6995845877b49be1f789cd7720/config/nvim/lua/plugins/editor/git.lua#L22-L50
+vim.keymap.set("n", "q", function()
+	local has_diff = vim.wo.diff
+	-- If not in diff view, just passthrough 'q'.
+	if not has_diff then
+		return "q"
+	end
+
+	local target_win
+	-- Go through all windows and its buffer.
+	for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+		local buf = vim.api.nvim_win_get_buf(win)
+		local bufname = vim.api.nvim_buf_get_name(buf)
+		-- If the buffer is from gitsigns, set it as the target to close.
+		if bufname:find("^gitsigns://") then
+			target_win = win
+			break
+		end
+	end
+
+	-- Close the target window if it was found before.
+	if target_win then
+		vim.schedule(function()
+			vim.api.nvim_win_close(target_win, true)
+		end)
+		return ""
+	end
+
+	-- If diff view was active but the target window was not found just passthrough 'q'.
+	return "q"
+end, { expr = true, silent = true })
 
 --== LSP
 
@@ -773,4 +803,10 @@ keymap("n", "<leader>+<", "g<", {
 })
 keymap("n", "<leader>+v", "gv", {
 	desc = "[gv] Reselect last visual selection.",
+})
+-- Useful because lualine doesn't print the full buffer name.
+keymap("n", "<leader>+b", function()
+	vim.print(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()))
+end, {
+	desc = "Print the current buffer's name.",
 })
