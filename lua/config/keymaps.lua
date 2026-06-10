@@ -25,14 +25,14 @@ keymap("v", ">", ">gv", { desc = "Indent right and reselect" })
 keymap("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
 
 -- Yank to and paste from the system clipboard.
-keymap({ "n", "v", "x" }, "<leader>y", '"+y', { desc = "Yank to clipboard with motions" })
+keymap({ "n", "x" }, "<leader>y", '"+y', { desc = "Yank to clipboard with motions" })
 keymap("n", "<leader>Y", 'v$"+y', { desc = "Yank to clipboard until the end of the line" })
 keymap("n", "<leader>p", '"+p', { desc = "Paste from clipboard" })
 keymap("n", "<leader>P", '"+P', { desc = "Paste from clipboard before" })
 
 -- Delete and paste without yanking (only on Visual mode so it doesn't interfere with other keymaps)
-keymap("v", "<leader>d", '"_d', { desc = "Delete without yanking" })
-keymap("v", "<leader>p", '"_dP', { desc = "Paste without yanking" })
+keymap("x", "<leader>d", '"_d', { desc = "Delete without yanking" })
+keymap("x", "<leader>p", '"_dP', { desc = "Paste without yanking" })
 
 -- Clear search highlighting by pressing <Esc> in normal mode.
 keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
@@ -644,9 +644,12 @@ end, { desc = "Toggle DAP UI" })
 keymap("n", "<leader>dw", function()
 	require("dapui").elements.watches.add()
 end, { desc = "Watch symbol on cursor" })
-keymap({ "n", "x" }, "<leader>de", function()
+keymap({ "n" }, "<leader>de", function()
 	require("dapui").eval()
 end, { desc = "Eval symbol on cursor" })
+keymap({ "x" }, "<leader>e", function()
+	require("dapui").eval()
+end, { desc = "Eval symbol on cursor (debug)" })
 
 --== Testing
 

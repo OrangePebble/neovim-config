@@ -59,6 +59,7 @@ return {
 			keymap = {
 				preset = "inherit",
 				["<Tab>"] = { "accept", "fallback" },
+				["<C-n>"] = { "show_and_insert", "select_next" },
 			},
 			completion = {
 				menu = {

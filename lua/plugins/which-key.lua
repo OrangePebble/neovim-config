@@ -33,12 +33,13 @@ return {
 			-- Technically <leader>? already does this for buffer specific keymaps, and I could add a
 			--  version for all keymaps,
 			{ "<leader>+", group = "Extras", icon = "" },
-			{ "<leader>y", icon = { icon = "󰆏", color = "grey" } },
+			{ "<leader>y", mode = "nx", icon = { icon = "󰆏", color = "grey" } },
 			{ "<leader>Y", icon = { icon = "󰆏", color = "grey" } },
-			{ "<leader>p", icon = { icon = "󰆒", color = "grey" } },
+			{ "<leader>p", mode = "nx", icon = { icon = "󰆒", color = "grey" } },
 			{ "<leader>P", icon = { icon = "󰆒", color = "grey" } },
 			{ "<leader>u", icon = { icon = "", color = "yellow" } },
 			{ "<leader>e", icon = { icon = "", color = "yellow" } },
+			{ "<leader>d", mode = "x", icon = { icon = "󰆴", color = "red" } },
 			{ "]t", icon = { icon = "󰷐", color = "grey" } },
 			{ "[t", icon = { icon = "󰷐", color = "grey" } },
 
@@ -180,7 +181,7 @@ return {
 			{ "<leader>gl", icon = { icon = "󰋣", color = "yellow" } },
 
 			-- Search
-			{ "<leader>s", group = "Search", icon = { icon = "", color = "cyan" } },
+			{ "<leader>s", mode = "nx", group = "Search", icon = { icon = "", color = "cyan" } },
 			{ "<leader>st", group = "Todo", icon = { icon = "󰷐", color = "yellow" } },
 			{ "<leader>stt", icon = { icon = "", color = "yellow" } },
 			{ "<leader>sta", icon = "" },
@@ -189,7 +190,7 @@ return {
 			{ "<leader>sc", icon = "" },
 			{ "<leader>sg", icon = { icon = "󰈞", color = "cyan" } },
 			{ "<leader>s/", icon = { icon = "󰈞", color = "cyan" } },
-			{ "<leader>sw", icon = { icon = "󰈞", color = "cyan" } },
+			{ "<leader>sw", mode = "nx", icon = { icon = "󰈞", color = "cyan" } },
 			{ "<leader>sh", icon = { icon = "󰞋", color = "grey" } },
 			{ "<leader>sN", icon = { icon = "", color = "grey" } },
 			{ "<leader>sR", icon = "" },
@@ -278,28 +279,38 @@ return {
 			{ "<leader>ct", icon = { icon = "󰌒", color = "green" } },
 
 			-- g*
-			{ "gx", desc = "Open with system app" },
-			{ "g<", desc = "Display previous command output" },
+			{ "g'", desc = "Marks", icon = { icon = "󰸕", color = "purple" } },
+			{ "g`", desc = "Marks", icon = { icon = "󰸕", color = "purple" } },
+			{ "gx", mode = "nx", desc = "Open with system app", icon = { icon = "󰏋", color = "purple" } },
+			{ "g<", desc = "Display previous command output", icon = { icon = "", color = "purple" } },
+			{ "g~", mode = "nx", desc = "Toggle case", icon = { icon = "󰬴", color = "yellow" } },
+			{ "gu", mode = "nx", desc = "Lowercase", icon = { icon = "󰬵", color = "purple" } },
+			{ "gU", mode = "nx", desc = "Uppercase", icon = { icon = "󰬶", color = "purple" } },
+			{ "gg", mode = "nx", desc = "First line", icon = { icon = "", color = "purple" } },
+			{ "gv", desc = "Last visual selection", icon = { icon = "", color = "purple" } },
+			{ "gi", desc = "Last insert", icon = { icon = "󰸱", color = "purple" } },
+			{
+				"g%",
+				mode = "nx",
+				desc = "Cycle backwards through matching group",
+				icon = { icon = "󰅩", color = "purple" },
+			},
+			{ "g[", mode = "nx", icon = { icon = "󰅩", color = "purple" } },
+			{ "g]", mode = "nx", icon = { icon = "󰅩", color = "purple" } },
+			{ "gc", mode = "nx", icon = { icon = "󰐣", color = "purple" } },
+			{ "ge", mode = "nx", desc = "Previous end of word", icon = { icon = "󰘀", color = "purple" } },
+			{ "g,", desc = "Go to newer position in change list", icon = { icon = "", color = "purple" } },
+			{ "g;", desc = "Go to older position in change list", icon = { icon = "", color = "purple" } },
+			-- Remove LSP keymaps
+			{ "gr", mode = "nx", hidden = true },
+			{ "gO", hidden = true },
 
-			-- TODO: figure out why the fold column is visible during diff mode
-			-- TODO: figure out how to save folds between window/buffer change and session restore
+			-- z*
 
-			-- TODO: figure out if I want to keep these as these seem to have different functionality
-			--  I never use them so I might as well keep the defaults
-			-- TODO: add the 'K' keymap in the readme
-			-- TODO: set which-key icon to the 'K' keymap
+			-- TODO: set which-key icons to the root keymaps
 			-- TODO: set which-key icons to the fold keymaps
-			-- TODO: add toggles for showing whitespace characters like tab
-			-- TODO: move these keymaps to the keymap file
-			-- TODO: change TMUX to remove the > separator from tabs without name
-			-- TODO: change fold column toggle to just change fillchars
-			-- TODO: remove g* keybinds I don't use like LSP. while it could be nice to keep defaults
-			--  for those if like someone else uses my config, it just gets in the way of finding
-			--  keybinds I actually want to use
-
-			-- TODO: https://github.com/neovim/neovim/discussions/34246
-			-- TODO: look into foldenable: https://stackoverflow.com/a/79405264
-			-- TODO: add @type and @method lsp hints to places
+			-- TODO: change goto, fold, and root keymap colors
+			-- TODO: add toggles for showing whitespace characters like tab (listchars)
 		})
 	end,
 }
