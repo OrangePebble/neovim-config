@@ -55,8 +55,11 @@ return {
 		-- Show the possible function arguments while typing inside the ().
 		signature = { enabled = true },
 
-		-- TODO: make tab autocomplete
 		cmdline = {
+			keymap = {
+				preset = "inherit",
+				["<Tab>"] = { "accept", "fallback" },
+			},
 			completion = {
 				menu = {
 					-- Only automatically show for some cmds.
