@@ -99,7 +99,7 @@ return {
 			{ "<leader>th", icon = { icon = "", color = "grey" } },
 			{ "<leader>tc", icon = { icon = "󰏘", color = "grey" } },
 			{ "<leader>tC", icon = { icon = "󰉾", color = "grey" } },
-			{ "<leader>tf", icon = { icon = "", color = "grey" } },
+			{ "<leader>tf", icon = { icon = "", color = "grey" } },
 			{ "<leader>ts", icon = { icon = "", color = "grey" } },
 
 			-- LSP icons.
@@ -206,18 +206,30 @@ return {
 			{ "<leader>w\\", icon = { icon = "", color = "orange" } },
 			{ "<leader>w-", icon = { icon = "", color = "orange" } },
 			{ "<leader>wh", icon = { icon = "󱂪", color = "grey" } },
+			{ "<A-h>", icon = { icon = "󱂪", color = "grey" } },
 			{ "<leader>wj", icon = { icon = "󱂩", color = "grey" } },
+			{ "<A-j>", icon = { icon = "󱂩", color = "grey" } },
 			{ "<leader>wk", icon = { icon = "󱔓", color = "grey" } },
+			{ "<A-k>", icon = { icon = "󱔓", color = "grey" } },
 			{ "<leader>wl", icon = { icon = "󱂫", color = "grey" } },
+			{ "<A-l>", icon = { icon = "󱂫", color = "grey" } },
 			{ "<leader>w;", icon = { icon = "󰮳", color = "grey" } },
 			{ "<leader>wH", icon = { icon = "", color = "yellow" } },
+			{ "<A-H>", icon = { icon = "", color = "yellow" } },
 			{ "<leader>wJ", icon = { icon = "", color = "yellow" } },
+			{ "<A-J>", icon = { icon = "", color = "yellow" } },
 			{ "<leader>wK", icon = { icon = "", color = "yellow" } },
+			{ "<A-K>", icon = { icon = "", color = "yellow" } },
 			{ "<leader>wL", icon = { icon = "", color = "yellow" } },
+			{ "<A-L>", icon = { icon = "", color = "yellow" } },
 			{ "<leader>w<C-h>", icon = { icon = "󰧙", color = "orange" } },
+			{ "<A-C-h>", icon = { icon = "󰧙", color = "orange" } },
 			{ "<leader>w<C-j>", icon = { icon = "󰧗", color = "orange" } },
+			{ "<A-C-j>", icon = { icon = "󰧗", color = "orange" } },
 			{ "<leader>w<C-k>", icon = { icon = "󰧝", color = "orange" } },
+			{ "<A-C-k>", icon = { icon = "󰧝", color = "orange" } },
 			{ "<leader>w<C-l>", icon = { icon = "󰧛", color = "orange" } },
+			{ "<A-C-l>", icon = { icon = "󰧛", color = "orange" } },
 			{ "<leader>w|", icon = { icon = "󰡎", color = "yellow" } },
 			{ "<leader>w_", icon = { icon = "󰡏", color = "yellow" } },
 			{ "<leader>w=", icon = { icon = "󰁌", color = "yellow" } },
@@ -286,7 +298,7 @@ return {
 			{ "g~", mode = "nx", desc = "Toggle case", icon = { icon = "󰬴", color = "yellow" } },
 			{ "gu", mode = "nx", desc = "Lowercase", icon = { icon = "󰬵", color = "purple" } },
 			{ "gU", mode = "nx", desc = "Uppercase", icon = { icon = "󰬶", color = "purple" } },
-			{ "gg", mode = "nx", desc = "First line", icon = { icon = "", color = "purple" } },
+			{ "gg", mode = "nx", desc = "First line", icon = { icon = "󰘣", color = "purple" } },
 			{ "gv", desc = "Last visual selection", icon = { icon = "", color = "purple" } },
 			{ "gi", desc = "Last insert", icon = { icon = "󰸱", color = "purple" } },
 			{
@@ -298,7 +310,7 @@ return {
 			{ "g[", mode = "nx", icon = { icon = "󰅩", color = "purple" } },
 			{ "g]", mode = "nx", icon = { icon = "󰅩", color = "purple" } },
 			{ "gc", mode = "nx", icon = { icon = "󰐣", color = "purple" } },
-			{ "ge", mode = "nx", desc = "Previous end of word", icon = { icon = "󰘀", color = "purple" } },
+			{ "ge", mode = "nx", desc = "Previous end of word", icon = { icon = "󰘟", color = "purple" } },
 			{ "g,", desc = "Go to newer position in change list", icon = { icon = "", color = "purple" } },
 			{ "g;", desc = "Go to older position in change list", icon = { icon = "", color = "purple" } },
 			-- Remove LSP keymaps
@@ -306,9 +318,34 @@ return {
 			{ "gO", hidden = true },
 
 			-- z*
+			{ "zf", mode = "nx", desc = "Create fold", icon = { icon = "", color = "purple" } },
+			{ "zc", desc = "Close fold under cursor", icon = { icon = "󰕎", color = "purple" } },
+			{ "zC", desc = "Close all folds under cursor", icon = { icon = "󰕎", color = "purple" } },
+			{ "zd", desc = "Delete fold under cursor", icon = { icon = "󰆴", color = "purple" } },
+			{ "zD", desc = "Delete all folds under cursor", icon = { icon = "󰆴", color = "purple" } },
+			{ "zE", desc = "Delete all folds in file", icon = { icon = "󰆴", color = "purple" } },
+			{ "zm", desc = "Fold more", icon = { icon = "󰕎", color = "purple" } },
+			{ "zM", desc = "Close all folds", icon = { icon = "󰕎", color = "purple" } },
+			{ "zo", desc = "Open fold under cursor", icon = { icon = "󰕏", color = "purple" } },
+			{ "zO", desc = "Open all folds under cursor", icon = { icon = "󰕏", color = "purple" } },
+			{ "zr", desc = "Fold less", icon = { icon = "󰕏", Collor = "purple" } },
+			{ "zR", desc = "Open all folds", icon = { icon = "󰕏", color = "purple" } },
+			{ "zv", desc = "Open folds until cursor", icon = { icon = "󰕏", color = "purple" } },
+			{ "zx", desc = "Update folds", icon = { icon = "󰚰", color = "purple" } },
+			{ "zz", desc = "Center this line", icon = { icon = "󰘢", color = "purple" } },
+			{ "z<CR>", desc = "Top this line", icon = { icon = "󰘣", color = "purple" } },
+			{ "zt", desc = "Top this line", icon = { icon = "󰘣", color = "purple" } },
+			{ "zb", desc = "Bottom this line", icon = { icon = "󰘡", color = "purple" } },
+			{ "ze", desc = "Right this line", icon = { icon = "󰘠", color = "purple" } },
+			{ "zs", desc = "Left this line", icon = { icon = "󰘟", color = "purple" } },
+			{ "zH", desc = "Half screen to the left", icon = { icon = "󱂪", color = "purple" } },
+			{ "zL", desc = "Half screen to the right", icon = { icon = "󱂫", color = "purple" } },
+			{ "z=", group = "Spelling suggestions", icon = { icon = "", color = "purple" } },
+			{ "zw", desc = "Mark work as bad/misspelling", icon = { icon = "", color = "purple" } },
+			{ "zg", desc = "Add word to spell list", icon = { icon = "", color = "purple" } },
 
 			-- TODO: set which-key icons to the root keymaps
-			-- TODO: set which-key icons to the fold keymaps
+			-- TODO: set which-key icons to the visual, delete, and change keymaps
 			-- TODO: change goto, fold, and root keymap colors
 			-- TODO: add toggles for showing whitespace characters like tab (listchars)
 		})
