@@ -455,8 +455,7 @@ end, { expr = true, silent = true })
 
 -- Rename the variable under the cursor.
 --  Most Language Servers support renaming across files, etc.
-keymap("n", "<leader>r", vim.lsp.buf.rename, { desc = "Rename" })
-keymap("n", "<leader>lR", vim.lsp.buf.rename, { desc = "Rename" })
+keymap("n", "<leader>lr", vim.lsp.buf.rename, { desc = "Rename" })
 
 -- Organize imports (most LSPs don't support this).
 keymap("n", "<leader>lo", function()
@@ -470,7 +469,7 @@ keymap("n", "<leader>ld", function()
 end, { desc = "Definitions" })
 
 -- Find references for the word under the cursor.
-keymap("n", "<leader>lr", function()
+keymap("n", "<leader>lR", function()
 	Snacks.picker.lsp_references()
 end, { desc = "References" })
 
@@ -695,10 +694,10 @@ keymap("n", "<leader>TtS", function()
 end, { desc = "Signcolumn signs" })
 
 --== Overseer
-keymap("n", "<leader>oo", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
-keymap("n", "<leader>os", ":OverseerShell ", { desc = "Run shell command" })
-keymap("n", "<leader>oS", ":OverseerShell! ", { desc = "Add shell task" })
-keymap("n", "<leader>ot", "<CMD>OverseerToggle<CR>", { desc = "Toggle" })
+keymap("n", "<leader>rr", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
+keymap("n", "<leader>rs", ":OverseerShell ", { desc = "Run shell command" })
+keymap("n", "<leader>rS", ":OverseerShell! ", { desc = "Add shell task" })
+keymap("n", "<leader>rt", "<CMD>OverseerToggle<CR>", { desc = "Toggle" })
 
 --== OpenCode
 keymap({ "n", "x" }, "<leader>aa", function()

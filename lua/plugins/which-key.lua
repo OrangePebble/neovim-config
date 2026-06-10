@@ -37,7 +37,6 @@ return {
 			{ "<leader>Y", icon = { icon = "󰆏", color = "grey" } },
 			{ "<leader>p", icon = { icon = "󰆒", color = "grey" } },
 			{ "<leader>P", icon = { icon = "󰆒", color = "grey" } },
-			{ "<leader>r", icon = { icon = "󰑕", color = "grey" } },
 			{ "<leader>u", icon = { icon = "", color = "yellow" } },
 			{ "<leader>e", icon = { icon = "", color = "yellow" } },
 			{ "]t", icon = { icon = "󰷐", color = "grey" } },
@@ -106,8 +105,8 @@ return {
 			{ "<leader>l", group = "LSP", icon = { icon = "󰰍", color = "cyan" } },
 			{ "<leader>ls", icon = { icon = "", color = "green" } },
 			{ "<leader>lS", icon = { icon = "", color = "green" } },
-			{ "<leader>lr", icon = { icon = "", color = "cyan" } },
-			{ "<leader>lR", icon = { icon = "󰑕", color = "grey" } },
+			{ "<leader>lR", icon = { icon = "", color = "cyan" } },
+			{ "<leader>lr", icon = { icon = "󰑕", color = "grey" } },
 			{ "<leader>lT", icon = { icon = "", color = "cyan" } },
 			{ "<leader>li", icon = { icon = "", color = "cyan" } },
 			{ "<leader>ld", icon = { icon = "", color = "cyan" } },
@@ -257,11 +256,11 @@ return {
 			{ "<leader>TtS", icon = { icon = "", color = "green" } },
 			{ "<leader>Ttw", icon = { icon = "󰈈", color = "grey" } },
 
-			-- Resession
-			{ "<leader>o", group = "Overseer", icon = { icon = "󰈈", color = "green" } },
-			{ "<leader>oo", icon = { icon = "󰷐", color = "green" } },
-			{ "<leader>os", icon = { icon = "", color = "grey" } },
-			{ "<leader>oS", icon = { icon = "", color = "cyan" } },
+			-- Overseer
+			{ "<leader>r", group = "Run", icon = { icon = "󰜎", color = "green" } },
+			{ "<leader>rr", icon = { icon = "󰷐", color = "green" } },
+			{ "<leader>rs", icon = { icon = "", color = "grey" } },
+			{ "<leader>rS", icon = { icon = "", color = "cyan" } },
 
 			-- OpenCode
 			{ "<leader>a", mode = "nx", group = "AI", icon = { icon = "󰚩", color = "green" } },
@@ -280,6 +279,7 @@ return {
 
 			-- g*
 			{ "gx", desc = "Open with system app" },
+			{ "g<", desc = "Display previous command output" },
 
 			-- TODO: figure out why the fold column is visible during diff mode
 			-- TODO: figure out how to save folds between window/buffer change and session restore
