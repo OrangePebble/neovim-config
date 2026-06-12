@@ -68,8 +68,6 @@ return {
 			{ "]A", desc = "Last file in args", icon = { icon = "󰈔", color = "green" } },
 			{ "[a", desc = "Previous file in args", icon = { icon = "󰈔", color = "green" } },
 			{ "[A", desc = "First file in args", icon = { icon = "󰈔", color = "green" } },
-			{ "[m", desc = "Previous method start", icon = "" },
-			{ "[M", desc = "Previous method end", icon = "" },
 			{ "]s", desc = "Next misspelled word", icon = { icon = "󰓆", color = "orange" } },
 			{ "[s", desc = "Previous misspelled word", icon = { icon = "󰓆", color = "orange" } },
 			{ "]x", icon = { icon = "󱖫", color = "red" } },
@@ -82,6 +80,14 @@ return {
 				mode = { "n", "x", "o" },
 				{ "]m", desc = "Next method start", icon = { icon = "", color = "cyan" } },
 				{ "]M", desc = "Next method end", icon = { icon = "", color = "cyan" } },
+				{ "[m", desc = "Previous method start", icon = "" },
+				{ "[M", desc = "Previous method end", icon = "" },
+				{ "](", desc = "(" },
+				{ "]<", desc = "<" },
+				{ "]{", desc = "{" },
+				{ "[(", desc = "(" },
+				{ "[<", desc = "<" },
+				{ "[{", desc = "{" },
 			},
 
 			-- Toggle icons.

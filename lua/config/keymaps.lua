@@ -845,3 +845,6 @@ keymap("n", "<leader>+l", "<C-l>", {
 keymap("n", "<leader>+h", "<C-h>", {
 	desc = "[<C-h>] Move to next snippet field.",
 })
+keymap("n", "<leader>+!", "!", {
+	desc = "[!] Print the contents of a command in the buffer.",
+})
