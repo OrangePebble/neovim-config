@@ -82,12 +82,12 @@ return {
 				{ "]M", desc = "Next method end", icon = { icon = "", color = "cyan" } },
 				{ "[m", desc = "Previous method start", icon = "" },
 				{ "[M", desc = "Previous method end", icon = "" },
-				{ "](", desc = "(" },
-				{ "]<", desc = "<" },
-				{ "]{", desc = "{" },
-				{ "[(", desc = "(" },
-				{ "[<", desc = "<" },
-				{ "[{", desc = "{" },
+				{ "](", desc = "(", icon = "" },
+				{ "]<", desc = "<", icon = "" },
+				{ "]{", desc = "{", icon = "" },
+				{ "[(", desc = "(", icon = "" },
+				{ "[<", desc = "<", icon = "" },
+				{ "[{", desc = "{", icon = "" },
 			},
 
 			-- Toggle icons.
@@ -349,6 +349,38 @@ return {
 			{ "zw", desc = "Mark work as bad/misspelling", icon = { icon = "󰓆", color = "cyan" } },
 			{ "zg", desc = "Add word to spell list", icon = { icon = "󰓆", color = "cyan" } },
 
+			-- Operators
+			{
+				mode = { "n", "x" },
+				{ "!", desc = "Run program", icon = { icon = "", color = "grey" } },
+				{ "<", desc = "Indent left", icon = { icon = "󰉵", color = "purple" } },
+				{ ">", desc = "Indent right", icon = { icon = "󰉶", color = "purple" } },
+				{ "V", desc = "Visual Line", icon = { icon = "󰒅", color = "green" } },
+				{ "c", desc = "Change", icon = { icon = "", color = "yellow" } },
+				{ "d", desc = "Delete", icon = { icon = "󰆴", color = "red" } },
+				{ "r", desc = "Replace", icon = { icon = "", color = "yellow" } },
+				{ "v", desc = "Visual", icon = { icon = "󰒅", color = "green" } },
+				{ "y", desc = "Yank", icon = { icon = "󰆏", color = "grey" } },
+				{ "~", desc = "Toggle case", icon = { icon = "󰬴", color = "purple" } },
+				{ "<C-h>", icon = { icon = "󰧙", color = "orange" } },
+				{ "<C-j>", icon = { icon = "󰧗", color = "orange" } },
+				{ "<C-k>", icon = { icon = "󰧝", color = "orange" } },
+				{ "<C-l>", icon = { icon = "󰧛", color = "orange" } },
+				{ "z", group = "Fold", icon = { icon = "", color = "green" } },
+				{ "Q", desc = "Repeat last register", icon = { icon = "󰑊", color = "red" } },
+				{ "@", desc = "Execute register", icon = { icon = "󰑊", color = "red" } },
+				{ "#", desc = "Search selection backwards", icon = { icon = "󰈞", color = "cyan" } },
+				{ "*", desc = "Search selection forwards", icon = { icon = "󰈞", color = "cyan" } },
+				{ "<C-w>", group = "Window" },
+			},
+
+			-- Visual only keybinds
+			{
+				mode = { "x" },
+				{ "]n", desc = "Next node", icon = { icon = "󰅩", color = "grey" } },
+				{ "[n", desc = "Previous node", icon = { icon = "󰅩", color = "grey" } },
+			},
+
 			-- Motions (Yank, Delete, Change)
 			{
 				mode = { "o", "x", "n" },
@@ -381,9 +413,9 @@ return {
 
 				{ "gg", desc = "First line", icon = { icon = "󰘣", color = "grey" } },
 
-				{ "]", group = "Next" },
+				{ "]", group = "Next", icon = { icon = "󰒭", color = "grey" } },
 				{ "]%", desc = "Next unmatched group", icon = { icon = "󰅩", color = "cyan" } },
-				{ "[", group = "Previous" },
+				{ "[", group = "Previous", icon = { icon = "󰒮", color = "grey" } },
 				{ "[%", desc = "Previous unmatched group", icon = { icon = "󰅩", color = "cyan" } },
 			},
 
@@ -578,7 +610,6 @@ return {
 			},
 
 			-- TODO: set which-key icons to the root keymaps
-			-- TODO: set which-key icons to the visual keymaps
 			-- TODO: change *goto*, and root keymap colors
 			-- TODO: add toggles for showing whitespace characters like tab (listchars)
 			-- TODO: maybe replace vim.opt with vim.o, as vim.o seems to use tables, and neovim 1.0 plans to remove vim.opt

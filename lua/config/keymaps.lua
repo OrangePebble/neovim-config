@@ -848,3 +848,6 @@ keymap("n", "<leader>+h", "<C-h>", {
 keymap("n", "<leader>+!", "!", {
 	desc = "[!] Print the contents of a command in the buffer.",
 })
+keymap("n", "<leader>+~", "~", {
+	desc = "[~] Toggle the case of the character under the cursor.",
+})

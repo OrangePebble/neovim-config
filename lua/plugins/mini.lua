@@ -27,8 +27,6 @@ return {
 			},
 		},
 	},
-	-- Add, delete, replace, find, highlight surrounding (like pair of parenthesis, quotes, etc.).
-	{ "echasnovski/mini.surround", version = "*", opts = {} },
 	-- Autohighlight word under cursor.
 	{
 		"echasnovski/mini.cursorword",
