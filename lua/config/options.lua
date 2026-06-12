@@ -97,13 +97,13 @@ vim.opt.guicursor = {
 }
 
 -- Folding Settings
-vim.o.foldcolumn = "1"
-vim.o.fillchars = "eob: ,fold: ,foldopen: ,foldsep: ,foldinner: ,foldclose:󰅂"
+vim.opt.foldcolumn = "1"
+vim.opt.fillchars = "eob: ,fold: ,foldopen: ,foldsep: ,foldinner: ,foldclose:󰅂"
 vim.opt.foldlevel = 99 -- Default fold level when first entering a buffer in a session
 vim.opt.foldnestmax = 4 -- Maximum nesting of folds for 'indent' and 'syntax' methods
-vim.o.foldmethod = "expr"
-vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-vim.o.foldtext = ""
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+vim.opt.foldtext = ""
 
 -- Split Behavior
 vim.opt.splitbelow = true -- Horizontal splits open below
@@ -124,4 +124,4 @@ vim.opt.listchars = {
 	-- tab = "| ",
 	-- space = "·",
 }
-vim.o.list = true
+vim.opt.list = true

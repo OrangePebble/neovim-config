@@ -613,8 +613,6 @@ return {
 					{ "ina", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 				},
 			},
-
-			-- TODO: maybe replace vim.opt with vim.o, as vim.o seems to use tables, and neovim 1.0 plans to remove vim.opt
 		})
 	end,
 }

@@ -116,6 +116,6 @@ vim.api.nvim_create_autocmd({ "BufLeave", "FocusLost", "InsertEnter", "CmdlineEn
 vim.api.nvim_create_autocmd("OptionSet", {
 	pattern = "diff",
 	callback = function()
-		vim.o.foldcolumn = "1"
+		vim.opt.foldcolumn = "1"
 	end,
 })
