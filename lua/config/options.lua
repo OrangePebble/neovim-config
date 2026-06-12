@@ -111,3 +111,17 @@ vim.opt.splitright = true -- Vertical splits open to the right
 
 -- Stop the Neovim intro screen from being shown.
 vim.opt.shortmess:append("I")
+
+-- Set virtual text that represents invisible characters and wrap indicators
+vim.opt.listchars = {
+	extends = "▶",
+	precedes = "◀",
+	nbsp = "▮",
+	eol = " ",
+	tab = "  ",
+	space = " ",
+	-- eol = "↲",
+	-- tab = "| ",
+	-- space = "·",
+}
+vim.o.list = true

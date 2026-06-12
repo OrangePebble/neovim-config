@@ -109,6 +109,14 @@ keymap("n", "<leader>tf", function()
 		end
 	end
 end, { desc = "Fold column" })
+keymap("n", "<leader>tW", function()
+	local listchars = vim.opt.listchars:get()
+	if listchars.space == "·" then
+		vim.opt.listchars:append({ eol = " ", tab = "  ", space = " " })
+	else
+		vim.opt.listchars:append({ eol = "↲", tab = "| ", space = "·" })
+	end
+end, { desc = "Whitespace indicators" })
 
 --== smart-splits and native window keymaps
 keymap("n", "<leader>wh", function()

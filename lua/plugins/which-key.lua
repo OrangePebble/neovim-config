@@ -108,6 +108,7 @@ return {
 			{ "<leader>tC", icon = { icon = "󰉾", color = "grey" } },
 			{ "<leader>tf", icon = { icon = "", color = "grey" } },
 			{ "<leader>ts", icon = { icon = "", color = "grey" } },
+			{ "<leader>tW", icon = { icon = "󱁐", color = "grey" } },
 
 			-- LSP icons.
 			{ "<leader>l", group = "LSP", icon = { icon = "󰰍", color = "cyan" } },
@@ -613,7 +614,6 @@ return {
 				},
 			},
 
-			-- TODO: add toggles for showing whitespace characters like tab (listchars)
 			-- TODO: maybe replace vim.opt with vim.o, as vim.o seems to use tables, and neovim 1.0 plans to remove vim.opt
 		})
 	end,
