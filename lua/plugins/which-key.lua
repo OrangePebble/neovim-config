@@ -300,24 +300,28 @@ return {
 			-- g*
 			{ "g'", desc = "Marks", icon = { icon = "󰸕", color = "purple" } },
 			{ "g`", desc = "Marks", icon = { icon = "󰸕", color = "purple" } },
-			{ "gx", mode = "nx", desc = "Open with system app", icon = { icon = "󰏋", color = "purple" } },
-			{ "g<", desc = "Display previous command output", icon = { icon = "", color = "purple" } },
+			{ "gx", mode = "nx", desc = "Open with system app", icon = { icon = "󰏋", color = "green" } },
+			{ "g<", desc = "Display previous command output", icon = { icon = "", color = "green" } },
 			{ "g~", mode = "nx", desc = "Toggle case", icon = { icon = "󰬴", color = "yellow" } },
-			{ "gu", mode = "nx", desc = "Lowercase", icon = { icon = "󰬵", color = "purple" } },
-			{ "gU", mode = "nx", desc = "Uppercase", icon = { icon = "󰬶", color = "purple" } },
-			{ "gg", mode = "nx", desc = "First line", icon = { icon = "󰘣", color = "purple" } },
-			{ "gv", desc = "Last visual selection", icon = { icon = "", color = "purple" } },
-			{ "gi", desc = "Last insert", icon = { icon = "󰸱", color = "purple" } },
+			{ "gu", mode = "nx", desc = "Lowercase", icon = { icon = "󰬵", color = "grey" } },
+			{ "gU", mode = "nx", desc = "Uppercase", icon = { icon = "󰬶", color = "grey" } },
+			{ "gv", desc = "Last visual selection", icon = { icon = "", color = "green" } },
+			{ "gi", desc = "Last insert", icon = { icon = "󰸱", color = "green" } },
 			{
 				"g%",
 				mode = "onx",
 				desc = "Cycle backwards through matching group",
-				icon = { icon = "󰅩", color = "purple" },
+				icon = { icon = "󰅩", color = "grey" },
 			},
-			{ "gc", mode = "nxo", name = "Comment", icon = { icon = "󰐣", color = "purple" } },
+			{ "gc", mode = "nxo", name = "Comment", icon = { icon = "󰐣", color = "grey" } },
 			{ "ge", mode = "nxo", desc = "Previous end of word", icon = { icon = "󰘟", color = "purple" } },
 			{ "g,", desc = "Go to newer position in change list", icon = { icon = "", color = "purple" } },
 			{ "g;", desc = "Go to older position in change list", icon = { icon = "", color = "purple" } },
+			{ "gt", desc = "Go to next tab page", icon = { icon = "󰓩", color = "green" } },
+			{ "gT", desc = "Go to previous tab page", icon = { icon = "󰓩", color = "green" } },
+			{ "gn", desc = "Search forwards and select", icon = { icon = "󰈞", color = "cyan" } },
+			{ "gN", desc = "Search backwards and select", icon = { icon = "󰈞", color = "cyan" } },
+			{ "gf", desc = "Open file", icon = { icon = "󰈔", color = "green" } },
 			-- Remove LSP keymaps
 			{ "gr", mode = "nx", hidden = true },
 			{ "gO", hidden = true },
@@ -411,7 +415,7 @@ return {
 				{ "{", desc = "Prev empty line", icon = { icon = "󰘣", color = "grey" } },
 				{ "}", desc = "Next empty line", icon = { icon = "󰘡", color = "grey" } },
 
-				{ "gg", desc = "First line", icon = { icon = "󰘣", color = "grey" } },
+				{ "gg", desc = "First line", icon = { icon = "󰘣", color = "purple" } },
 
 				{ "]", group = "Next", icon = { icon = "󰒭", color = "grey" } },
 				{ "]%", desc = "Next unmatched group", icon = { icon = "󰅩", color = "cyan" } },
@@ -609,8 +613,6 @@ return {
 				},
 			},
 
-			-- TODO: set which-key icons to the root keymaps
-			-- TODO: change *goto*, and root keymap colors
 			-- TODO: add toggles for showing whitespace characters like tab (listchars)
 			-- TODO: maybe replace vim.opt with vim.o, as vim.o seems to use tables, and neovim 1.0 plans to remove vim.opt
 		})
