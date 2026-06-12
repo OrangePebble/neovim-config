@@ -346,11 +346,10 @@ return {
 			{ "zg", desc = "Add word to spell list", icon = { icon = "󰓆", color = "cyan" } },
 
 			-- TODO: set which-key icons to the root keymaps
-			-- TODO: set which-key icons to the visual, delete, and change keymaps
+			-- TODO: set which-key icons to the yank, visual, delete, and change keymaps
 			-- TODO: change goto, and root keymap colors
 			-- TODO: add toggles for showing whitespace characters like tab (listchars)
-			-- TODO: https://superuser.com/questions/1486785/how-to-customize-tmux-last-window-marker
-			-- TODO: figure out why search ignore errors but works
+			-- TODO: maybe replace vim.opt with vim.o, as vim.o seems to use tables, and neovim 1.0 plans to remove vim.opt
 		})
 	end,
 }

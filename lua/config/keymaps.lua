@@ -827,8 +827,6 @@ keymap("n", "<leader>+gu", "gu", {
 keymap("n", "<leader>+gU", "gU", {
 	desc = "[gU] Change to uppercase.",
 })
--- TODO: add g< to which-key
--- TODO: figure if g< has a history I can search with a picker
 keymap("n", "<leader>+g<", "g<", {
 	desc = "[g<] Reopen last command output.",
 })
