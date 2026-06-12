@@ -1,6 +1,10 @@
 -- Library of 40+ independent Lua modules.
 return {
-	-- Improve selection of 'inside' or 'around' objects.
+	-- Improve selection of 'inside' or 'around' objects:
+	-- - Throws error if no match was found.
+	-- - Allows matching objects I'm not inside of.
+	-- - Adds keymap to go to edge of object I'm inside of.
+	-- - Extra matches and more...
 	{ "echasnovski/mini.ai", version = "*", opts = {} },
 	-- Improved commenting.
 	{ "echasnovski/mini.comment", version = "*", opts = {} },
