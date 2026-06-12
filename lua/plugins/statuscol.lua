@@ -11,15 +11,15 @@ return {
 			segments = {
 				{ text = { "%s" }, click = "v:lua.ScSa" },
 				{ text = { builtin.lnumfunc }, click = "v:lua.ScLa" },
-				{
-					text = { " " },
-					condition = {
-						function(args)
-							return builtin.not_empty(args) and vim.opt.foldcolumn._value == "0"
-						end,
-					},
-					click = "v:lua.ScLa",
-				},
+				-- {
+				-- 	text = { " " },
+				-- 	condition = {
+				-- 		function(args)
+				-- 			return builtin.not_empty(args) and vim.opt.foldcolumn._value == "0"
+				-- 		end,
+				-- 	},
+				-- 	click = "v:lua.ScLa",
+				-- },
 				{ text = { "%C" }, click = "v:lua.ScSa" },
 			},
 			clickhandlers = {

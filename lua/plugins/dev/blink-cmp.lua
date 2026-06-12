@@ -59,7 +59,13 @@ return {
 			keymap = {
 				preset = "inherit",
 				["<Tab>"] = { "accept", "fallback" },
+				-- Because <Tab> is now "accept", new keymaps are used to show completion menu
 				["<C-n>"] = { "show_and_insert", "select_next" },
+				["<C-p>"] = { "show_and_insert", "select_prev" },
+				-- Make these "cancel" so I can go through history while menu is open
+				-- I could use <C-e> to close it manually but I probably won't remember it
+				["<Up>"] = { "cancel", "fallback" },
+				["<Down>"] = { "cancel", "fallback" },
 			},
 			completion = {
 				menu = {

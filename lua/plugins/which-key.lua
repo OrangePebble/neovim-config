@@ -95,7 +95,8 @@ return {
 			{ "<leader>tq", icon = { icon = "󰺧", color = "yellow" } },
 			{ "<leader>te", icon = { icon = "󰈔", color = "green" } },
 			{ "<leader>td", icon = { icon = "󰉄", color = "grey" } },
-			{ "<leader>tr", icon = { icon = "󰉻", color = "grey" } },
+			{ "<leader>tn", icon = { icon = "󰉻", color = "grey" } },
+			{ "<leader>tN", icon = { icon = "󰉻", color = "grey" } },
 			{ "<leader>th", icon = { icon = "", color = "grey" } },
 			{ "<leader>tc", icon = { icon = "󰏘", color = "grey" } },
 			{ "<leader>tC", icon = { icon = "󰉾", color = "grey" } },
@@ -348,6 +349,8 @@ return {
 			-- TODO: set which-key icons to the visual, delete, and change keymaps
 			-- TODO: change goto, and root keymap colors
 			-- TODO: add toggles for showing whitespace characters like tab (listchars)
+			-- TODO: https://superuser.com/questions/1486785/how-to-customize-tmux-last-window-marker
+			-- TODO: figure out why search ignore errors but works
 		})
 	end,
 }

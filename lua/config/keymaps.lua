@@ -45,13 +45,23 @@ keymap("t", "<Esc>", "<C-\\><C-n>")
 
 --== Toggles
 keymap("n", "<leader>tw", "<cmd>set wrap!<CR>", { desc = "Line wrap" })
-keymap("n", "<leader>tr", function()
+keymap("n", "<leader>tn", function()
 	vim.opt.relativenumber = not vim.opt.relativenumber._value
 	vim.g.togglerelativenumber = not vim.g.togglerelativenumber
 end, { desc = "Relative line numbers" })
-keymap("n", "<leader>tF", function()
+keymap("n", "<leader>tN", function()
+	if vim.opt.number._value then
+		vim.opt.number = false
+		vim.opt.relativenumber = false
+	else
+		vim.opt.number = true
+		vim.opt.relativenumber = vim.g.togglerelativenumber
+		vim.opt.numberwidth = 3
+	end
+end, { desc = "Number column" })
+keymap("n", "<leader>ta", function()
 	vim.g.autoformat = not vim.g.autoformat
-end, { desc = "Formatting on save" })
+end, { desc = "Auto-format" })
 keymap("n", "<leader>th", function()
 	vim.g.minicursorword_disable = not vim.g.minicursorword_disable
 end, { desc = "Cursor word highlighting" })
@@ -79,10 +89,24 @@ keymap("n", "<leader>ts", function()
 	end
 end, { desc = "Sign column" })
 keymap("n", "<leader>tf", function()
-	if vim.opt.fillchars._value == "eob: ,fold: ,foldopen:󰅀,foldsep: ,foldinner: ,foldclose:󰅂" then
-		vim.o.fillchars = "eob: ,fold: ,foldopen: ,foldsep: ,foldinner: ,foldclose:󰅂"
+	if vim.opt.signcolumn._value == "no" and not vim.opt.number._value then
+		-- When both sign and number columns are hidden, toggle foldcolumn visibility instead
+		if vim.opt.foldcolumn._value == "0" then
+			vim.opt.foldcolumn = "1"
+		else
+			vim.opt.foldcolumn = "0"
+		end
 	else
-		vim.o.fillchars = "eob: ,fold: ,foldopen:󰅀,foldsep: ,foldinner: ,foldclose:󰅂"
+		if vim.opt.foldcolumn._value == "0" then
+			vim.opt.foldcolumn = "1"
+			vim.opt.numberwidth = 3
+		else
+			if vim.opt.fillchars._value == "eob: ,fold: ,foldopen:󰅀,foldsep: ,foldinner: ,foldclose:󰅂" then
+				vim.opt.fillchars = "eob: ,fold: ,foldopen: ,foldsep: ,foldinner: ,foldclose:󰅂"
+			else
+				vim.opt.fillchars = "eob: ,fold: ,foldopen:󰅀,foldsep: ,foldinner: ,foldclose:󰅂"
+			end
+		end
 	end
 end, { desc = "Fold column" })
 

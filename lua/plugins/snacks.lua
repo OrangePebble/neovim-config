@@ -21,6 +21,8 @@ return {
 				hl = "SnacksIndent",
 			},
 		},
+		-- TODO: figure out why "lazy.nvim config changed notification" causes yank to go to the first line
+		--  and probaly use the other notification plugin
 		notifier = {
 			enabled = true,
 			-- Same as the default "compact" but with left aligned title.

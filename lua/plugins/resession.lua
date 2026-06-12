@@ -44,11 +44,7 @@ return {
 		local function autosave()
 			vim.defer_fn(function()
 				resession.save(vim.fn.getcwd(), { notify = false })
-				vim.notify(
-					string.format('Saved session "%s"', vim.fn.getcwd()),
-					"INFO",
-					{ history = false, timeout = 1000 }
-				)
+				require("fidget").notify(string.format('Saved session "%s"', vim.fn.getcwd()))
 				autosave()
 			end, 300000)
 		end
