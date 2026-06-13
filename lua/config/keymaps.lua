@@ -117,6 +117,14 @@ keymap("n", "<leader>tW", function()
 		vim.opt.listchars:append({ eol = "↲", tab = "| ", space = "·" })
 	end
 end, { desc = "Whitespace indicators" })
+keymap("n", "<leader>ti", function()
+	vim.g.snacks_indent = not vim.g.snacks_indent
+	if vim.g.snacks_indent then
+		Snacks.indent.enable()
+	else
+		Snacks.indent.disable()
+	end
+end, { desc = "Indent scope guide" })
 
 --== smart-splits and native window keymaps
 keymap("n", "<leader>wh", function()

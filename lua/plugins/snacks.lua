@@ -36,5 +36,6 @@ return {
 	},
 	init = function()
 		vim.g.snacks_dim = false
+		vim.g.snacks_indent = true
 	end,
 }

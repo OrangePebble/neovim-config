@@ -109,6 +109,7 @@ return {
 			{ "<leader>tf", icon = { icon = "", color = "grey" } },
 			{ "<leader>ts", icon = { icon = "", color = "grey" } },
 			{ "<leader>tW", icon = { icon = "󱁐", color = "grey" } },
+			{ "<leader>ti", icon = { icon = "󰉶", color = "grey" } },
 
 			-- LSP icons.
 			{ "<leader>l", group = "LSP", icon = { icon = "󰰍", color = "cyan" } },
