@@ -280,7 +280,8 @@ return {
 
 			-- Overseer
 			{ "<leader>r", group = "Run", icon = { icon = "󰜎", color = "green" } },
-			{ "<leader>rr", icon = { icon = "󰷐", color = "green" } },
+			{ "<leader>rr", icon = { icon = "", color = "orange" } },
+			{ "<leader>rR", icon = { icon = "󰷐", color = "green" } },
 			{ "<leader>rs", icon = { icon = "", color = "grey" } },
 			{ "<leader>rS", icon = { icon = "", color = "cyan" } },
 

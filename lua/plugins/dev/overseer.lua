@@ -2,13 +2,15 @@ return {
 	"stevearc/overseer.nvim",
 	config = function()
 		local overseer = require("overseer")
-
 		---@type overseer.SetupOpts
 		overseer.setup({
 			task_list = {
 				render = function(task)
 					return require("overseer.render").format_compact(task)
 				end,
+				-- Make it so the list is very thin to make more space for the output.
+				max_width = 5,
+				min_width = 5,
 			},
 			component_aliases = {
 				default = {
@@ -20,5 +22,8 @@ return {
 				},
 			},
 		})
+		-- TODO: Improve/Remove keymaps inside the task list
+		-- TODO: Change the notify levels to use the actual types instead of strings
+		-- TODO: Make LSP's code action picker show a preview
 	end,
 }

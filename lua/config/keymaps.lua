@@ -737,10 +737,34 @@ keymap("n", "<leader>TtS", function()
 end, { desc = "Signcolumn signs" })
 
 --== Overseer
-keymap("n", "<leader>rr", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
+keymap("n", "<leader>rR", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
+keymap("n", "<leader>rr", function()
+	-- https://github.com/stevearc/overseer.nvim/blob/a93d9f6d6defdac4bcd6d2c8ba988650e42e0a0e/doc/recipes.md#restart-last-task
+	local overseer = require("overseer")
+	local task_list = require("overseer.task_list")
+	local tasks = overseer.list_tasks({
+		status = {
+			overseer.STATUS.SUCCESS,
+			overseer.STATUS.FAILURE,
+			overseer.STATUS.CANCELED,
+		},
+		sort = task_list.sort_finished_recently,
+	})
+	if vim.tbl_isempty(tasks) then
+		vim.notify("No tasks found.", vim.log.levels.WARN)
+	else
+		local most_recent = tasks[1]
+		overseer.run_action(most_recent, "restart")
+	end
+end, { desc = "Restart last task" })
 keymap("n", "<leader>rs", ":OverseerShell ", { desc = "Run shell command" })
 keymap("n", "<leader>rS", ":OverseerShell! ", { desc = "Add shell task" })
-keymap("n", "<leader>rt", "<CMD>OverseerToggle<CR>", { desc = "Toggle" })
+keymap("n", "<leader>rt", function()
+	require("overseer").toggle({ enter = false })
+end, { desc = "Toggle task list and outputs" })
+keymap("n", "<leader>rl", function()
+	require("overseer").toggle({ enter = false })
+end, { desc = "Toggle task list and outputs" })
 
 --== OpenCode
 keymap({ "n", "x" }, "<leader>aa", function()
