@@ -23,7 +23,6 @@ return {
 			},
 		})
 		-- TODO: Improve/Remove keymaps inside the task list
-		-- TODO: Change the notify levels to use the actual types instead of strings
 		-- TODO: Make LSP's code action picker show a preview
 	end,
 }

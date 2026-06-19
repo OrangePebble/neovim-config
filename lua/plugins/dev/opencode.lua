@@ -13,13 +13,25 @@ return {
 			},
 			server = {
 				start = function()
-					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { history = false })
+					vim.notify(
+						"Disabled opencode.nvim's server functinality.",
+						vim.log.levels.WARN,
+						{ history = false }
+					)
 				end,
 				stop = function()
-					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { history = false })
+					vim.notify(
+						"Disabled opencode.nvim's server functinality.",
+						vim.log.levels.WARN,
+						{ history = false }
+					)
 				end,
 				toggle = function()
-					vim.notify("Disabled opencode.nvim's server functinality.", "WARN", { history = false })
+					vim.notify(
+						"Disabled opencode.nvim's server functinality.",
+						vim.log.levels.WARN,
+						{ history = false }
+					)
 				end,
 			},
 		}
@@ -31,15 +43,15 @@ return {
 				local url = args.data.url
 
 				-- See the available event types and their properties
-				-- vim.notify(vim.inspect(event), "DEBUG")
+				-- vim.notify(vim.inspect(event), vim.log.levels.DEBUG)
 
 				if event.type == "session.idle" then
-					vim.notify("OpenCode finished responding.", "INFO", { history = false })
+					vim.notify("OpenCode finished responding.", vim.log.levels.INFO, { history = false })
 				end
 				-- if event.type == "server.connected" then
 				-- 	vim.notify(
 				-- 		"End the prompt with a space to append instead of submit.",
-				-- 		"INFO",
+				-- 		vim.log.levels.INFO,
 				-- 		{ history = false }
 				-- 	)
 				-- end
@@ -47,7 +59,7 @@ return {
 					vim.defer_fn(function()
 						vim.notify(
 							"Press '<leader>?l' to see local keymaps.",
-							"INFO",
+							vim.log.levels.INFO,
 							{ history = false, timeout = 1000 }
 						)
 					end, 5000)

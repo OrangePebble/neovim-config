@@ -154,7 +154,7 @@ return {
 			else
 				-- Dlay so neovim has time to load notification plugin.
 				vim.defer_fn(function()
-					vim.notify("clangd: docker exec failed (container not running?)", "WARN")
+					vim.notify("clangd: docker exec failed (container not running?)", vim.log.levels.WARN)
 				end, 1000)
 			end
 		end
