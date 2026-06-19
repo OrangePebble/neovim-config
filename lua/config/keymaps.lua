@@ -741,22 +741,13 @@ keymap("n", "<leader>rR", "<CMD>OverseerRun<CR>", { desc = "Run template task" }
 keymap("n", "<leader>rr", function()
 	-- https://github.com/stevearc/overseer.nvim/blob/a93d9f6d6defdac4bcd6d2c8ba988650e42e0a0e/doc/recipes.md#restart-last-task
 	local overseer = require("overseer")
-	local task_list = require("overseer.task_list")
-	local tasks = overseer.list_tasks({
-		status = {
-			overseer.STATUS.SUCCESS,
-			overseer.STATUS.FAILURE,
-			overseer.STATUS.CANCELED,
-		},
-		sort = task_list.sort_finished_recently,
-	})
+	local tasks = overseer.list_tasks()
 	if vim.tbl_isempty(tasks) then
 		vim.notify("No tasks found.", vim.log.levels.WARN)
 	else
-		local most_recent = tasks[1]
-		overseer.run_action(most_recent, "restart")
+		overseer.run_action(tasks[1], "restart")
 	end
-end, { desc = "Restart last task" })
+end, { desc = "Restart most recent task" })
 keymap("n", "<leader>rs", ":OverseerShell ", { desc = "Run shell command" })
 keymap("n", "<leader>rS", ":OverseerShell! ", { desc = "Add shell task" })
 keymap("n", "<leader>rt", function()
