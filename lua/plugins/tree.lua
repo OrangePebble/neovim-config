@@ -1,5 +1,4 @@
 -- A file explorer tree.
-
 return {
 	"nvim-tree/nvim-tree.lua",
 	lazy = false,
@@ -9,6 +8,9 @@ return {
 		-- vim.cmd([[hi NvimTreeNormal guibg=NONE ctermbg=NONE]])
 
 		require("nvim-tree").setup({
+			view = {
+				signcolumn = "no",
+			},
 			filters = {
 				dotfiles = false, -- Show hidden files (dotfiles)
 				git_ignored = false, -- Show files in .gitignore. Hide them with 'I'.
@@ -18,7 +20,9 @@ return {
 					return ".."
 				end,
 				icons = {
-					git_placement = "signcolumn",
+					git_placement = "right_align",
+					bookmarks_placement = "right_align",
+					diagnostics_placement = "right_align",
 					glyphs = {
 						git = {
 							untracked = "󰎜",
