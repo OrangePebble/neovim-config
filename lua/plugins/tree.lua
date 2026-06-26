@@ -19,6 +19,15 @@ return {
 				end,
 				icons = {
 					git_placement = "signcolumn",
+					glyphs = {
+						git = {
+							untracked = "󰎜",
+							unstaged = "",
+							staged = "󰄬",
+							deleted = "󰆴",
+							renamed = "󰑕",
+						},
+					},
 				},
 			},
 			on_attach = function(bufnr)
@@ -27,7 +36,7 @@ return {
 					return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
 				end
 				-- Use default mappings.
-				api.config.mappings.default_on_attach(bufnr)
+				api.map.on_attach.default(bufnr)
 				-- Make '?' open help.
 				vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
 			end,

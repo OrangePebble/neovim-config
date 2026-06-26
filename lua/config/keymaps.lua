@@ -388,6 +388,7 @@ keymap("n", "<leader>tq", "<cmd>Trouble qflist toggle<CR>", { desc = "Quickfix l
 
 --== markview
 keymap("n", "<leader>tm", "<cmd>Markview Toggle<CR>", { desc = "Markview" })
+keymap("n", "<leader>tM", "<CMD>Markview HybridToggle<CR>", { desc = "Markview hybrid mode" })
 
 --== harpoon
 keymap("n", "<leader><leader>j", function()
@@ -847,11 +848,14 @@ keymap("n", "<leader>+N", "<C-a>", {
 keymap("n", "<leader>+n", "<C-x>", {
 	desc = "[<C-x>] Decrement number under cursor.",
 })
-keymap("n", "<leader>+:s", ":Sops ", {
+keymap("n", "<leader>+:S", ":Sops ", {
 	desc = "[:Sops ] Edit/encrypt/decrypt/... files with sops.",
 })
 keymap("n", "<leader>+:M", "<cmd>mes<CR>", {
 	desc = "[:mes] Show all messages.",
+})
+keymap("n", "<leader>+:s", "<cmd>sort<CR>", {
+	desc = "[:sort i] Sort the buffer's lines alphabetically case-insensitively. Can be used on a selection. Add '!' for reverse, 'u' for removing duplicates, and 'n' for numeric sort.",
 })
 keymap("n", "<leader>+gt", "gt", {
 	desc = "[gt] Go to next tab.",

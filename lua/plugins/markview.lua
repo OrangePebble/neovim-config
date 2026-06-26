@@ -40,6 +40,15 @@ return {
 						padding_left = "           ",
 						padding_right = " ",
 					},
+					setext_1 = {
+						sign = "",
+					},
+					setext_2 = {
+						sign = "",
+					},
+				},
+				code_blocks = {
+					sign = false,
 				},
 			},
 			preview = {

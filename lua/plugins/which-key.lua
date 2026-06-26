@@ -95,6 +95,7 @@ return {
 			{ "<leader>tt", group = "Todo", icon = { icon = "󰷐", color = "yellow" } },
 			{ "<leader>tu", icon = { icon = "", color = "orange" } },
 			{ "<leader>tm", icon = { icon = "󰍔", color = "grey" } },
+			{ "<leader>tM", icon = { icon = "󰍔", color = "grey" } },
 			{ "<leader>tw", icon = { icon = "", color = "grey" } },
 			{ "<leader>ttt", icon = { icon = "", color = "grey" } },
 			{ "<leader>tta", icon = "" },
