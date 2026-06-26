@@ -80,7 +80,7 @@ vim.api.nvim_create_autocmd("QuitPre", {
 
 -- https://github.com/sitiom/nvim-numbertoggle
 -- Toggles relativenumber when entering insert mode.
-vim.g.togglerelativenumber = vim.o.nu
+vim.g.togglerelativenumber = vim.o.relativenumber
 local number_toggle_group = vim.api.nvim_create_augroup("numbertoggle", {})
 vim.api.nvim_create_autocmd({ "BufEnter", "FocusGained", "InsertLeave", "CmdlineLeave", "WinEnter" }, {
 	pattern = "*",

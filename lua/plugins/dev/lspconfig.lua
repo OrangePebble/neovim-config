@@ -102,6 +102,39 @@ return {
 					provideFormatter = false, -- Using 'prettierd' instead.
 				},
 			},
+			lemminx = { -- xml
+				filetypes = { "xml", "xsd", "xsl", "xslt", "svg", "xosc" },
+				settings = {
+					xml = {
+						-- Found after searching `lemminx path:**/*.lua spaceBeforeEmptyCloseTag` on GitHub.
+						format = {
+							enabled = true,
+							spaceBeforeEmptycloseTag = false,
+							maxLineWidth = 999,
+							joinContentLines = true,
+							splitAttributes = "preserve",
+							splitAttributesIndentSize = 1,
+							closingBracketNewLine = false,
+							formatComments = false,
+							joinCommentLine = false,
+							preservedNewlines = 1,
+							preserveAttributeLineBreaks = true,
+							preserveEmptyContent = true,
+							emptyElements = "ignore",
+						},
+						-- Because I do this direct association I don't need to use catalogs, but here is some documentation:
+						-- https://github.com/eclipse-lemminx/lemminx/blob/85de2145eb5acb40e5f3b2d4b0cbf8ce107e515b/docs/Configuration.md
+						-- https://github.com/redhat-developer/vscode-xml/blob/ac784ed123b2ae0ec42b23f190c1d4402094d3dd/docs/Features/XMLCatalogFeatures.md
+						-- https://github.com/redhat-developer/vscode-xml/blob/ac784ed123b2ae0ec42b23f190c1d4402094d3dd/docs/Validation.md#xml-catalog-with-xsd
+						fileAssociations = {
+							{
+								pattern = "**/*.xosc",
+								systemId = vim.fn.stdpath("config") .. "/lua/plugins/dev/xml/openscenario.xsd",
+							},
+						},
+					},
+				},
+			},
 		}
 		require("utils.mason-installer").ensure_installed(vim.tbl_keys(servers_ensure_installed or {}))
 
