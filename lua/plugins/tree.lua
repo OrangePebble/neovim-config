@@ -8,6 +8,9 @@ return {
 		-- vim.cmd([[hi NvimTreeNormal guibg=NONE ctermbg=NONE]])
 
 		require("nvim-tree").setup({
+			update_focused_file = {
+				enable = true,
+			},
 			view = {
 				signcolumn = "no",
 			},
@@ -34,6 +37,11 @@ return {
 					},
 				},
 			},
+			actions = {
+				open_file = {
+					resize_window = false,
+				},
+			},
 			on_attach = function(bufnr)
 				local api = require("nvim-tree.api")
 				local function opts(desc)
@@ -45,5 +53,16 @@ return {
 				vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
 			end,
 		})
+
+		-- Save if nvim-tree is open for use elsewhere like lualine.
+		vim.g.nvim_tree_open = false
+		local api = require("nvim-tree.api")
+		local Event = api.events.Event
+		api.events.subscribe(Event.TreeOpen, function(data)
+			vim.g.nvim_tree_open = true
+		end)
+		api.events.subscribe(Event.TreeClose, function(data)
+			vim.g.nvim_tree_open = false
+		end)
 	end,
 }

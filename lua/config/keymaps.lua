@@ -22,7 +22,12 @@ keymap("v", "<", "<gv", { desc = "Indent left and reselect" })
 keymap("v", ">", ">gv", { desc = "Indent right and reselect" })
 
 -- Better J behavior
-keymap("n", "J", "mzJ`z", { desc = "Join lines and keep cursor position" })
+keymap("n", "J", function()
+	-- Using this method instead of "mzJ`z" so the 'z' mark isn't set.
+	local pos = vim.api.nvim_win_get_cursor(0)
+	vim.cmd("normal! J")
+	vim.api.nvim_win_set_cursor(0, pos)
+end, { desc = "Join lines and keep cursor position" })
 
 -- Yank to and paste from the system clipboard.
 keymap({ "n", "x" }, "<leader>y", '"+y', { desc = "Yank to clipboard with motions" })
@@ -125,6 +130,14 @@ keymap("n", "<leader>ti", function()
 		Snacks.indent.disable()
 	end
 end, { desc = "Indent scope guide" })
+keymap("n", "<leader>tb", function()
+	vim.g.satellite = not vim.g.satellite
+	if vim.g.satellite then
+		vim.cmd("SatelliteEnable")
+	else
+		vim.cmd("SatelliteDisable")
+	end
+end, { desc = "Scrollbar" })
 
 --== smart-splits and native window keymaps
 keymap("n", "<leader>wh", function()
@@ -325,12 +338,19 @@ keymap("n", "<leader>sf", function()
 	Snacks.picker.files({
 		-- Follow symlinks.
 		follow = true,
+	})
+end, { desc = "Files" })
+keymap("n", "<leader>sF", function()
+	---@type snacks.picker.files.Config
+	Snacks.picker.files({
+		-- Follow symlinks.
+		follow = true,
 		-- Remove git submodules from search results.
 		exclude = vim.tbl_map(function(l)
 			return l:match(" (%S+)$")
 		end, vim.fn.systemlist("git config --file .gitmodules --get-regexp path 2>/dev/null")),
 	})
-end, { desc = "Files" })
+end, { desc = "Files (excluding submodules)" })
 keymap("n", "<leader>sN", function()
 	---@type snacks.picker.files.Config
 	Snacks.picker.files({
@@ -437,9 +457,28 @@ keymap("n", "]G", "<cmd>Gitsigns nav_hunk last<CR>", { desc = "Last git hunk" })
 keymap("n", "<leader>g}", "<cmd>Gitsigns nav_hunk Last<CR>", { desc = "']G' Last hunk" })
 keymap("n", "[G", "<cmd>Gitsigns nav_hunk first<CR>", { desc = "First git hunk" })
 keymap("n", "<leader>g{", "<cmd>Gitsigns nav_hunk first<CR>", { desc = "'[G' First hunk" })
+keymap("n", "]c", function()
+	if vim.wo.diff then
+		vim.cmd.normal({ "]c", bang = true })
+	else
+		require("gitsigns").nav_hunk("next")
+	end
+end)
+keymap("n", "[c", function()
+	if vim.wo.diff then
+		vim.cmd.normal({ "[c", bang = true })
+	else
+		require("gitsigns").nav_hunk("prev")
+	end
+end)
 
-keymap("n", "<leader>gs", "<cmd>Gitsigns stage_hunk<CR>", { desc = "Stage hunk" })
+keymap({ "n", "v" }, "<leader>gs", function()
+	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "Stage hunk" })
 keymap("n", "<leader>gS", "<cmd>Gitsigns stage_buffer<CR>", { desc = "Stage buffer" })
+keymap({ "n", "v" }, "<leader>gr", function()
+	require("gitsigns").reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+end, { desc = "Reset hunk" })
 keymap("n", "<leader>gr", "<cmd>Gitsigns reset_hunk<CR>", { desc = "Reset hunk" })
 keymap("n", "<leader>gR", "<cmd>Gitsigns reset_buffer<CR>", { desc = "Reset buffer" })
 keymap("n", "<leader>gu", "<cmd>Gitsigns undo_stage_hunk<CR>", { desc = "Undo stage hunk" })
@@ -456,6 +495,7 @@ keymap("n", "<leader>gtw", "<cmd>Gitsigns toggle_word_diff<CR>", { desc = "Word 
 keymap("n", "<leader>gtl", "<cmd>Gitsigns toggle_linehl<CR>", { desc = "Line highlight" })
 keymap("n", "<leader>gtn", "<cmd>Gitsigns toggle_numhl<CR>", { desc = "Number highlight" })
 keymap("n", "<leader>gtb", "<cmd>Gitsigns toggle_current_line_blame<CR>", { desc = "Current line blame" })
+keymap("n", "<leader>gtB", "<cmd>Gitsigns blame<cr>", { desc = "All line blames" })
 
 keymap({ "o", "x" }, "ig", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
 keymap({ "o", "x" }, "ag", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
@@ -742,22 +782,44 @@ keymap("n", "<leader>TtS", function()
 end, { desc = "Signcolumn signs" })
 
 --== Overseer
-keymap("n", "<leader>rR", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
+keymap("n", "<leader>rt", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
 keymap("n", "<leader>rr", function()
 	-- https://github.com/stevearc/overseer.nvim/blob/a93d9f6d6defdac4bcd6d2c8ba988650e42e0a0e/doc/recipes.md#restart-last-task
 	local overseer = require("overseer")
 	local tasks = overseer.list_tasks()
 	if vim.tbl_isempty(tasks) then
 		vim.notify("No tasks found.", vim.log.levels.WARN)
-	else
-		overseer.run_action(tasks[1], "restart")
+		return
 	end
-end, { desc = "Restart most recent task" })
+	overseer.run_action(tasks[1], "restart")
+end, { desc = "Restart last task" })
+keymap("n", "<leader>rR", function()
+	local overseer = require("overseer")
+	local tasks = overseer.list_tasks()
+	if vim.tbl_isempty(tasks) then
+		vim.notify("No tasks found.", vim.log.levels.WARN)
+		return
+	end
+	local last_task = tasks[1]
+	if type(last_task.cmd) ~= "string" then
+		vim.notify("Last task is not a shell command.", vim.log.levels.ERROR)
+		return
+	end
+	vim.ui.input({
+		prompt = "cmd: ",
+		--- Solved in the if above.
+		---@diagnostic disable-next-line: assign-type-mismatch
+		default = last_task.cmd,
+	}, function(input)
+		if last_task.name == last_task.cmd then
+			last_task.name = input
+		end
+		last_task.cmd = input
+		overseer.run_action(last_task, "restart")
+	end)
+end, { desc = "Edit and restart last task" })
 keymap("n", "<leader>rs", ":OverseerShell ", { desc = "Run shell command" })
 keymap("n", "<leader>rS", ":OverseerShell! ", { desc = "Add shell task" })
-keymap("n", "<leader>rt", function()
-	require("overseer").toggle({ enter = false })
-end, { desc = "Toggle task list and outputs" })
 keymap("n", "<leader>rl", function()
 	require("overseer").toggle({ enter = false })
 end, { desc = "Toggle task list and outputs" })

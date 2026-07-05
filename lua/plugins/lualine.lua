@@ -1,5 +1,5 @@
--- Fast and easy to configu statusline.
 return {
+	-- Fast and easy to configu statusline.
 	"nvim-lualine/lualine.nvim",
 	config = function()
 		local trouble = require("trouble")
@@ -21,8 +21,23 @@ return {
 			},
 			extensions = {
 				"trouble",
-				"nvim-tree",
 				"nvim-dap-ui",
+				{
+					-- nvim-tree
+					sections = {
+						lualine_a = {
+							{
+								function()
+									return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+								end,
+								on_click = function()
+									require("nvim-tree.api").tree.toggle()
+								end,
+							},
+						},
+					},
+					filetypes = { "NvimTree" },
+				},
 			},
 			sections = {
 				lualine_b = {
@@ -61,7 +76,25 @@ return {
 							return vim.bo.buftype ~= ""
 						end,
 					},
-					"filename",
+					{
+						"filename",
+						on_click = function()
+							require("nvim-tree.api").tree.toggle({ focus = false })
+						end,
+						cond = function()
+							return not vim.g.nvim_tree_open
+						end,
+					},
+					{
+						"filename",
+						path = 1, -- Relative path
+						on_click = function()
+							require("nvim-tree.api").tree.close()
+						end,
+						cond = function()
+							return vim.g.nvim_tree_open
+						end,
+					},
 				},
 			},
 		})

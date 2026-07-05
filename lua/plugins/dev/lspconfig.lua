@@ -63,6 +63,7 @@ return {
 				-- Changing these extensions to match the OpenGL shader filetype.
 				fs = "glsl",
 				vs = "glsl",
+				xodr = "xml",
 			},
 		})
 		-- Language servers to enable and automatically install using Mason.
@@ -103,13 +104,14 @@ return {
 				},
 			},
 			lemminx = { -- xml
-				filetypes = { "xml", "xsd", "xsl", "xslt", "svg", "xosc" },
+				-- INFO: Added 'xodr' as an xml filetype above.
+				filetypes = { "xml", "xsd", "xsl", "xslt", "svg", "xosc", "xodr" },
 				settings = {
 					xml = {
 						-- Found after searching `lemminx path:**/*.lua spaceBeforeEmptyCloseTag` on GitHub.
 						format = {
 							enabled = true,
-							spaceBeforeEmptycloseTag = false,
+							spaceBeforeEmptycloseTag = true,
 							maxLineWidth = 999,
 							joinContentLines = true,
 							splitAttributes = "preserve",
@@ -129,7 +131,13 @@ return {
 						fileAssociations = {
 							{
 								pattern = "**/*.xosc",
-								systemId = vim.fn.stdpath("config") .. "/lua/plugins/dev/xml/openscenario.xsd",
+								systemId = vim.fn.stdpath("config")
+									.. "/lua/plugins/dev/xml/OpenSCENARIO_StrictValidation_1_3.xsd",
+							},
+							{
+								pattern = "**/*.xodr",
+								systemId = vim.fn.stdpath("config") .. "/lua/plugins/dev/xml/OpenDRIVE_1.4H.xsd",
+								-- systemId = vim.fn.stdpath("config") .. "/lua/plugins/dev/xml/OpenDRIVE_1.3.xsd",
 							},
 						},
 					},

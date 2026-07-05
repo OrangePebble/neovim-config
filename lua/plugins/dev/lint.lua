@@ -14,7 +14,7 @@ return {
 		-- INFO: Get all available filetypes at:
 		--  https://github.com/neovim/neovim/blob/master/runtime/lua/vim/filetype.lua
 		lint.linters_by_ft = {
-			lua = { "luacheck" },
+			-- lua = { "luacheck" },
 			nix = { "statix" },
 			sh = { "shellcheck" },
 			bash = { "shellcheck" },

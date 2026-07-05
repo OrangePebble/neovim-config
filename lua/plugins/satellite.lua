@@ -19,5 +19,6 @@ return {
 				},
 			},
 		})
+		vim.g.satellite = true
 	end,
 }

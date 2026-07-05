@@ -111,6 +111,7 @@ return {
 				{ "<leader>ts", icon = { icon = "", color = "grey" } },
 				{ "<leader>tW", icon = { icon = "󱁐", color = "grey" } },
 				{ "<leader>ti", icon = { icon = "󰉶", color = "grey" } },
+				{ "<leader>tb", icon = { icon = "󱕒", color = "grey" } },
 
 				-- LSP icons.
 				{ "<leader>l", group = "LSP", icon = { icon = "󰰍", color = "cyan" } },
@@ -167,7 +168,7 @@ return {
 				{ "<leader>du", icon = { icon = "󰙵", color = "yellow" } },
 
 				-- Git
-				{ "<leader>g", group = "Git" },
+				{ "<leader>g", mode = "nv", group = "Git" },
 				{ "<leader>gt", group = "Toggle" },
 				{ "<leader>gb", icon = { icon = "", color = "orange" } },
 				{ "<leader>gp", icon = { icon = "󰈈", color = "yellow" } },
@@ -177,12 +178,13 @@ return {
 				{ "<leader>g}", icon = { icon = "󰞒", color = "grey" } },
 				{ "<leader>g[", icon = { icon = "󰁝", color = "grey" } },
 				{ "<leader>g{", icon = { icon = "󰞕", color = "grey" } },
-				{ "<leader>gr", icon = { icon = "󰆴", color = "red" } },
+				{ "<leader>gr", mode = "nv", icon = { icon = "󰆴", color = "red" } },
 				{ "<leader>gR", icon = { icon = "󰆴", color = "red" } },
-				{ "<leader>gs", icon = { icon = "", color = "green" } },
+				{ "<leader>gs", mode = "nv", icon = { icon = "", color = "green" } },
 				{ "<leader>gS", icon = { icon = "", color = "green" } },
 				{ "<leader>gu", icon = { icon = "", color = "orange" } },
 				{ "<leader>gtb", icon = { icon = "", color = "orange" } },
+				{ "<leader>gtB", icon = { icon = "", color = "orange" } },
 				{ "<leader>gts", icon = { icon = "", color = "green" } },
 				{ "<leader>gtl", icon = { icon = "󰸱", color = "yellow" } },
 				{ "<leader>gtn", icon = { icon = "󰉻", color = "yellow" } },
@@ -196,6 +198,7 @@ return {
 				{ "<leader>stt", icon = { icon = "", color = "yellow" } },
 				{ "<leader>sta", icon = "" },
 				{ "<leader>sf", icon = { icon = "󰈔", color = "green" } },
+				{ "<leader>sF", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>si", icon = { icon = "󰘓", color = "green" } },
 				{ "<leader>sc", icon = "" },
 				{ "<leader>sg", icon = { icon = "󰈞", color = "cyan" } },
@@ -282,7 +285,8 @@ return {
 				-- Overseer
 				{ "<leader>r", group = "Run", icon = { icon = "󰜎", color = "green" } },
 				{ "<leader>rr", icon = { icon = "", color = "orange" } },
-				{ "<leader>rR", icon = { icon = "󰷐", color = "green" } },
+				{ "<leader>rR", icon = { icon = "", color = "orange" } },
+				{ "<leader>rt", icon = { icon = "󰷐", color = "green" } },
 				{ "<leader>rs", icon = { icon = "", color = "grey" } },
 				{ "<leader>rS", icon = { icon = "", color = "cyan" } },
 
