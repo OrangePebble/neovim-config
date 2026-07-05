@@ -303,8 +303,8 @@ local theme = lush(function(injected_functions)
     -- Types ------------------------------------------------------------------
     sym"@type"            { Type }, -- type or class definitions and annotations
     sym"@type.builtin"    { fg = cyan_bright }, -- built-in types
-    -- sym"@type.definition" { }, -- identifiers in type definitions (e.g. `typedef <type> <identifier>` in C)
-    -- sym"@type.qualifier"  { }, -- type qualifiers (e.g. `const`)
+    sym"@type.definition" { sym"@type" }, -- identifiers in type definitions (e.g. `typedef <type> <identifier>` in C)
+    sym"@type.qualifier"  { sym"@type" }, -- type qualifiers (e.g. `const`)
     sym"@attribute"       { Constant }, -- attribute annotations (e.g. Python decorators)
     sym"@property"        { fg = blue }, -- the key in key/value pairs
 
@@ -320,7 +320,7 @@ local theme = lush(function(injected_functions)
 
     -- Keywords ---------------------------------------------------------------
     sym"@keyword"                     { Keyword }, -- keywords not fitting into specific categories
-    -- sym"@keyword.coroutine"           { }, -- keywords related to coroutines (e.g. `go` in Go, `async/await` in Python)
+    sym"@keyword.coroutine"           { sym"@keyword" }, -- keywords related to coroutines (e.g. `go` in Go, `async/await` in Python)
     sym"@keyword.function"            { fg = magenta }, -- keywords that define a function (e.g. `func` in Go, `def` in Python)
     sym"@keyword.operator"            { fg = fg2 }, -- operators that are English words (e.g. `and` / `or`)
     sym"@keyword.import"              { Include }, -- keywords for including modules (e.g. `import` / `from` in Python)
@@ -428,7 +428,8 @@ local theme = lush(function(injected_functions)
     sym"@include"               { sym"@keyword.import" },
     sym"@repeat"                { sym"@keyword.repeat" },
 		sym"@structure"             { Structure },
-		sym"@debug"                 { sym"@keyword.debug"},
+		sym"@debug"                 { sym"@keyword.debug" },
+		sym"@error"                 { Error },
     -- sym"@variable.member.yaml"  { sym"@field.yaml" },
     -- sym"@text.title.1.markdown" { sym"@markup.heading.1.markdown" },
     -- sym"@text.title.2.markdown" { sym"@markup.heading.2.markdown" },
@@ -436,6 +437,38 @@ local theme = lush(function(injected_functions)
     -- sym"@text.title.4.markdown" { sym"@markup.heading.4.markdown" },
     -- sym"@text.title.5.markdown" { sym"@markup.heading.5.markdown" },
     -- sym"@text.title.6.markdown" { sym"@markup.heading.6.markdown" },
+
+    -- LSP semantic tokens
+    sym"@lsp.type.boolean"                      { sym"@boolean" },
+    sym"@lsp.type.builtinType"                  { sym"@type.builtin" },
+    sym"@lsp.type.comment"                      { sym"@comment" },
+    sym"@lsp.type.enum"                         { sym"@type" },
+    sym"@lsp.type.enumMember"                   { sym"@constant" },
+    sym"@lsp.type.escapeSequence"               { sym"@string.escape" },
+    sym"@lsp.type.formatSpecifier"              { sym"@punctuation.special" },
+    sym"@lsp.type.interface"                    { fg = red_bright },
+    sym"@lsp.type.keyword"                      { sym"@keyword" },
+    sym"@lsp.type.namespace"                    { sym"@module" },
+    sym"@lsp.type.number"                       { sym"@number" },
+    sym"@lsp.type.operator"                     { sym"@operator" },
+    sym"@lsp.type.parameter"                    { sym"@parameter" },
+    sym"@lsp.type.property"                     { sym"@property" },
+    sym"@lsp.type.selfKeyword"                  { sym"@variable.builtin" },
+    sym"@lsp.type.typeAlias"                    { sym"@type.definition" },
+    sym"@lsp.type.unresolvedReference"          { sym"@error" },
+    sym"@lsp.type.variable"                     {}, -- use treesitter styles for regular variables
+    sym"@lsp.typemod.class.defaultLibrary"      { sym"@type.builtin" },
+    sym"@lsp.typemod.enum.defaultLibrary"       { sym"@type.builtin" },
+    sym"@lsp.typemod.enumMember.defaultLibrary" { sym"@constant.builtin" },
+    sym"@lsp.typemod.function.defaultLibrary"   { sym"@function.builtin" },
+    sym"@lsp.typemod.keyword.async"             { sym"@keyword.coroutine" },
+    sym"@lsp.typemod.macro.defaultLibrary"      { sym"@function.builtin" },
+    sym"@lsp.typemod.method.defaultLibrary"     { sym"@function.builtin" },
+    sym"@lsp.typemod.operator.injected"         { sym"@operator" },
+    sym"@lsp.typemod.string.injected"           { sym"@string" },
+    sym"@lsp.typemod.type.defaultLibrary"       { sym"@type.builtin" },
+    sym"@lsp.typemod.variable.defaultLibrary"   { sym"@variable.builtin" },
+    sym"@lsp.typemod.variable.injected"         { sym"@variable" },
 
     -- which-key
     WhichKey          { Identifier },
@@ -453,7 +486,7 @@ local theme = lush(function(injected_functions)
     NvimTreeRootFolder        { fg = orange, gui = "bold" },
     NvimTreeFolderName        { fg = fg2 },
     NvimTreeFolderIcon        { fg = yellow },
-    NvimTreeOpenedFolderName  { fg = fg1 },
+    NvimTreeOpenedFolderName  { fg = fg2 },
     NvimTreeEmptyFolderName   { fg = fg3 },
     NvimTreeSymlink           { fg = blue },
     NvimTreeSymlinkFolderName { fg = blue },
