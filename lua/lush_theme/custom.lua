@@ -343,10 +343,10 @@ local theme = lush(function(injected_functions)
     -- Comments ---------------------------------------------------------------
     sym"@comment"               { Comment }, -- line and block comments
     -- sym"@comment.documentation" { link = "" }, -- comments documenting code
-    sym"@comment.error"         { fg = bg1, bg = red }, -- error-type comments (e.g. `ERROR`, `FIXME`, `DEPRECATED:`)
-    sym"@comment.warning"       { fg = bg1, bg = orange }, -- warning-type comments (e.g. `WARNING:`, `FIX:`, `HACK:`)
-    sym"@comment.todo"          { fg = bg1, bg = magenta }, -- todo-type comments (e.g. `TODO:`, `WIP:`, `FIXME:`)
-    sym"@comment.note"          { fg = bg1, bg = blue }, -- note-type comments (e.g. `NOTE:`, `INFO:`, `XXX`)
+    sym"@comment.error"         { fg = bg1, bg = red }, -- error-type comments (e.g. `ERROR`, `FIXME`, `DEPRECATED`)
+    sym"@comment.warning"       { fg = bg1, bg = orange }, -- warning-type comments (e.g. `WARNING`, `FIX`, `HACK`)
+    sym"@comment.todo"          { fg = bg1, bg = magenta }, -- todo-type comments (e.g. `TODO`, `WIP`, `FIXME`)
+    sym"@comment.note"          { fg = bg1, bg = blue }, -- note-type comments (e.g. `NOTE`, `INFO`, `XXX`)
 
     -- Markup -----------------------------------------------------------------
     sym"@markup"                { fg = fg1 }, -- For strings considerated text in a markup language.
@@ -470,6 +470,11 @@ local theme = lush(function(injected_functions)
     sym"@lsp.typemod.variable.defaultLibrary"   { sym"@variable.builtin" },
     sym"@lsp.typemod.variable.injected"         { sym"@variable" },
 
+    -- lazy.nvim
+    LazyButtonActive { TabLineSel },
+    LazyDimmed       { LineNr },
+    LazyProp         { LineNr },
+
     -- which-key
     WhichKey          { Identifier },
     WhichKeyGroup     { Function },
@@ -514,6 +519,73 @@ local theme = lush(function(injected_functions)
     MiniIconsPurple { fg = magenta },
     MiniIconsRed    { fg = red },
     MiniIconsYellow { fg = yellow },
+
+    -- blink.cmp
+    BlinkCmpDoc               { fg = fg1, bg = bg0 },
+    BlinkCmpDocBorder         { fg = sel0, bg = bg0 },
+    BlinkCmpLabel             { fg = fg1, },
+    BlinkCmpLabelDeprecated   { fg = fg3, gui = "strikethrough" },
+    BlinkCmpLabelMatch        { fg = blue_bright },
+    BlinkCmpKindDefault       { fg = fg2, },
+    BlinkCmpLabelDetail       { Comment },
+    BlinkCmpKindKeyword       { Identifier },
+    BlinkCmpKindVariable      { sym"@variable" },
+    BlinkCmpKindConstant      { sym"@constant" },
+    BlinkCmpKindReference     { Keyword },
+    BlinkCmpKindValue         { Keyword },
+    BlinkCmpKindFunction      { Function },
+    BlinkCmpKindMethod        { Function },
+    BlinkCmpKindConstructor   { Function },
+    BlinkCmpKindInterface     { Constant },
+    BlinkCmpKindEvent         { Constant },
+    BlinkCmpKindEnum          { Constant },
+    BlinkCmpKindUnit          { Constant },
+    BlinkCmpKindClass         { Type },
+    BlinkCmpKindStruct        { Type },
+    BlinkCmpKindModule        { sym"@namespace" },
+    BlinkCmpKindProperty      { sym"@property" },
+    BlinkCmpKindField         { sym"@field" },
+    BlinkCmpKindTypeParameter { sym"@field" },
+    BlinkCmpKindEnumMember    { sym"@field" },
+    BlinkCmpKindOperator      { Operator },
+    BlinkCmpKindSnippet       { fg = fg2 },
+
+    -- dapui
+    DapUIVariable                { fg = white },
+    DapUIScope                   { fg = cyan_bright },
+    DapUIType                    { Type },
+    DapUIValue                   { fg = white },
+    DapUIModifiedValue           { fg = white , gui = "bold" },
+    DapUIDecoration              { fg = fg3 },
+    DapUIThread                  { String },
+    DapUIStoppedThread           { fg = cyan_bright },
+    DapUIFrameName               { Normal },
+    DapUISource                  { Keyword },
+    DapUILineNumber              { Number },
+    DapUIFloatBorder             { FloatBorder },
+    DapUIWatchesEmpty            { fg = red },
+    DapUIWatchesValue            { fg = orange },
+    DapUIWatchesError            { fg = red },
+    DapUIBreakpointsPath         { fg = cyan_bright },
+    DapUIBreakpointsInfo         { fg = blue },
+    DapUIBreakpointsCurrentLine  { fg = magenta, gui = "bold" },
+    DapUIBreakpointsLine         { DapUILineNumber },
+    DapUIBreakpointsDisabledLine { fg = comment },
+
+    -- neotest
+    NeotestPassed       { fg = green },
+    NeotestFailed       { fg = red },
+    NeotestRunning      { fg = magenta },
+    NeotestSkipped      { fg = orange },
+    NeotestTest         { Normal},
+    NeotestNamespace    { fg = cyan_dark },
+    NeotestMarked       { fg = fg1, gui = 'bold' },
+    NeotestFocused      { gui = 'underline' },
+    NeotestFile         { fg = blue },
+    NeotestDir          { fg = cyan },
+    NeotestIndent       { Conceal },
+    NeotestExpandMarker { Conceal },
+    NeotestAdapterName  { fg = pink, gui = 'bold'},
 	}
 end)
 
