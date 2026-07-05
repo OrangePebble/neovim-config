@@ -2,6 +2,7 @@
 -- For usage guides, see :h lush or :LushRunTutorial
 -- To see changes on real time on this file, run:
 --  `:Lushify` or `:lua require('lush').ify()`
+-- Call `:Inspect` to see which highlight-group was chosen.
 
 -- I'll be mostly using the values/methods used in 'https://github.com/EdenEast/nightfox.nvim'.
 -- I was using it before but I want more control and an easier and standard way to switch themes.
@@ -350,7 +351,7 @@ local theme = lush(function(injected_functions)
 
     -- Markup -----------------------------------------------------------------
     sym"@markup"                { fg = fg1 }, -- For strings considerated text in a markup language.
-    sym"@markup.strong"         { fg = red_dark, gui = "bold" }, -- bold text
+    sym"@markup.strong"         { fg = red, gui = "bold" }, -- bold text
     sym"@markup.italic"         { gui = "italic" }, -- italic text
     sym"@markup.strikethrough"  { fg = fg1, gui= "strikethrough" }, -- struck-through text
     sym"@markup.underline"      { Underlined }, -- underlined text (only for literal underline markup!)
@@ -488,7 +489,7 @@ local theme = lush(function(injected_functions)
     NvimTreeNormal            { NormalFloat },
     NvimTreeVertSplit         { VertSplit },
     NvimTreeIndentMarker      { fg = bg4 },
-    NvimTreeRootFolder        { fg = orange, gui = "bold" },
+    NvimTreeRootFolder        { fg = comment, gui = "bold" },
     NvimTreeFolderName        { fg = fg2 },
     NvimTreeFolderIcon        { fg = yellow },
     NvimTreeOpenedFolderName  { fg = fg2 },
@@ -555,7 +556,7 @@ local theme = lush(function(injected_functions)
     DapUIScope                   { fg = cyan_bright },
     DapUIType                    { Type },
     DapUIValue                   { fg = white },
-    DapUIModifiedValue           { fg = white , gui = "bold" },
+    DapUIModifiedValue           { fg = white, gui = "bold" },
     DapUIDecoration              { fg = fg3 },
     DapUIThread                  { String },
     DapUIStoppedThread           { fg = cyan_bright },
