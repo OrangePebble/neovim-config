@@ -656,6 +656,11 @@ keymap("n", "<leader>dr", function()
 	local dap = require("dap")
 	if not dap.session() then
 		vim.cmd("DapResetCache")
+		vim.notify(
+			"Debugger commands in REPL are prefixed with '.'. Run '.help' to see more.",
+			vim.log.levels.INFO,
+			{ history = false }
+		)
 	end
 	dap.continue()
 end, { desc = "Run/Continue" })
@@ -673,6 +678,11 @@ keymap("n", "<leader>dk", function()
 end, { desc = "Up stack without stepping" })
 keymap("n", "<leader>dl", function()
 	require("dap").run_last()
+	vim.notify(
+		"Debugger commands in REPL are prefixed with '.'. Run '.help' to see more.",
+		vim.log.levels.INFO,
+		{ history = false }
+	)
 end, { desc = "Repeat last run" })
 
 keymap("n", "<leader>di", function()
