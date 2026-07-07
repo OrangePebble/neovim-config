@@ -150,6 +150,7 @@ return {
 						program = cached("program", function()
 							return vim.fn.getcwd() .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli"
 						end),
+						args = default_args,
 					},
 					{
 						name = "Launch file in ./bazel-bin",
@@ -159,6 +160,7 @@ return {
 						program = cached("program", function()
 							return pick_executable(vim.fn.getcwd() .. "/bazel-bin", "Path to executable (./bazel-bin)")
 						end),
+						args = default_args,
 					},
 				})
 			end
@@ -168,14 +170,6 @@ return {
 					type = "gdb",
 					request = "launch",
 					cwd = "${workspaceFolder}",
-					program = default_program,
-				},
-				{
-					name = "Launch file (args)",
-					type = "gdb",
-					request = "launch",
-					cwd = "${workspaceFolder}",
-					stopAtBeginningOfMainSubprogram = false,
 					program = default_program,
 					args = default_args,
 				},
