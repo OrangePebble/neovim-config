@@ -4,13 +4,11 @@ return {
 	dependencies = {
 		-- Large collection of pre-made snippets for various languages
 		"rafamadriz/friendly-snippets",
+		"mayromr/blink-cmp-dap",
 	},
 	-- Versions 2.* are currently unstable.
 	version = "1.*",
 	event = { "InsertEnter", "CmdlineEnter" },
-
-	init = function() --
-	end,
 
 	---@module 'blink.cmp'
 	---@type blink.cmp.Config
@@ -33,6 +31,9 @@ return {
 		completion = {
 			-- Automatically show the documentation of the selected menu.
 			documentation = { auto_show = true },
+			trigger = {
+				show_on_insert = true,
+			},
 		},
 
 		sources = {
@@ -42,12 +43,18 @@ return {
 			per_filetype = {
 				-- Slightly better completion for require statements and module annotations
 				lua = { inherit_defaults = true, "lazydev" },
+				-- dap includes omni
+				["dap-repl"] = { "dap" },
 			},
 			providers = {
 				lazydev = {
 					name = "LazyDev",
 					module = "lazydev.integrations.blink",
 					score_offset = 100, -- show at a higher priority than lsp
+				},
+				dap = {
+					name = "dap",
+					module = "blink-cmp-dap",
 				},
 			},
 		},
