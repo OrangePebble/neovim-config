@@ -652,28 +652,14 @@ end, { desc = "Set breakpoint condition" })
 keymap("n", "<leader>db", function()
 	require("dap").toggle_breakpoint()
 end, { desc = "Toggle breakpoint" })
-keymap("n", "<leader>dc", function()
-	require("dap").continue()
+keymap("n", "<leader>dr", function()
+	local dap = require("dap")
+	if not dap.session() then
+		vim.cmd("DapResetCache")
+	end
+	dap.continue()
 end, { desc = "Run/Continue" })
-keymap("n", "<leader>da", function()
-	require("dap").continue({
-		before = function(config)
-			local args = type(config.args) == "function" and (config.args() or {}) or config.args or {}
-			local args_str = type(args) == "table" and table.concat(args, " ") or args --[[@as string]]
-
-			config = vim.deepcopy(config)
-			config.args = function()
-				local new_args = vim.fn.expand(vim.fn.input("Run with args: ", args_str))
-				if config.type and config.type == "java" then
-					return new_args
-				end
-				return require("dap.utils").splitstr(new_args)
-			end
-			return config
-		end,
-	})
-end, { desc = "Run with args" })
-keymap("n", "<leader>dC", function()
+keymap("n", "<leader>dR", function()
 	require("dap").run_to_cursor()
 end, { desc = "Run to cursor" })
 keymap("n", "<leader>dg", function()
@@ -717,15 +703,9 @@ end, { desc = "Step back (debug)" })
 keymap("n", "<leader>dp", function()
 	require("dap").pause()
 end, { desc = "Pause" })
-keymap("n", "<leader>dr", function()
-	require("dap").repl.toggle()
-end, { desc = "Toggle REPL" })
 keymap("n", "<leader>ds", function()
 	require("dap").terminate()
 end, { desc = "Stop" })
-keymap("n", "<leader>du", function()
-	require("dapui").toggle({})
-end, { desc = "Toggle DAP UI" })
 keymap("n", "<leader>dw", function()
 	require("dapui").elements.watches.add()
 end, { desc = "Watch symbol on cursor" })
@@ -735,6 +715,13 @@ end, { desc = "Eval symbol on cursor" })
 keymap({ "x" }, "<leader>e", function()
 	require("dapui").eval()
 end, { desc = "Eval symbol on cursor (debug)" })
+
+keymap("n", "<leader>dtr", function()
+	require("dap").repl.toggle()
+end, { desc = "Toggle REPL" })
+keymap("n", "<leader>dtu", function()
+	require("dapui").toggle({})
+end, { desc = "Toggle DAP UI" })
 
 --== Testing
 

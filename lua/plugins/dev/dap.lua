@@ -21,7 +21,27 @@ return {
 		},
 
 		config = function()
-			local pick_executable = function(path, title)
+			-- Cache for last-used program/args/address so run_last reuses them.
+			local _cache = {}
+
+			local function cached(key, fn)
+				return function()
+					if _cache[key] ~= nil then
+						return _cache[key]
+					end
+					local result = fn()
+					_cache[key] = result
+					return result
+				end
+			end
+
+			-- Reset cache so next explicit launch prompts again.
+			local function dap_reset_cache()
+				_cache = {}
+			end
+			vim.api.nvim_create_user_command("DapResetCache", dap_reset_cache, { desc = "Reset DAP selection cache" })
+
+			local function pick_executable(path, title)
 				if path:sub(-1) ~= "/" then
 					path = path .. "/"
 				end
@@ -59,7 +79,7 @@ return {
 					cppdbg = function(config)
 						-- Taken from https://github.com/jay-babu/mason-nvim-dap.nvim/blob/main/lua/mason-nvim-dap/mappings/configurations.lua
 						--  and modified.
-						local program_func = function()
+						local program_func = cached("program", function()
 							local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 							if string.match(cwd_name, "ddad") then
 								return pick_executable(
@@ -69,26 +89,27 @@ return {
 							else
 								return pick_executable(vim.fn.getcwd(), nil)
 							end
-						end
+						end)
+						local args_func = cached("args", function()
+							return vim.split(vim.fn.input("Args: "), " +", { trimempty = true })
+						end)
 						config.configurations = {
 							{
 								name = "Launch file",
 								type = "cppdbg",
 								request = "launch",
-								program = program_func,
 								cwd = "${workspaceFolder}",
 								stopAtEntry = true,
+								program = program_func,
 							},
 							{
 								name = "Launch file (args)",
 								type = "cppdbg",
 								request = "launch",
-								program = program_func,
 								cwd = "${workspaceFolder}",
-								args = function()
-									return vim.split(vim.fn.input("Args: "), " +", { trimempty = true })
-								end,
 								stopAtEntry = true,
+								program = program_func,
+								args = args_func,
 							},
 							{
 								name = "Attach to gdbserver :1234",
@@ -105,7 +126,7 @@ return {
 								type = "cppdbg",
 								request = "launch",
 								MIMode = "gdb",
-								miDebuggerServerAddress = function()
+								miDebuggerServerAddress = cached("gdbserver_addr", function()
 									local uri = vim.fn.input("[host]:port : ")
 									if uri:find("^%d+$") == 1 then
 										uri = "localhost:" .. uri
@@ -113,13 +134,11 @@ return {
 										uri = "localhost" .. uri
 									end
 									return uri
-								end,
+								end),
 								miDebuggerPath = vim.fn.exepath("gdb"),
 								cwd = "${workspaceFolder}",
-								args = function()
-									return vim.split(vim.fn.input("Args: "), " +", { trimempty = true })
-								end,
 								program = program_func,
+								args = args_func,
 							},
 						}
 						require("mason-nvim-dap").default_setup(config) -- don't forget this!
