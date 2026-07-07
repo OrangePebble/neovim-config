@@ -10,6 +10,20 @@ return {
 	version = "1.*",
 	event = { "InsertEnter", "CmdlineEnter" },
 
+	init = function()
+		-- Show the completion menu when entering insert mode for some buffers.
+		-- Not using ops.completion.trigger.show_on_insert because I don't want this to happen on
+		--  every buffer, as there usually are so many options it isn't really worth it.
+		-- And show_on_insert does not work when entering insert on an empty line in "dap-repl".
+		vim.api.nvim_create_autocmd("InsertEnter", {
+			callback = function()
+				if vim.bo.filetype == "dap-repl" then
+					require("blink.cmp").show()
+				end
+			end,
+		})
+	end,
+
 	---@module 'blink.cmp'
 	---@type blink.cmp.Config
 	opts = {
@@ -31,9 +45,6 @@ return {
 		completion = {
 			-- Automatically show the documentation of the selected menu.
 			documentation = { auto_show = true },
-			trigger = {
-				show_on_insert = true,
-			},
 		},
 
 		sources = {
