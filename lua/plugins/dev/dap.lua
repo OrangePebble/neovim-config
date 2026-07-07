@@ -85,6 +85,7 @@ return {
 
 			-- Cache for last-used program/args/address so run_last reuses them.
 			local _cache = {}
+			local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 			local function cached(key, fn)
 				return function()
 					if _cache[key] ~= nil then
@@ -124,15 +125,10 @@ return {
 				end
 				return path .. selected
 			end
-			local program_func = cached("program", function()
-				local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-				if string.match(cwd_name, "ddad") then
-					return pick_executable(vim.fn.getcwd() .. "/bazel-bin", "Path to executable (/bazel-bin)")
-				else
-					return pick_executable(vim.fn.getcwd(), nil)
-				end
+			local default_program = cached("program", function()
+				return pick_executable(vim.fn.getcwd(), nil)
 			end)
-			local args_func = cached("args", function()
+			local default_args = cached("args", function()
 				return vim.split(vim.fn.input("Args: "), " +", { trimempty = true })
 			end)
 
@@ -142,13 +138,37 @@ return {
 				command = "gdb",
 				args = { "--interpreter=dap", "--eval-command", "set print pretty on" },
 			}
-			dap.configurations.c = {
+			dap.configurations.c = {}
+			-- Adding these optional ones first so they show on top of the list.
+			if string.match(cwd_name, "ddad") then
+				vim.list_extend(dap.configurations.c, {
+					{
+						name = "Launch astas_cli",
+						type = "gdb",
+						request = "launch",
+						cwd = "${workspaceFolder}",
+						program = cached("program", function()
+							return vim.fn.getcwd() .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli"
+						end),
+					},
+					{
+						name = "Launch file in ./bazel-bin",
+						type = "gdb",
+						request = "launch",
+						cwd = "${workspaceFolder}",
+						program = cached("program", function()
+							return pick_executable(vim.fn.getcwd() .. "/bazel-bin", "Path to executable (./bazel-bin)")
+						end),
+					},
+				})
+			end
+			vim.list_extend(dap.configurations.c, {
 				{
 					name = "Launch file",
 					type = "gdb",
 					request = "launch",
 					cwd = "${workspaceFolder}",
-					program = program_func,
+					program = default_program,
 				},
 				{
 					name = "Launch file (args)",
@@ -156,8 +176,8 @@ return {
 					request = "launch",
 					cwd = "${workspaceFolder}",
 					stopAtBeginningOfMainSubprogram = false,
-					program = program_func,
-					args = args_func,
+					program = default_program,
+					args = default_args,
 				},
 				{
 					name = "Select and attach to process",
@@ -168,7 +188,7 @@ return {
 						return require("dap.utils").pick_process({ filter = name })
 					end,
 					cwd = "${workspaceFolder}",
-					program = program_func,
+					program = default_program,
 				},
 				{
 					name = "Attach to gdbserver :1234",
@@ -176,9 +196,9 @@ return {
 					request = "attach",
 					target = "localhost:1234",
 					cwd = "${workspaceFolder}",
-					program = program_func,
+					program = default_program,
 				},
-			}
+			})
 			dap.configurations.cpp = dap.configurations.c
 			dap.configurations.rust = dap.configurations.c
 		end,
