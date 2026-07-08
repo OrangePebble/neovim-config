@@ -146,12 +146,12 @@ return {
 			-- Adding these optional ones first so they show on top of the list.
 			-- See available options at: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
 			local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-			if string.match(cwd_name, "ddad") or string.match(cwd_name, "env_simulator") then
-				-- Make these configurations show on any file type
-				dap.defaults.fallback.configurations = dap.configurations.c
-				dap.configurations[""] = dap.configurations.c
-				-- TODO: make this work for env_simulator
+			local is_ddad_workspace = string.match(cwd_name, "ddad") or string.match(cwd_name, "env_simulator")
+			if is_ddad_workspace then
 				local ddad_path = vim.fn.getcwd()
+				if string.match(cwd_name, "env_simulator") then
+					ddad_path = vim.fn.fnamemodify(ddad_path, ":h:h")
+				end
 				vim.list_extend(dap.configurations.c, {
 					{
 						name = "Run SCMHighway E2E test",
@@ -335,6 +335,19 @@ return {
 			})
 			dap.configurations.cpp = dap.configurations.c
 			dap.configurations.rust = dap.configurations.c
+			dap.providers.configs["ddad.gdb"] = function(bufnr)
+				if not is_ddad_workspace then
+					return {}
+				end
+				-- "dap-srcft" is for overrides that dap may do so filetypes use configurations of another filetype
+				-- Without this we may duplicate configurations.
+				local filetype = vim.b[bufnr]["dap-srcft"] or vim.bo[bufnr].filetype
+				local configurations = dap.configurations[filetype]
+				if configurations ~= nil and #configurations > 0 then
+					return {}
+				end
+				return dap.configurations.c
+			end
 		end,
 	},
 }
