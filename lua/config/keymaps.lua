@@ -774,7 +774,7 @@ keymap("n", "<leader>TtS", function()
 end, { desc = "Signcolumn signs" })
 
 --== Overseer
-keymap("n", "<leader>rt", "<CMD>OverseerRun<CR>", { desc = "Run template task" })
+keymap("n", "<leader>rt", "<CMD>OverseerCustomRun<CR>", { desc = "Run template task" })
 keymap("n", "<leader>rr", function()
 	-- https://github.com/stevearc/overseer.nvim/blob/a93d9f6d6defdac4bcd6d2c8ba988650e42e0a0e/doc/recipes.md#restart-last-task
 	local overseer = require("overseer")

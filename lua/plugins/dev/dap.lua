@@ -85,7 +85,6 @@ return {
 
 			-- Cache for last-used program/args/address so run_last reuses them.
 			local _cache = {}
-			local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 			local function cached(key, fn)
 				return function()
 					if _cache[key] ~= nil then
@@ -146,6 +145,7 @@ return {
 			dap.configurations.c = {}
 			-- Adding these optional ones first so they show on top of the list.
 			-- See available options at: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
+			local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 			if string.match(cwd_name, "ddad") or string.match(cwd_name, "env_simulator") then
 				-- Make these configurations show on any file type
 				dap.defaults.fallback.configurations = dap.configurations.c
