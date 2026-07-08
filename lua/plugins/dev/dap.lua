@@ -108,13 +108,15 @@ return {
 				local selected = nil
 				Snacks.picker.files({
 					cwd = path,
-					title = title or "Path to executable",
+					title = title or "Path to file",
 					ignored = true,
 					hidden = true,
 					layout = { hidden = { "preview" } },
 					confirm = function(picker, item)
-						picker:close()
 						selected = item and item.file or nil
+						picker:close()
+					end,
+					on_close = function()
 						if co then
 							coroutine.resume(co)
 						end
@@ -123,10 +125,13 @@ return {
 				if co then
 					coroutine.yield()
 				end
+				if selected == nil then
+					return nil
+				end
 				return path .. selected
 			end
 			local default_program = cached("program", function()
-				return pick_executable(vim.fn.getcwd(), nil)
+				return pick_executable(vim.fn.getcwd(), nil) or dap.ABORT
 			end)
 			local default_args = cached("args", function()
 				return vim.split(vim.fn.input("Args: "), " +", { trimempty = true })
@@ -140,25 +145,149 @@ return {
 			}
 			dap.configurations.c = {}
 			-- Adding these optional ones first so they show on top of the list.
-			if string.match(cwd_name, "ddad") then
+			-- See available options at: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
+			if string.match(cwd_name, "ddad") or string.match(cwd_name, "env_simulator") then
+				-- TODO: make this work for env_simulator
+				local ddad_path = vim.fn.getcwd()
 				vim.list_extend(dap.configurations.c, {
 					{
-						name = "Launch astas_cli",
+						name = "Run SCMHighway E2E test",
 						type = "gdb",
 						request = "launch",
 						cwd = "${workspaceFolder}",
 						program = cached("program", function()
-							return vim.fn.getcwd() .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli"
+							return ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli"
+						end),
+						args = cached("args", function()
+							local co = coroutine.running()
+
+							-- Pick a configuration directory
+							local configs_path = ddad_path
+								.. "/tools/env_simulator/ASTAS_DATA/E2EOpTestArtifacts/SCMHighway/Resources/Configurations/"
+							local dirs = {}
+							for name, type in vim.fs.dir(configs_path) do
+								if type == "directory" then
+									table.insert(dirs, name)
+								end
+							end
+							table.sort(dirs)
+							Snacks.picker.select(dirs, {
+								title = "Select configuration directory",
+							}, function(value)
+								if co then
+									coroutine.resume(co, value)
+								end
+							end)
+							local selected_test = coroutine.yield()
+							if selected_test == nil then
+								return dap.ABORT
+							end
+							local selected_test_path = configs_path .. selected_test
+							local common_resources_path = ddad_path
+								.. "/tools/env_simulator/ExampleData/E2EOpTestArtifacts/SCMHighway/Resources/Common"
+							local output_path = vim.fn.expand("~")
+								.. "/simulation_outputs/"
+								.. selected_test
+								.. "/"
+								.. string.format("%s-%03d", os.date("%y-%m-%d-%H-%M-%S"), vim.uv.hrtime() / 1e6 % 1000)
+
+							local tmp_file_path = vim.fn.tempname()
+							vim.fn.writefile({
+								string.format(
+									"cp %s/MiscObjects %s -r --remove-destination",
+									common_resources_path,
+									selected_test_path
+								),
+								string.format(
+									"cp %s/UserSettings %s -r --remove-destination",
+									common_resources_path,
+									selected_test_path
+								),
+								string.format(
+									"cp %s/Vehicles %s -r --remove-destination",
+									common_resources_path,
+									selected_test_path
+								),
+								string.format(
+									"cp %s/systemConfigBlueprint.xml %s -r --remove-destination",
+									common_resources_path,
+									selected_test_path
+								),
+								string.format(
+									"cp %s/ProfilesCatalog.xml %s -r --remove-destination",
+									common_resources_path,
+									selected_test_path
+								),
+								string.format(
+									'sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, %s/bazel-bin/external/gecco_default/src/controller}|" "%s/UserSettings/UserSettings.ini"',
+									ddad_path,
+									selected_test_path
+								),
+								"mkdir -p " .. output_path,
+								string.format(
+									'sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = %s|" "%s/UserSettings/UserSettings.ini"',
+									output_path,
+									selected_test_path
+								),
+								string.format(
+									'sed -i "s|"/path/to/update"|"%s"|" "%s/Scenarios/XOSC/Scenario.xosc"',
+									selected_test_path,
+									selected_test_path
+								),
+								"bazel build --config=env_simulator_debug //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
+								string.format(
+									'cp "%s/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "%s"',
+									ddad_path,
+									selected_test_path
+								),
+							}, tmp_file_path)
+
+							-- Run pre-launch commands
+							local overseer = require("overseer")
+							local task = overseer.new_task({
+								name = "Preparing SCMHighway's " .. selected_test .. " E2E test",
+								ephemeral = true,
+								cmd = { "bash", tmp_file_path },
+								components = {
+									{ "on_exit_set_status" },
+									{ "on_complete_notify" },
+									{ "resume_coroutine", coroutine = co },
+								},
+							})
+							task:start()
+							local status = coroutine.yield()
+							if status ~= "SUCCESS" then
+								return dap.ABORT
+							end
+
+							local args = string.format(
+								"-s %s -d %s -p %s -l %s -n 1 -r 0 -o %s",
+								selected_test_path .. "/Scenarios/XOSC/Scenario.xosc",
+								selected_test_path,
+								output_path,
+								output_path,
+								output_path .. "/output.mcap"
+							)
+							return args
+						end),
+					},
+					{
+						name = "Run astas_cli",
+						type = "gdb",
+						request = "launch",
+						cwd = "${workspaceFolder}",
+						program = cached("program", function()
+							return ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli"
 						end),
 						args = default_args,
 					},
 					{
-						name = "Launch file in ./bazel-bin",
+						name = "Run file in ./bazel-bin",
 						type = "gdb",
 						request = "launch",
 						cwd = "${workspaceFolder}",
 						program = cached("program", function()
-							return pick_executable(vim.fn.getcwd() .. "/bazel-bin", "Path to executable (./bazel-bin)")
+							return pick_executable(ddad_path .. "/bazel-bin", "Path to file (./bazel-bin)") or dap.ABORT
 						end),
 						args = default_args,
 					},
@@ -166,7 +295,7 @@ return {
 			end
 			vim.list_extend(dap.configurations.c, {
 				{
-					name = "Launch file",
+					name = "Run file",
 					type = "gdb",
 					request = "launch",
 					cwd = "${workspaceFolder}",
