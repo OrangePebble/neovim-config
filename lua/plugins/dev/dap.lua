@@ -147,6 +147,9 @@ return {
 			-- Adding these optional ones first so they show on top of the list.
 			-- See available options at: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
 			if string.match(cwd_name, "ddad") or string.match(cwd_name, "env_simulator") then
+				-- Make these configurations show on any file type
+				dap.defaults.fallback.configurations = dap.configurations.c
+				dap.configurations[""] = dap.configurations.c
 				-- TODO: make this work for env_simulator
 				local ddad_path = vim.fn.getcwd()
 				vim.list_extend(dap.configurations.c, {
@@ -250,10 +253,11 @@ return {
 								cmd = { "bash", tmp_file_path },
 								components = {
 									{ "on_exit_set_status" },
-									{ "on_complete_notify" },
-									{ "resume_coroutine", coroutine = co },
 								},
 							})
+							task:subscribe("on_complete", function(_, status)
+								coroutine.resume(co, status)
+							end)
 							task:start()
 							local status = coroutine.yield()
 							if status ~= "SUCCESS" then
@@ -261,12 +265,19 @@ return {
 							end
 
 							local args = string.format(
-								"-s %s -d %s -p %s -l %s -n 1 -r 0 -o %s",
+								"-t 100 -s %s -d %s -p %s -l %s -n 1 -r 0 -o %s",
 								selected_test_path .. "/Scenarios/XOSC/Scenario.xosc",
 								selected_test_path,
 								output_path,
 								output_path,
 								output_path .. "/output.mcap"
+							)
+							vim.notify(
+								"Debugging: "
+									.. ddad_path
+									.. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli "
+									.. args,
+								vim.log.levels.INFO
 							)
 							return args
 						end),
