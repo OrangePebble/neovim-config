@@ -45,77 +45,54 @@ vim.api.nvim_create_user_command("OverseerCustomRun", function(_)
 		vim.list_extend(items, {
 			{
 				-- Inspired by https://github.com/alexander-born/cmp-bazel
-				-- For all possible 'bazel query' output formats, see: https://bazel.build/query/language#output-formats
 				name = "Build a bazel target",
 				run = function()
-					local stdout_path = vim.fn.tempname()
-					local stderr_path = vim.fn.tempname()
-					local query_task = overseer.new_task({
-						name = "Query bazel targets",
-						ephemeral = true,
-						cmd = {
-							"bash",
-							"-c",
-							string.format(
-								[[(bazel query --noshow_progress --output label '%s' && bazel query --noshow_progress --output label '%s') >'%s' 2>'%s']],
-								"//tools/env_simulator/astas_cli/... except kind(cc_test, //tools/env_simulator/astas_cli/...) except kind(filegroup, //tools/env_simulator/astas_cli/...)",
-								"//tools/env_simulator/modules/stochastic_cognitive_model/... except kind(cc_test, //tools/env_simulator/modules/stochastic_cognitive_model/...) except kind(filegroup, //tools/env_simulator/modules/stochastic_cognitive_model/...)",
-								stdout_path,
-								stderr_path
-							),
-						},
-						cwd = vim.fn.getcwd(),
-						components = {
-							{ "on_exit_set_status" },
-						},
-					})
-					query_task:subscribe("on_complete", function(_, status)
-						local targets = vim.fn.readfile(stdout_path)
-						local stderr = table.concat(vim.fn.readfile(stderr_path), "\n")
-						vim.fn.delete(stdout_path)
-						vim.fn.delete(stderr_path)
-						if status ~= "SUCCESS" then
-							vim.notify(stderr, vim.log.levels.WARN, { title = "Bazel query failed" })
-							return
-						end
-						if vim.tbl_isempty(targets) then
-							vim.notify("No targets found.", vim.log.levels.WARN, { title = "Bazel query failed" })
-							return
-						end
+					-- Instead of manually defining a list of targets, I could automatically get a list of targets using something like:
+					--  `bazel query --keep_going --noshow_progress --output label '//tools/env_simulator/astas_cli/... except kind(cc_test, //tools/env_simulator/astas_cli/...) except kind(filegroup, //tools/env_simulator/astas_cli/...)' 2>/dev/null`
+					-- But it is hard to filter those for targets I actually care about so I'll just add to this list whenever I find one I need.
+					-- Get all available targets with `bazel query --keep_going //...`.
+					-- For all possible 'bazel query' output formats, see: https://bazel.build/query/language#output-formats
+					local targets = {
+						"//tools/env_simulator/astas_cli:astas_cli",
+						"//tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
+						"//tools/env_simulator/modules/stochastic_cognitive_model:stochastic_cognitive_model_lib",
+						"//third_party/googletest:googletest",
+						"//tools/env_simulator/modules/stochastic_cognitive_model/tests/Core/Sensor_Tests:sensor_tests",
+					}
 
-						Snacks.picker.select(targets, {
-							title = "Select target",
-						}, function(selected_target)
-							if selected_target == nil then
-								return
-							end
-							Snacks.picker.select(
-								{ "env_simulator_debug", "env_simulator_clang", "env_simulator_release" },
-								{
-									title = "Select config",
-								},
-								function(selected_config)
-									local args = {}
-									if selected_config ~= nil then
-										vim.list_extend(args, { "--config=" .. selected_config })
-									end
-									vim.list_extend(args, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
-									local cmd = { "bazel", "build" }
-									vim.list_extend(cmd, args)
-									vim.list_extend(cmd, { "--", selected_target })
-									local task = overseer.new_task({
-										cmd = cmd,
-										cwd = vim.fn.getcwd(),
-										components = {
-											{ "on_exit_set_status", "default" },
-										},
-									})
-									task:start()
+					Snacks.picker.select(targets, {
+						title = "Select target",
+					}, function(selected_target)
+						if selected_target == nil then
+							return
+						end
+						Snacks.picker.select(
+							-- TODO: add option for env_simulator_debug with clang flags so I get the best of both worlds, or clang with debug flags, whichever is easier
+							-- TODO: remove F1 keymap for help
+							{ "env_simulator_debug", "env_simulator_clang", "env_simulator_release" },
+							{
+								title = "Select config",
+							},
+							function(selected_config)
+								local args = {}
+								if selected_config ~= nil then
+									vim.list_extend(args, { "--config=" .. selected_config })
 								end
-							)
-						end)
+								vim.list_extend(args, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
+								local cmd = { "bazel", "build" }
+								vim.list_extend(cmd, args)
+								vim.list_extend(cmd, { "--", selected_target })
+								local task = overseer.new_task({
+									cmd = cmd,
+									cwd = vim.fn.getcwd(),
+									components = {
+										{ "on_exit_set_status", "default" },
+									},
+								})
+								task:start()
+							end
+						)
 					end)
-					query_task:start()
 				end,
 			},
 		})

@@ -67,6 +67,8 @@ return {
 			},
 		})
 		-- Language servers to enable and automatically install using Mason.
+		-- See available default configs at:
+		--  https://github.com/neovim/nvim-lspconfig/blob/master/doc/configs.md
 		---@type table<string, vim.lsp.Config>
 		local servers_ensure_installed = {
 			lua_ls = {}, -- lua
@@ -149,7 +151,9 @@ return {
 		-- Language servers to enable but not automatically install.
 		---@type table<string, vim.lsp.Config>
 		local servers = vim.tbl_extend("error", servers_ensure_installed, {
-			clangd = {}, -- c/c++
+			clangd = {
+				filetypes = { "c", "c.doxygen", "cpp", "cpp.doxygen", "objc", "objcpp", "cuda", "tpp" },
+			}, -- c/c++
 			cmake = {}, -- CMakeLists.txt
 			dockerls = {}, -- dockerfile
 			nil_ls = {}, -- nix

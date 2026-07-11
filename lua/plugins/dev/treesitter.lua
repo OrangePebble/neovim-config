@@ -31,6 +31,7 @@ return {
 			"diff",
 			"regex",
 		})
+		vim.treesitter.language.register("cpp", { "tpp" })
 		-- So treesitter has had a massive revamp and removed a bunch of features so that they
 		--  become just the foundation for the features and is therefore easier to maintain.
 		-- Use https://github.com/MeanderingProgrammer/treesitter-modules.nvim#implementing-yourself

@@ -146,12 +146,10 @@ return {
 			-- Adding these optional ones first so they show on top of the list.
 			-- See available options at: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
 			local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-			local is_ddad_workspace = string.match(cwd_name, "ddad") or string.match(cwd_name, "env_simulator")
+			-- Not also accepting "env_simulator" because breakpoints don't work there
+			local is_ddad_workspace = string.match(cwd_name, "ddad")
 			if is_ddad_workspace then
 				local ddad_path = vim.fn.getcwd()
-				if string.match(cwd_name, "env_simulator") then
-					ddad_path = vim.fn.fnamemodify(ddad_path, ":h:h")
-				end
 				vim.list_extend(dap.configurations.c, {
 					{
 						name = "Run SCMHighway E2E test",
@@ -237,7 +235,7 @@ return {
 									selected_test_path,
 									selected_test_path
 								),
-								"bazel build --config=env_simulator_debug //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
+								"bazel build --config=env_simulator_debug --override_repository=osi_query_library=/home/pedro/projects/osi-query-library //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
 								string.format(
 									'cp "%s/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "%s"',
 									ddad_path,

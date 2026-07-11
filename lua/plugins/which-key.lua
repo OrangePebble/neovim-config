@@ -74,8 +74,8 @@ return {
 				{ "]X", icon = { icon = "󱖫", color = "red" } },
 				{ "[x", icon = { icon = "󱖫", color = "red" } },
 				{ "[X", icon = { icon = "󱖫", color = "red" } },
-				{ "]c", desc = "Next change (diff)", icon = { icon = "", color = "orange" } },
-				{ "[c", desc = "Previous change (diff)", icon = { icon = "", color = "orange" } },
+				{ "]c", icon = { icon = "", color = "orange" } },
+				{ "[c", icon = { icon = "", color = "orange" } },
 				{
 					mode = { "n", "x", "o" },
 					{ "]m", desc = "Next method start", icon = { icon = "", color = "cyan" } },

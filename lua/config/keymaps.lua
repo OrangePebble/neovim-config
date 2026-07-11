@@ -336,15 +336,20 @@ end, { desc = "Resume search" })
 keymap("n", "<leader>sf", function()
 	---@type snacks.picker.files.Config
 	Snacks.picker.files({
-		-- Follow symlinks.
-		follow = true,
+		follow = true, -- Follow symlinks.
+		hidden = true, -- Search dot-files.
 	})
+	vim.notify(
+		string.format("Use <A-i> to toggle git-ignored files.", vim.fn.getcwd()),
+		vim.log.levels.INFO,
+		{ history = false }
+	)
 end, { desc = "Files" })
 keymap("n", "<leader>sF", function()
 	---@type snacks.picker.files.Config
 	Snacks.picker.files({
-		-- Follow symlinks.
-		follow = true,
+		follow = true, -- Follow symlinks.
+		hidden = true, -- Search dot-files.
 		-- Remove git submodules from search results.
 		exclude = vim.tbl_map(function(l)
 			return l:match(" (%S+)$")
@@ -354,32 +359,41 @@ end, { desc = "Files (excluding submodules)" })
 keymap("n", "<leader>sN", function()
 	---@type snacks.picker.files.Config
 	Snacks.picker.files({
-		-- Follow symlinks.
-		follow = true,
+		follow = true, -- Follow symlinks.
+		hidden = true, -- Search dot-files.
 		dirs = { vim.fn.stdpath("config") },
 	})
 end, { desc = "Neovim config" })
-keymap("n", "<leader>si", function()
-	---@type snacks.picker.files.Config
-	Snacks.picker.files({
-		-- Follow symlinks.
-		follow = true,
-		-- Search hidden and gitignored files.
-		ignored = true,
-		hidden = true,
-	})
-end, { desc = "Files (including ignored)" })
 keymap("n", "<leader>sr", function()
 	Snacks.picker.recent()
 end, { desc = "Recent files" })
 keymap("n", "<leader>sg", function()
-	Snacks.picker.grep()
-end, { desc = "Live grep" })
+	-- I've thought about using `Snacks.picker.resume({ source = "grep" })` to automatically use the
+	--  last search but using the keymaps to manually go through history is probably better.
+	Snacks.picker.grep({
+		follow = true, -- Follow symlinks.
+		hidden = true, -- Search dot-files.
+		limit_live = 999999,
+	})
+	vim.notify(
+		string.format("Append '-- -g **/*' to glob filter directories.", vim.fn.getcwd()),
+		vim.log.levels.INFO,
+		{ history = false }
+	)
+	vim.notify(
+		string.format("Use <C-G> to toggle live mode and fuzzy filter results.", vim.fn.getcwd()),
+		vim.log.levels.INFO,
+		{ history = false }
+	)
+end, { desc = "Grep" })
 keymap("n", "<leader>s/", function()
 	Snacks.picker.lines()
-end, { desc = "Live grep current buffer" })
+end, { desc = "Grep current buffer" })
 keymap({ "n", "x" }, "<leader>sw", function()
-	Snacks.picker.grep_word()
+	Snacks.picker.grep_word({
+		follow = true, -- Follow symlinks.
+		hidden = true, -- Search dot-files.
+	})
 end, { desc = "Grep word on cursor" })
 keymap("n", "<leader>sb", function()
 	Snacks.picker.buffers()
@@ -463,14 +477,14 @@ keymap("n", "]c", function()
 	else
 		require("gitsigns").nav_hunk("next")
 	end
-end)
+end, { desc = "Next change" })
 keymap("n", "[c", function()
 	if vim.wo.diff then
 		vim.cmd.normal({ "[c", bang = true })
 	else
 		require("gitsigns").nav_hunk("prev")
 	end
-end)
+end, { desc = "Previous change" })
 
 keymap({ "n", "v" }, "<leader>gs", function()
 	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
@@ -653,6 +667,7 @@ keymap("n", "<leader>db", function()
 	require("dap").toggle_breakpoint()
 end, { desc = "Toggle breakpoint" })
 
+-- TODO: think about making separate run/continue keybinds and renaming "Run to cursor" to "Continue to cursor"
 keymap("n", "<leader>dr", function()
 	local dap = require("dap")
 	if not dap.session() then
@@ -873,7 +888,7 @@ keymap("n", "<leader>+:q", "<CMD>cgetexpr []<CR>", {
 	desc = "[:cgetexpr []] Clear the quickfix list",
 })
 keymap("n", "<leader>+::", "q: ", {
-	desc = "[q:] Open cmd window where you can see the history and use modes (insert, visual, ...). Open window in regular cmd with <C-f>",
+	desc = "[q:] (<C-f> in cmd) Open cmd window where you can see the history and use modes (insert, visual, ...).",
 })
 keymap("n", "<leader>+:w", "<cmd>W<CR>", {
 	desc = "[:W] Custom command to save without formatting",

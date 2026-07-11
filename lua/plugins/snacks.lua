@@ -4,7 +4,19 @@ return {
 	---@module "snacks"
 	---@type snacks.Config
 	opts = {
-		picker = { enabled = true },
+		picker = {
+			enabled = true,
+			win = {
+				input = {
+					-- footer_keys = { "?" },
+					-- footer_pos = "right",
+					-- TODO: Change <C-k> and <C-j> to go through history and clean repeat keybinds I don't use so <?> returns cleaner options.
+					keys = {
+						["?"] = { "toggle_help_input", desc = "Help" },
+					},
+				},
+			},
+		},
 		dim = { enabled = true },
 		lazygit = { configure = true },
 		indent = {
