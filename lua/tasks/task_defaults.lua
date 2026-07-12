@@ -19,7 +19,7 @@
 ---@class Task
 ---@field name string Name of the task. Defaults to the cmd output
 ---@field enabled? boolean
----@field resolve_metadata? fun(): { is_overseer_task: true|nil, is_dap_task: true|nil, [string]: any } The phase when the user is asked for input. Returns metadata for the cmds to use
+---@field resolve_metadata? fun(): { is_overseer_task: true|nil, is_dap_task: true|nil, [string]: any }|nil The phase when the user is asked for input. Returns metadata for the cmds to use or nil if failed or cancelled
 ---@field pre_run_cmd? fun(metadata: table): string[] Returns a list of a cmd and args to run before the main cmd
 ---@field cmd fun(metadata: table): string[] Returns a list of a cmd and args
 ---@field post_run_cmd? fun(metadata: table, status?: string): string[] Returns a list of a cmd and args to run after the main cmd

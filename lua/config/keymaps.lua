@@ -48,6 +48,9 @@ keymap("n", "<C-c>", "<C-a>")
 -- Exit from Terminal insert mode by using escape.
 keymap("t", "<Esc>", "<C-\\><C-n>")
 
+-- I don't want the help keymap. vim.keymap.del doesn't work for this
+keymap({ "n", "i", "x", "s", "o" }, "<F1>", "<nop>")
+
 --== Toggles
 keymap("n", "<leader>tw", "<cmd>set wrap!<CR>", { desc = "Line wrap" })
 keymap("n", "<leader>tn", function()
@@ -669,11 +672,7 @@ end, { desc = "Toggle breakpoint" })
 
 -- TODO: think about making separate run/continue keybinds and renaming "Run to cursor" to "Continue to cursor"
 keymap("n", "<leader>dr", function()
-	local dap = require("dap")
-	if not dap.session() then
-		vim.cmd("DapResetCache")
-	end
-	dap.continue()
+	require("dap").continue()
 end, { desc = "Run/Continue" })
 keymap("n", "<leader>dR", function()
 	require("dap").run_to_cursor()

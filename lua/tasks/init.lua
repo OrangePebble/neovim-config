@@ -25,6 +25,13 @@ for i = 1, #tasks do
 			name = task.name,
 			run = function()
 				local metadata = task.resolve_metadata and task.resolve_metadata() or {}
+				if not metadata then
+					vim.notify(
+						"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
+						vim.log.levels.ERROR
+					)
+					return
+				end
 				metadata.is_overseer_task = true
 
 				local function start_main_and_post_tasks()
@@ -69,6 +76,13 @@ for i = 1, #tasks do
 			name = task.name,
 			run = function()
 				local metadata = task.resolve_metadata and task.resolve_metadata() or {}
+				if not metadata then
+					vim.notify(
+						"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
+						vim.log.levels.ERROR
+					)
+					return
+				end
 				metadata.is_dap_task = true
 
 				local function start_main_and_post_tasks()
@@ -204,13 +218,32 @@ M.choose_and_run_overseer_task = function()
 			return
 		end
 		Snacks.picker.select(items, {
-			title = "Select task:",
+			prompt = "Select task",
 			format_item = function(item)
 				if item.desc then
 					return string.format("%s (%s)", item.name, item.desc)
 				end
 				return item.name
 			end,
+			snacks = {
+				-- Disable multi-selection
+				win = {
+					input = {
+						keys = {
+							["<Tab>"] = false,
+							["<S-Tab>"] = false,
+							["<c-a>"] = false,
+						},
+					},
+					list = {
+						keys = {
+							["<Tab>"] = false,
+							["<S-Tab>"] = false,
+							["<c-a>"] = false,
+						},
+					},
+				},
+			},
 		}, function(item)
 			if item then
 				item.run()
@@ -250,10 +283,29 @@ M.choose_and_run_dap_task = function()
 	end
 
 	Snacks.picker.select(items, {
-		title = "Select debugging task:",
+		prompt = "Select debugging task",
 		format_item = function(item)
 			return item.name
 		end,
+		snacks = {
+			-- Disable multi-selection
+			win = {
+				input = {
+					keys = {
+						["<Tab>"] = false,
+						["<S-Tab>"] = false,
+						["<c-a>"] = false,
+					},
+				},
+				list = {
+					keys = {
+						["<Tab>"] = false,
+						["<S-Tab>"] = false,
+						["<c-a>"] = false,
+					},
+				},
+			},
+		},
 	}, function(item)
 		if item then
 			item.run()
