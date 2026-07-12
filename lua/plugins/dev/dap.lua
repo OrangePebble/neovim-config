@@ -59,7 +59,24 @@ return {
 
 			local dap = require("dap")
 			local dapui = require("dapui")
-			dapui.setup()
+			---@diagnostic disable-next-line: missing-fields
+			dapui.setup({
+				layouts = {
+					{
+						elements = { "scopes", "breakpoints", "stacks", "watches" },
+						size = 30,
+						position = "left",
+					},
+					{
+						elements = {
+							"repl",
+							-- "console",
+						},
+						size = 12,
+						position = "bottom",
+					},
+				},
+			})
 
 			local repl_hint_shown = false
 			dap.listeners.after.event_stopped["dapui_config"] = function()

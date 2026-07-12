@@ -733,7 +733,7 @@ keymap({ "x" }, "<leader>e", function()
 end, { desc = "Eval symbol on cursor (debug)" })
 
 keymap("n", "<leader>dtr", function()
-	require("dap").repl.toggle()
+	require("dap").repl.toggle({}, "belowright 12split")
 end, { desc = "Toggle REPL" })
 keymap("n", "<leader>dtu", function()
 	require("dapui").toggle({})
