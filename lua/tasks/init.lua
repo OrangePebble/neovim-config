@@ -12,9 +12,136 @@ end
 
 ---@type { name: string, run: fun() }[]
 local overseer_tasks = {}
-
 ---@type { name: string, run: fun() }[]
 local dap_tasks = {}
+
+---@type { task: Task, metadata: TaskMetadata }
+local last_overseer_task = nil
+---@type { task: Task, metadata: TaskMetadata }|{ regular_dap: true }
+local last_dap_task = nil
+
+---@param task Task
+---@param metadata TaskMetadata
+local function run_overseer_task(task, metadata)
+	local function start_main_and_post_tasks()
+		local main_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
+			name = task.name,
+			cmd = task.cmd(metadata),
+		}))
+		if task.post_run_cmd then
+			main_task:subscribe("on_complete", function(_, status)
+				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
+					name = "Post: " .. task.name,
+					cmd = task.post_run_cmd(metadata, status),
+				}))
+				post_task:start()
+			end)
+		end
+		main_task:start()
+	end
+
+	if task.pre_run_cmd then
+		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
+			name = "Pre: " .. task.name,
+			cmd = task.pre_run_cmd(metadata),
+		}))
+		pre_task:subscribe("on_complete", function(_, pre_status)
+			if pre_status ~= "SUCCESS" then
+				vim.notify("The task 'Pre: " .. task.name .. "' failed", vim.log.levels.ERROR)
+				return
+			end
+			start_main_and_post_tasks()
+		end)
+		pre_task:start()
+	else
+		start_main_and_post_tasks()
+	end
+end
+
+---@param task Task
+---@param metadata TaskMetadata
+local function run_dap_task(task, metadata)
+	local function start_main_and_post_tasks()
+		local cmd = task.cmd(metadata)
+		local config = vim.tbl_deep_extend("force", task.dap.options, {
+			name = task.name,
+			program = cmd[1],
+			args = vim.list_slice(cmd, 2),
+		})
+
+		local time_start = os.time()
+		local listener_key = "tasks.dap_complete." .. task.name .. "." .. tostring(time_start)
+		local repl_output = {}
+		local function on_dap_complete(_, body)
+			dap.listeners.after.event_terminated[listener_key] = nil
+			dap.listeners.after.event_output[listener_key] = nil
+
+			local lines = {}
+			local repl_buffer_found = false
+			for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
+				if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype == "dap-repl" then
+					lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+					repl_buffer_found = true
+					break
+				end
+			end
+
+			local output = repl_buffer_found and table.concat(lines, "\n") or table.concat(repl_output)
+
+			local repl_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
+				name = "DAP Output: " .. task.name,
+				cmd = task.name,
+			}))
+			repl_task.status = "SUCCESS"
+			repl_task.time_start = time_start
+			repl_task.time_end = os.time()
+			repl_task.metadata.raw_output = output
+
+			local bufnr = vim.api.nvim_create_buf(false, true)
+			local term_id = vim.api.nvim_open_term(bufnr, {})
+			vim.bo[bufnr].scrollback = 99999
+			pcall(vim.api.nvim_chan_send, term_id, repl_task.metadata.raw_output)
+			vim.bo[bufnr].filetype = "OverseerOutput"
+			vim.b[bufnr].overseer_task = repl_task.id
+			repl_task.strategy.bufnr = bufnr
+			repl_task.strategy.term_id = term_id
+
+			if task.post_run_cmd then
+				local status = body and body.exitCode and tostring(body.exitCode) or nil
+				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
+					name = "Post: " .. task.name,
+					cmd = task.post_run_cmd(metadata, status),
+				}))
+				post_task:start()
+			end
+		end
+		dap.listeners.after.event_terminated[listener_key] = on_dap_complete
+		dap.listeners.after.event_output[listener_key] = function(_, body)
+			if body and body.category ~= "telemetry" and body.output and body.output ~= "" then
+				table.insert(repl_output, body.output)
+			end
+		end
+
+		dap.run(config)
+	end
+
+	if task.pre_run_cmd then
+		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
+			name = "Pre: " .. task.name,
+			cmd = task.pre_run_cmd(metadata),
+		}))
+		pre_task:subscribe("on_complete", function(_, pre_status)
+			if pre_status ~= "SUCCESS" then
+				vim.notify("The task 'Pre: " .. task.name .. "' failed", vim.log.levels.ERROR)
+				return
+			end
+			start_main_and_post_tasks()
+		end)
+		pre_task:start()
+	else
+		start_main_and_post_tasks()
+	end
+end
 
 for i = 1, #tasks do
 	tasks[i] = vim.tbl_deep_extend("force", task_defaults, tasks[i])
@@ -33,40 +160,8 @@ for i = 1, #tasks do
 					return
 				end
 				metadata.is_overseer_task = true
-
-				local function start_main_and_post_tasks()
-					local main_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-						name = task.name,
-						cmd = task.cmd(metadata),
-					}))
-					if task.post_run_cmd then
-						main_task:subscribe("on_complete", function(_, status)
-							local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-								name = "Post: " .. task.name,
-								cmd = task.post_run_cmd(metadata, status),
-							}))
-							post_task:start()
-						end)
-					end
-					main_task:start()
-				end
-
-				if task.pre_run_cmd then
-					local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-						name = "Pre: " .. task.name,
-						cmd = task.pre_run_cmd(metadata),
-					}))
-					pre_task:subscribe("on_complete", function(_, pre_status)
-						if pre_status ~= "SUCCESS" then
-							vim.notify("The task 'Pre: " .. task.name .. "' failed", vim.log.levels.ERROR)
-							return
-						end
-						start_main_and_post_tasks()
-					end)
-					pre_task:start()
-				else
-					start_main_and_post_tasks()
-				end
+				last_overseer_task = { task = task, metadata = metadata }
+				run_overseer_task(task, metadata)
 			end,
 		})
 	end
@@ -84,87 +179,8 @@ for i = 1, #tasks do
 					return
 				end
 				metadata.is_dap_task = true
-
-				local function start_main_and_post_tasks()
-					local cmd = task.cmd(metadata)
-					local config = vim.tbl_deep_extend("force", task.dap.options, {
-						name = task.name,
-						program = cmd[1],
-						args = vim.list_slice(cmd, 2),
-					})
-
-					local time_start = os.time()
-					local listener_key = "tasks.dap_complete." .. task.name .. "." .. tostring(time_start)
-					local repl_output = {}
-					local function on_dap_complete(_, body)
-						dap.listeners.after.event_terminated[listener_key] = nil
-						dap.listeners.after.event_output[listener_key] = nil
-
-						local lines = {}
-						local repl_buffer_found = false
-						for _, bufnr in ipairs(vim.api.nvim_list_bufs()) do
-							if vim.api.nvim_buf_is_loaded(bufnr) and vim.bo[bufnr].filetype == "dap-repl" then
-								lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
-								repl_buffer_found = true
-								break
-							end
-						end
-
-						local output = repl_buffer_found and table.concat(lines, "\n") or table.concat(repl_output)
-
-						local repl_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-							name = "DAP Output: " .. task.name,
-							cmd = task.name,
-						}))
-						repl_task.status = "SUCCESS"
-						repl_task.time_start = time_start
-						repl_task.time_end = os.time()
-						repl_task.metadata.raw_output = output
-
-						local bufnr = vim.api.nvim_create_buf(false, true)
-						local term_id = vim.api.nvim_open_term(bufnr, {})
-						vim.bo[bufnr].scrollback = 99999
-						pcall(vim.api.nvim_chan_send, term_id, repl_task.metadata.raw_output)
-						vim.bo[bufnr].filetype = "OverseerOutput"
-						vim.b[bufnr].overseer_task = repl_task.id
-						repl_task.strategy.bufnr = bufnr
-						repl_task.strategy.term_id = term_id
-
-						if task.post_run_cmd then
-							local status = body and body.exitCode and tostring(body.exitCode) or nil
-							local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-								name = "Post: " .. task.name,
-								cmd = task.post_run_cmd(metadata, status),
-							}))
-							post_task:start()
-						end
-					end
-					dap.listeners.after.event_terminated[listener_key] = on_dap_complete
-					dap.listeners.after.event_output[listener_key] = function(_, body)
-						if body and body.category ~= "telemetry" and body.output and body.output ~= "" then
-							table.insert(repl_output, body.output)
-						end
-					end
-
-					dap.run(config)
-				end
-
-				if task.pre_run_cmd then
-					local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-						name = "Pre: " .. task.name,
-						cmd = task.pre_run_cmd(metadata),
-					}))
-					pre_task:subscribe("on_complete", function(_, pre_status)
-						if pre_status ~= "SUCCESS" then
-							vim.notify("The task 'Pre: " .. task.name .. "' failed", vim.log.levels.ERROR)
-							return
-						end
-						start_main_and_post_tasks()
-					end)
-					pre_task:start()
-				else
-					start_main_and_post_tasks()
-				end
+				last_dap_task = { task = task, metadata = metadata }
+				run_dap_task(task, metadata)
 			end,
 		})
 	end
@@ -263,6 +279,16 @@ M.choose_and_run_dap_task = function()
 				table.insert(items, {
 					name = configuration.name,
 					run = function()
+						local listener_key = "tasks.regular_dap." .. configuration.name
+						local function clear_regular_dap_listeners()
+							dap.listeners.after.event_initialized[listener_key] = nil
+							dap.listeners.after.event_terminated[listener_key] = nil
+						end
+						dap.listeners.after.event_initialized[listener_key] = function()
+							clear_regular_dap_listeners()
+							last_dap_task = { regular_dap = true }
+						end
+						dap.listeners.after.event_terminated[listener_key] = clear_regular_dap_listeners
 						dap.run(configuration)
 					end,
 				})
@@ -311,6 +337,26 @@ M.choose_and_run_dap_task = function()
 			item.run()
 		end
 	end)
+end
+
+M.run_last_overseer_task = function()
+	if last_overseer_task then
+		run_overseer_task(last_overseer_task.task, last_overseer_task.metadata)
+	else
+		vim.notify("No task has been run.", vim.log.levels.WARN)
+	end
+end
+
+M.run_last_dap_task = function()
+	if last_dap_task then
+		if last_dap_task.regular_dap then
+			dap.run_last()
+		else
+			run_dap_task(last_dap_task.task, last_dap_task.metadata)
+		end
+	else
+		vim.notify("No debugging task has been run.", vim.log.levels.WARN)
+	end
 end
 
 return M

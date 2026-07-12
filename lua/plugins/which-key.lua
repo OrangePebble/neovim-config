@@ -141,13 +141,14 @@ return {
 				{ "<leader>xtd", icon = { icon = "󰈔", color = "yellow" } },
 				{ "<leader>xtw", icon = { icon = "", color = "yellow" } },
 
-				-- Debug icons.
+				-- DAP icons.
 				{ "<leader>d", group = "Debug" },
 				{ "<leader>db", icon = { icon = "", color = "red" } },
 				{ "<leader>dB", icon = { icon = "", color = "red" } },
 				{ "<leader>dr", icon = { icon = "", color = "green" } },
-				{ "<leader>dR", icon = { icon = "", color = "green" } },
 				{ "<leader>dl", icon = { icon = "", color = "green" } },
+				{ "<leader>dc", icon = { icon = "", color = "green" } },
+				{ "<leader>dC", icon = { icon = "", color = "green" } },
 				{ "<leader>dp", icon = { icon = "", color = "orange" } },
 				{ "<leader>dq", icon = { icon = "", color = "red" } },
 				{ "<leader>dg", icon = { icon = "", color = "grey" } },
@@ -285,9 +286,8 @@ return {
 
 				-- Overseer
 				{ "<leader>r", group = "Run", icon = { icon = "󰜎", color = "green" } },
-				{ "<leader>rr", icon = { icon = "", color = "orange" } },
-				{ "<leader>rR", icon = { icon = "", color = "orange" } },
-				{ "<leader>rt", icon = { icon = "󰷐", color = "green" } },
+				{ "<leader>rr", icon = { icon = "󰷐", color = "green" } },
+				{ "<leader>rl", icon = { icon = "", color = "orange" } },
 				{ "<leader>rs", icon = { icon = "", color = "grey" } },
 				{ "<leader>rS", icon = { icon = "", color = "cyan" } },
 

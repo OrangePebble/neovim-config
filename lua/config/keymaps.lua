@@ -670,16 +670,23 @@ keymap("n", "<leader>db", function()
 	require("dap").toggle_breakpoint()
 end, { desc = "Toggle breakpoint" })
 
--- TODO: think about making separate run/continue keybinds and renaming "Run to cursor" to "Continue to cursor"
 keymap("n", "<leader>dr", function()
-	require("dap").continue()
-end, { desc = "Run/Continue" })
-keymap("n", "<leader>dR", function()
-	require("dap").run_to_cursor()
-end, { desc = "Run to cursor" })
+	require("tasks").choose_and_run_dap_task()
+end, { desc = "Run" })
 keymap("n", "<leader>dl", function()
-	require("dap").run_last()
+	require("tasks").run_last_dap_task()
 end, { desc = "Repeat last run" })
+keymap("n", "<leader>dc", function()
+	local dap = require("dap")
+	if not dap.session() then
+		vim.notify("No active DAP session.", vim.log.levels.INFO)
+		return
+	end
+	dap.continue()
+end, { desc = "Continue" })
+keymap("n", "<leader>dC", function()
+	require("dap").run_to_cursor()
+end, { desc = "Continue to cursor" })
 keymap("n", "<leader>dp", function()
 	require("dap").pause()
 end, { desc = "Pause" })
@@ -788,45 +795,15 @@ keymap("n", "<leader>TtS", function()
 end, { desc = "Signcolumn signs" })
 
 --== Overseer
-keymap("n", "<leader>rt", "<CMD>OverseerCustomRun<CR>", { desc = "Run template task" })
 keymap("n", "<leader>rr", function()
-	-- https://github.com/stevearc/overseer.nvim/blob/a93d9f6d6defdac4bcd6d2c8ba988650e42e0a0e/doc/recipes.md#restart-last-task
-	local overseer = require("overseer")
-	local tasks = overseer.list_tasks()
-	if vim.tbl_isempty(tasks) then
-		vim.notify("No tasks found.", vim.log.levels.WARN)
-		return
-	end
-	overseer.run_action(tasks[1], "restart")
-end, { desc = "Restart last task" })
-keymap("n", "<leader>rR", function()
-	local overseer = require("overseer")
-	local tasks = overseer.list_tasks()
-	if vim.tbl_isempty(tasks) then
-		vim.notify("No tasks found.", vim.log.levels.WARN)
-		return
-	end
-	local last_task = tasks[1]
-	if type(last_task.cmd) ~= "string" then
-		vim.notify("Last task is not a shell command.", vim.log.levels.ERROR)
-		return
-	end
-	vim.ui.input({
-		prompt = "cmd: ",
-		--- Solved in the if above.
-		---@diagnostic disable-next-line: assign-type-mismatch
-		default = last_task.cmd,
-	}, function(input)
-		if last_task.name == last_task.cmd then
-			last_task.name = input
-		end
-		last_task.cmd = input
-		overseer.run_action(last_task, "restart")
-	end)
-end, { desc = "Edit and restart last task" })
-keymap("n", "<leader>rs", ":OverseerShell ", { desc = "Run shell command" })
-keymap("n", "<leader>rS", ":OverseerShell! ", { desc = "Add shell task" })
+	require("tasks").choose_and_run_overseer_task()
+end, { desc = "Run template task" })
 keymap("n", "<leader>rl", function()
+	require("tasks").run_last_overseer_task()
+end, { desc = "Restart last task" })
+keymap("n", "<leader>rs", ":OverseerShell ", { desc = "Run shell command" })
+keymap("n", "<leader>rS", ":OverseerShell! ", { desc = "Add shell command" })
+keymap("n", "<leader>rt", function()
 	require("overseer").toggle({ enter = false })
 end, { desc = "Toggle task list and outputs" })
 
