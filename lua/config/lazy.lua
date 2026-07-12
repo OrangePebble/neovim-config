@@ -54,3 +54,5 @@ require("lazy").setup({
 	-- 	frequency = 604800, -- check every week
 	-- },
 })
+
+require("tasks")

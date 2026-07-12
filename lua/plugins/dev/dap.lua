@@ -60,9 +60,7 @@ return {
 			local dap = require("dap")
 			local dapui = require("dapui")
 			dapui.setup()
-			dap.listeners.after.event_initialized["dapui_config"] = function()
-				dapui.open()
-			end
+
 			local repl_hint_shown = false
 			dap.listeners.after.event_stopped["dapui_config"] = function()
 				if not repl_hint_shown then
@@ -76,11 +74,6 @@ return {
 			end
 			dap.listeners.after.event_terminated["dapui_config"] = function()
 				repl_hint_shown = false
-				dapui.close()
-			end
-			dap.listeners.after.event_exited["dapui_config"] = function()
-				repl_hint_shown = false
-				dapui.close()
 			end
 
 			-- Cache for last-used program/args/address so run_last reuses them.
