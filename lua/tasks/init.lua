@@ -162,48 +162,67 @@ local function run_dap_task(task, metadata)
 	end
 end
 
-for i = 1, #tasks do
-	tasks[i] = vim.tbl_deep_extend("force", task_defaults, tasks[i])
-	local task = tasks[i]
+---@param generic_tasks Task[]
+---@return { name: string, run: fun() }[]
+local function generic_to_overseer_tasks(generic_tasks)
+	local local_overseer_tasks = {}
+	for i = 1, #generic_tasks do
+		generic_tasks[i] = vim.tbl_deep_extend("keep", generic_tasks[i], task_defaults)
+		local task = generic_tasks[i]
 
-	if task.overseer.enabled then
-		table.insert(overseer_tasks, {
-			name = task.name,
-			run = function()
-				local metadata = task.resolve_metadata and task.resolve_metadata() or {}
-				if not metadata then
-					vim.notify(
-						"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
-						vim.log.levels.ERROR
-					)
-					return
-				end
-				metadata.is_overseer_task = true
-				last_overseer_task = { task = task, metadata = metadata }
-				run_overseer_task(task, metadata)
-			end,
-		})
+		if task.overseer.enabled then
+			table.insert(local_overseer_tasks, {
+				name = task.name,
+				run = function()
+					local metadata = task.resolve_metadata and task.resolve_metadata() or {}
+					if not metadata then
+						vim.notify(
+							"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
+							vim.log.levels.ERROR
+						)
+						return
+					end
+					metadata.is_overseer_task = true
+					last_overseer_task = { task = task, metadata = metadata }
+					run_overseer_task(task, metadata)
+				end,
+			})
+		end
 	end
-
-	if task.dap.enabled then
-		table.insert(dap_tasks, {
-			name = task.name,
-			run = function()
-				local metadata = task.resolve_metadata and task.resolve_metadata() or {}
-				if not metadata then
-					vim.notify(
-						"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
-						vim.log.levels.ERROR
-					)
-					return
-				end
-				metadata.is_dap_task = true
-				last_dap_task = { task = task, metadata = metadata }
-				run_dap_task(task, metadata)
-			end,
-		})
-	end
+	return local_overseer_tasks
 end
+vim.list_extend(overseer_tasks, generic_to_overseer_tasks(get_initial_tasks()))
+
+---@param generic_tasks Task[]
+---@return { name: string, run: fun() }[]
+local function generic_to_dap_tasks(generic_tasks)
+	local local_dap_tasks = {}
+	for i = 1, #generic_tasks do
+		generic_tasks[i] = vim.tbl_deep_extend("keep", generic_tasks[i], task_defaults)
+		local task = generic_tasks[i]
+
+		if task.dap.enabled then
+			table.insert(local_dap_tasks, {
+				name = task.name,
+				run = function()
+					local metadata = task.resolve_metadata and task.resolve_metadata() or {}
+					if not metadata then
+						vim.notify(
+							"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
+							vim.log.levels.ERROR
+						)
+						return
+					end
+					metadata.is_dap_task = true
+					last_dap_task = { task = task, metadata = metadata }
+					run_dap_task(task, metadata)
+				end,
+			})
+		end
+	end
+	return local_dap_tasks
+end
+vim.list_extend(dap_tasks, generic_to_dap_tasks(get_initial_tasks()))
 
 local M = {}
 
@@ -213,7 +232,7 @@ local M = {}
 --  C-call, so this is the best solution I thought of.
 M.choose_and_run_overseer_task = function()
 	local items = vim.deepcopy(overseer_tasks)
-	vim.list_extend(items, get_runtime_tasks())
+	vim.list_extend(items, generic_to_overseer_tasks(get_runtime_tasks()))
 
 	local overseer_template = require("overseer.template")
 	local search = {
@@ -294,7 +313,7 @@ end
 
 M.choose_and_run_dap_task = function()
 	local items = vim.deepcopy(dap_tasks)
-	vim.list_extend(items, get_runtime_tasks())
+	vim.list_extend(items, generic_to_dap_tasks(get_runtime_tasks()))
 
 	local seen_configurations = {}
 	local seen_item_names = {}
