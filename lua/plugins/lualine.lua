@@ -72,7 +72,8 @@ return {
 			},
 			sections = {
 				lualine_a = { "mode" },
-				lualine_b = {
+				lualine_b = {},
+				lualine_c = {
 					"diff",
 					{
 						"diagnostics",
@@ -99,9 +100,8 @@ return {
 						end,
 					},
 				},
-				lualine_c = {},
-				lualine_x = {},
-				lualine_y = { "filetype" },
+				lualine_x = { "filetype" },
+				lualine_y = {},
 				lualine_z = {
 					-- Added this so I can easily tell if I've closed the wrong file during a git diff but
 					--  it might also be useful in other occasions.

@@ -1,5 +1,7 @@
 # neovim-config
 
+This config has some package dependencies, see what I install [in my neovim nix file](https://git.orangepebble.net/OrangePebble/nix-config/src/branch/master/modules/terminal/neovim/default.nix) and if that is missing something you can see what else I install [in my terminal nix file](https://git.orangepebble.net/OrangePebble/nix-config/src/branch/master/modules/terminal/default.nix).
+
 This config was heavily inspired by [radleylewis's nvim repo](https://github.com/radleylewis/nvim) which includes a 3 part youtube tutorial ([Part 1: Install, Keymaps, Lazy & Plugins](https://www.youtube.com/watch?v=cdAMq2KcF4w); [Part 2: LSP, Linters, Formatters, AI Assist & Completion](https://www.youtube.com/watch?v=qp1OcolI6x0); [Part 3: TMUX, Git & Debugging](https://www.youtube.com/watch?v=JN4Zbs0ypwM)).
 
 I've also gotten help with defining keymaps from [LazyVim](https://www.lazyvim.org/keymaps).

@@ -102,7 +102,7 @@ local M = {
 			return {
 				metadata.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
 				"-t",
-				"100",
+				"50",
 				"-n",
 				"1",
 				"-r",

@@ -6,7 +6,7 @@ local tasks = {}
 local task_defaults = require("tasks.task_defaults")
 
 local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-if string.match(cwd_name, "*ddad*") then
+if string.match(cwd_name, ".*ddad.*") then
 	vim.list_extend(tasks, require("tasks.ddad"))
 end
 
@@ -193,7 +193,7 @@ local M = {}
 --  the callback-based picker syncronous. I tried using coroutines but those can't be used in a
 --  C-call, so this is the best solution I thought of.
 M.choose_and_run_overseer_task = function()
-	local items = overseer_tasks
+	local items = vim.deepcopy(overseer_tasks)
 
 	local overseer_template = require("overseer.template")
 	local search = {
@@ -262,7 +262,11 @@ M.choose_and_run_overseer_task = function()
 			},
 		}, function(item)
 			if item then
-				item.run()
+				local co = coroutine.create(item.run)
+				local ok, err = coroutine.resume(co)
+				if not ok then
+					vim.notify(err, vim.log.levels.ERROR)
+				end
 			end
 		end)
 	end)
@@ -334,7 +338,11 @@ M.choose_and_run_dap_task = function()
 		},
 	}, function(item)
 		if item then
-			item.run()
+			local co = coroutine.create(item.run)
+			local ok, err = coroutine.resume(co)
+			if not ok then
+				vim.notify(err, vim.log.levels.ERROR)
+			end
 		end
 	end)
 end
