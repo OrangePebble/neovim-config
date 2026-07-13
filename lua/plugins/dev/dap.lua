@@ -107,38 +107,6 @@ return {
 				command = "gdb",
 				args = { "--interpreter=dap", "--eval-command", "set print pretty on" },
 			}
-			-- See available options at: https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debugger-Adapter-Protocol.html
-			dap.configurations.c = {
-				{
-					name = "Run file",
-					type = "gdb",
-					request = "launch",
-					cwd = "${workspaceFolder}",
-					program = default_program,
-					args = default_args,
-				},
-				{
-					name = "Select and attach to process",
-					type = "gdb",
-					request = "attach",
-					pid = function()
-						local name = vim.fn.input("Executable name (filter): ")
-						return require("dap.utils").pick_process({ filter = name })
-					end,
-					cwd = "${workspaceFolder}",
-					program = default_program,
-				},
-				{
-					name = "Attach to gdbserver :1234",
-					type = "gdb",
-					request = "attach",
-					target = "localhost:1234",
-					cwd = "${workspaceFolder}",
-					program = default_program,
-				},
-			}
-			dap.configurations.cpp = dap.configurations.c
-			dap.configurations.rust = dap.configurations.c
 		end,
 	},
 }

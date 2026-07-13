@@ -1,7 +1,7 @@
 ---@type Task[]
 local M = {
 	{
-		name = "Run SCMHighway E2E test",
+		name = "Run SCMHighway E2E test in astas_cli",
 		dap = {
 			enabled = true,
 			options = {

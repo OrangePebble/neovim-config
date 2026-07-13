@@ -4,10 +4,29 @@ local dap = require("dap")
 ---@type Task[]
 local tasks = {}
 local task_defaults = require("tasks.task_defaults")
-
 local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-if string.match(cwd_name, ".*ddad.*") then
-	vim.list_extend(tasks, require("tasks.ddad"))
+
+-- Get tasks that are chosen when Neovim first opens.
+---@return Task[]
+local function get_initial_tasks()
+	local t = {}
+	if string.match(cwd_name, ".*ddad.*") then
+		vim.list_extend(t, require("tasks.ddad"))
+	end
+	return t
+end
+vim.list_extend(tasks, get_initial_tasks())
+
+-- Get tasks that are chosen whenever a choose_* function below is run.
+---@return Task[]
+local function get_runtime_tasks()
+	local t = {}
+	local bufnr = vim.api.nvim_get_current_buf()
+	local filetype = vim.b[bufnr]["dap-srcft"] or vim.bo[bufnr].filetype
+	if string.match(cwd_name, ".*ddad.*") or filetype == "c" or filetype == "cpp" or filetype == "rust" then
+		vim.list_extend(t, require("tasks.gdb"))
+	end
+	return t
 end
 
 ---@type { name: string, run: fun() }[]
@@ -194,6 +213,7 @@ local M = {}
 --  C-call, so this is the best solution I thought of.
 M.choose_and_run_overseer_task = function()
 	local items = vim.deepcopy(overseer_tasks)
+	vim.list_extend(items, get_runtime_tasks())
 
 	local overseer_template = require("overseer.template")
 	local search = {
@@ -273,13 +293,19 @@ M.choose_and_run_overseer_task = function()
 end
 
 M.choose_and_run_dap_task = function()
-	local items = dap_tasks
+	local items = vim.deepcopy(dap_tasks)
+	vim.list_extend(items, get_runtime_tasks())
 
 	local seen_configurations = {}
+	local seen_item_names = {}
+	for _, item in ipairs(items) do
+		seen_item_names[item.name] = true
+	end
 	local function add_configurations(configurations)
 		for _, configuration in ipairs(configurations or {}) do
-			if not seen_configurations[configuration] then
+			if not seen_configurations[configuration] and not seen_item_names[configuration.name] then
 				seen_configurations[configuration] = true
+				seen_item_names[configuration.name] = true
 				table.insert(items, {
 					name = configuration.name,
 					run = function()
