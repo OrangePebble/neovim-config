@@ -8,7 +8,7 @@ M.pick_file = function(path, title)
 	local selected = nil
 	Snacks.picker.files({
 		cwd = path,
-		prompt = title or "Pick a file",
+		title = title or "Pick a file",
 		ignored = true,
 		hidden = true,
 		layout = { hidden = { "preview" } },

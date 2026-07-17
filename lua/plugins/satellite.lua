@@ -1,4 +1,4 @@
--- Scrollbar.
+-- Scrollbar. Chose this one because it supports mouse dragging to scroll.
 -- Other good options are:
 -- - https://github.com/dstein64/nvim-scrollview
 -- - https://github.com/petertriho/nvim-scrollbar

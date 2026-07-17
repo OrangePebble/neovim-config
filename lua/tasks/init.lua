@@ -10,8 +10,9 @@ local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 ---@return Task[]
 local function get_initial_tasks()
 	local t = {}
-	if string.match(cwd_name, ".*ddad.*") then
-		vim.list_extend(t, require("tasks.ddad"))
+	-- Allow for alternative directory names for cases where I may want a 2nd version for some reason.
+	if string.match(cwd_name, ".*ddad.*") or string.match(cwd_name, ".*env_simulator.*") then
+		vim.list_extend(t, require("tasks.env_simulator"))
 	end
 	return t
 end
@@ -23,7 +24,13 @@ local function get_runtime_tasks()
 	local t = {}
 	local bufnr = vim.api.nvim_get_current_buf()
 	local filetype = vim.b[bufnr]["dap-srcft"] or vim.bo[bufnr].filetype
-	if string.match(cwd_name, ".*ddad.*") or filetype == "c" or filetype == "cpp" or filetype == "rust" then
+	if
+		string.match(cwd_name, ".*ddad.*")
+		or string.match(cwd_name, ".*env_simulator.*")
+		or filetype == "c"
+		or filetype == "cpp"
+		or filetype == "rust"
+	then
 		vim.list_extend(t, require("tasks.gdb"))
 	end
 	return t

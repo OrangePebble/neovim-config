@@ -119,3 +119,19 @@ vim.api.nvim_create_autocmd("OptionSet", {
 		vim.opt.foldcolumn = "1"
 	end,
 })
+
+-- Enabled line numbers in OverseerOutput buffers, needs to be an autocmd as Overseer keeps disabling
+--  it. Also requires vim.schedule so I don't think this is very robust but does the job.
+vim.api.nvim_create_autocmd("User", {
+	pattern = { "OverseerListTaskHover", "OverseerListFocusChanged", "OverseerListUpdate" },
+	callback = function()
+		vim.schedule(function()
+			for _, winid in ipairs(vim.api.nvim_list_wins()) do
+				local bufnr = vim.api.nvim_win_get_buf(winid)
+				if vim.bo[bufnr].filetype == "OverseerOutput" then
+					vim.wo[winid].number = true
+				end
+			end
+		end)
+	end,
+})

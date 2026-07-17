@@ -1,3 +1,11 @@
+-- For this file I'm assuming that env_simulator will always be a ddad submodule.
+
+local ddad_path = vim.fn.getcwd()
+if string.match(vim.fn.fnamemodify(ddad_path, ":t"), ".*env_simulator.*") then
+	-- 2 directories up
+	ddad_path = vim.fn.fnamemodify(ddad_path, ":h:h")
+end
+
 ---@type Task[]
 local M = {
 	{
@@ -10,7 +18,7 @@ local M = {
 		},
 		resolve_metadata = function()
 			local metadata = {}
-			metadata.ddad_path = vim.fn.getcwd()
+			metadata.ddad_path = ddad_path
 			metadata.tests_path = metadata.ddad_path
 				.. "/tools/env_simulator/ASTAS_DATA/E2EOpTestArtifacts/SCMHighway/Resources/Configurations/"
 			metadata.common_resources_path = metadata.ddad_path
@@ -44,79 +52,51 @@ local M = {
 				.. "/simulation_outputs/"
 				.. metadata.selected_test
 				.. "/"
-				.. string.format("%s-%03d", os.date("%y-%m-%d-%H-%M-%S"), vim.uv.hrtime() / 1e6 % 1000)
+				.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
-			local pre_run_script = vim.fn.tempname()
-			vim.fn.writefile({
-				string.format(
-					"cp %s/MiscObjects %s -r --remove-destination",
-					metadata.common_resources_path,
-					metadata.selected_test_path
-				),
-				string.format(
-					"cp %s/UserSettings %s -r --remove-destination",
-					metadata.common_resources_path,
-					metadata.selected_test_path
-				),
-				string.format(
-					"cp %s/Vehicles %s -r --remove-destination",
-					metadata.common_resources_path,
-					metadata.selected_test_path
-				),
-				string.format(
-					"cp %s/systemConfigBlueprint.xml %s -r --remove-destination",
-					metadata.common_resources_path,
-					metadata.selected_test_path
-				),
-				string.format(
-					"cp %s/ProfilesCatalog.xml %s -r --remove-destination",
-					metadata.common_resources_path,
-					metadata.selected_test_path
-				),
-				string.format(
-					'sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, %s/bazel-bin/external/gecco_default/src/controller}|" "%s/UserSettings/UserSettings.ini"',
-					metadata.ddad_path,
-					metadata.selected_test_path
-				),
-				"mkdir -p " .. metadata.output_path,
-				string.format(
-					'sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = %s|" "%s/UserSettings/UserSettings.ini"',
-					metadata.output_path,
-					metadata.selected_test_path
-				),
-				string.format(
-					'sed -i "s|"/path/to/update"|"%s"|" "%s/Scenarios/XOSC/Scenario.xosc"',
-					metadata.selected_test_path,
-					metadata.selected_test_path
-				),
-				"bazel build --config=env_simulator_debug --override_repository=osi_query_library=/home/pedro/projects/osi-query-library //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
-				string.format(
-					'cp "%s/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "%s"',
-					metadata.ddad_path,
-					metadata.selected_test_path
-				),
-			}, pre_run_script)
-			return { "bash", pre_run_script }
+			-- TODO: if this fails I need to fail the pre_run_cmd
+			return {
+				"env",
+				"COMMON_RESOURCES_PATH=" .. metadata.common_resources_path,
+				"SELECTED_TEST_PATH=" .. metadata.selected_test_path,
+				"DDAD_PATH=" .. metadata.ddad_path,
+				"OUTPUT_PATH=" .. metadata.output_path,
+				"bash",
+				"-c",
+				[[
+          cp "$COMMON_RESOURCES_PATH/MiscObjects"               "$SELECTED_TEST_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/UserSettings"              "$SELECTED_TEST_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/Vehicles"                  "$SELECTED_TEST_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/systemConfigBlueprint.xml" "$SELECTED_TEST_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/ProfilesCatalog.xml"       "$SELECTED_TEST_PATH" -r --remove-destination
+          sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, $DDAD_PATH/bazel-bin/external/gecco_default/src/controller}|" "$SELECTED_TEST_PATH/UserSettings/UserSettings.ini"
+          sed -i "s|"/path/to/update"|"$SELECTED_TEST_PATH"|" "$SELECTED_TEST_PATH/Scenarios/XOSC/Scenario.xosc"
+
+          mkdir -p "$OUTPUT_PATH"
+          sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_TEST_PATH/UserSettings/UserSettings.ini"
+
+          bazel build --config=env_simulator_clang  --compilation_mode=dbg --cxxopt=-O0 --strip=never --override_repository=osi_query_library=/home/pedro/projects/osi-query-library -- //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
+          cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_TEST_PATH"
+        ]],
+			}
 		end,
 		cmd = function(metadata)
 			return {
-				metadata.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
-				"-t",
-				"50",
-				"-n",
-				"1",
-				"-r",
-				"0",
-				"-s",
-				metadata.selected_test_path .. "/Scenarios/XOSC/Scenario.xosc",
-				"-d",
-				metadata.selected_test_path,
-				"-p",
-				metadata.output_path,
-				"-l",
-				metadata.output_path,
-				"-o",
-				metadata.output_path .. "/output.mcap",
+				"env",
+				"SELECTED_TEST_PATH=" .. metadata.selected_test_path,
+				"DDAD_PATH=" .. metadata.ddad_path,
+				"OUTPUT_PATH=" .. metadata.output_path,
+				"bash",
+				"-c",
+				[[
+          $DDAD_PATH/bazel-bin/tools/env_simulator/astas_cli/astas_cli \
+            -t 100 -n 1 -r 0 \
+            -s $SELECTED_TEST_PATH/Scenarios/XOSC/Scenario.xosc \
+            -d $SELECTED_TEST_PATH \
+            -p $OUTPUT_PATH \
+            -l $OUTPUT_PATH \
+            -o $OUTPUT_PATH/output.mcap
+        ]],
 			}
 		end,
 	},
