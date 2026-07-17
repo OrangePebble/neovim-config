@@ -162,10 +162,10 @@ return {
 				{ "<leader>dI", icon = { icon = "", color = "grey" } },
 				{ "<leader>dw", icon = { icon = "", color = "purple" } },
 				{ "<leader>de", icon = { icon = "", color = "purple" } },
-				{ "<leader>dt", group = "Toggle" },
-				{ "<leader>dtr", icon = { icon = "", color = "yellow" } },
-				{ "<leader>dtu", icon = { icon = "󰙵", color = "yellow" } },
-				{ "<leader>dtv", icon = { icon = "󰫧", color = "yellow" } },
+				{ "<leader>dt", icon = { icon = "󰙵", color = "yellow" } },
+				{ "<leader>dT", group = "Toggle" },
+				{ "<leader>dTr", icon = { icon = "", color = "yellow" } },
+				{ "<leader>dTv", icon = { icon = "󰫧", color = "yellow" } },
 
 				-- Git
 				{ "<leader>g", mode = "nv", group = "Git" },
