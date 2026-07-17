@@ -92,13 +92,11 @@ return {
 
 				-- Toggle icons.
 				{ "<leader>t", group = "Toggle" },
-				{ "<leader>tt", group = "Todo", icon = { icon = "󰷐", color = "yellow" } },
+				{ "<leader>tt", icon = { icon = "󰷐", color = "yellow" } },
 				{ "<leader>tu", icon = { icon = "", color = "orange" } },
 				{ "<leader>tm", icon = { icon = "󰍔", color = "grey" } },
 				{ "<leader>tM", icon = { icon = "󰍔", color = "grey" } },
 				{ "<leader>tw", icon = { icon = "", color = "grey" } },
-				{ "<leader>ttt", icon = { icon = "", color = "grey" } },
-				{ "<leader>tta", icon = "" },
 				{ "<leader>tq", icon = { icon = "󰺧", color = "yellow" } },
 				{ "<leader>te", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>td", icon = { icon = "󰉄", color = "grey" } },
@@ -196,9 +194,7 @@ return {
 
 				-- Search
 				{ "<leader>s", mode = "nx", group = "Search", icon = { icon = "", color = "cyan" } },
-				{ "<leader>st", group = "Todo", icon = { icon = "󰷐", color = "yellow" } },
-				{ "<leader>stt", icon = { icon = "", color = "yellow" } },
-				{ "<leader>sta", icon = "" },
+				{ "<leader>st", icon = { icon = "󰷐", color = "yellow" } },
 				{ "<leader>sf", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>sF", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>si", icon = { icon = "󰘓", color = "green" } },

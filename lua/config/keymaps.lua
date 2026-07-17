@@ -285,18 +285,12 @@ end, { desc = "Undotree" })
 local to_fix_keywords = { "TODO", "FIX", "FIXME" }
 
 -- Search and toggle workspace TODOs
-keymap("n", "<leader>stt", function()
+keymap("n", "<leader>st", function()
 	Snacks.picker.todo_comments({ keywords = to_fix_keywords })
-end, { desc = "To do and fix" })
-keymap("n", "<leader>sta", function()
-	Snacks.picker.todo_comments()
-end, { desc = "All" })
-keymap("n", "<leader>ttt", function()
+end, { desc = "Todo" })
+keymap("n", "<leader>tt", function()
 	require("trouble").toggle({ mode = "todo", filter = { tag = to_fix_keywords } })
-end, { desc = "To do and fix" })
-keymap("n", "<leader>tta", function()
-	require("trouble").toggle("todo")
-end, { desc = "All" })
+end, { desc = "Todo" })
 
 -- Jumps to TODOs, these replace tab jumps but I don't use tabs.
 -- Doesn't work across files, but neither does diagnostics, so if I want that just use quickfix.
