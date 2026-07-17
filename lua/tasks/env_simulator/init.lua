@@ -125,7 +125,7 @@ local M = {
 	},
 	{
 		-- Inspired by https://github.com/alexander-born/cmp-bazel
-		name = "Build a bazel target",
+		name = "Build bazel targets",
 		resolve_context = function()
 			-- Instead of manually defining a list of targets, I could automatically get a list of targets using something like:
 			--  `bazel query --keep_going --noshow_progress --output label '//tools/env_simulator/astas_cli/... except kind(cc_test, //tools/env_simulator/astas_cli/...) except kind(filegroup, //tools/env_simulator/astas_cli/...)' 2>/dev/null`
@@ -161,9 +161,9 @@ local M = {
 				return nil
 			end
 
+			local special_config = "env_simulator_clang with debug flags"
 			Snacks.picker.select(
-				-- TODO: add option for env_simulator_debug with clang flags so I get the best of both worlds, or clang with debug flags, whichever is easier
-				{ "env_simulator_debug", "env_simulator_clang", "env_simulator_release" },
+				{ special_config, "env_simulator_debug", "env_simulator_clang", "env_simulator_release" },
 				{
 					prompt = "Select config",
 				},
@@ -175,7 +175,14 @@ local M = {
 
 			local cmd = { "bazel", "build" }
 			if selected_config ~= nil then
-				vim.list_extend(cmd, { "--config=" .. selected_config })
+				if selected_config == special_config then
+					vim.list_extend(
+						cmd,
+						{ "--config=env_simulator_clang", "--compilation_mode=dbg", "--cxxopt=-O0", "--strip=never" }
+					)
+				else
+					vim.list_extend(cmd, { "--config=" .. selected_config })
+				end
 			end
 			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
 			table.insert(cmd, "--")
