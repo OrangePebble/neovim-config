@@ -16,17 +16,17 @@ local M = {
 				type = "gdb",
 			},
 		},
-		resolve_metadata = function()
-			local metadata = {}
-			metadata.ddad_path = ddad_path
-			metadata.tests_path = metadata.ddad_path
+		resolve_context = function()
+			local context = {}
+			context.ddad_path = ddad_path
+			context.tests_path = context.ddad_path
 				.. "/tools/env_simulator/ASTAS_DATA/E2EOpTestArtifacts/SCMHighway/Resources/Configurations/"
-			metadata.common_resources_path = metadata.ddad_path
+			context.common_resources_path = context.ddad_path
 				.. "/tools/env_simulator/ExampleData/E2EOpTestArtifacts/SCMHighway/Resources/Common"
 
 			-- Pick a test configuration directory
 			local dirs = {}
-			for name, type in vim.fs.dir(metadata.tests_path) do
+			for name, type in vim.fs.dir(context.tests_path) do
 				if type == "directory" then
 					table.insert(dirs, name)
 				end
@@ -39,28 +39,27 @@ local M = {
 			}, function(v)
 				coroutine.resume(co, v)
 			end)
-			metadata.selected_test = coroutine.yield()
-			if metadata.selected_test == nil then
+			context.selected_test = coroutine.yield()
+			if context.selected_test == nil then
 				return nil
 			end
-			metadata.selected_test_path = metadata.tests_path .. metadata.selected_test
+			context.selected_test_path = context.tests_path .. context.selected_test
 
-			return metadata
+			return context
 		end,
-		pre_run_cmd = function(metadata)
-			metadata.output_path = vim.fn.expand("~")
+		pre_run_cmd = function(context)
+			context.output_path = vim.fn.expand("~")
 				.. "/simulation_outputs/"
-				.. metadata.selected_test
+				.. context.selected_test
 				.. "/"
 				.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
-			-- TODO: if this fails I need to fail the pre_run_cmd
 			return {
 				"env",
-				"COMMON_RESOURCES_PATH=" .. metadata.common_resources_path,
-				"SELECTED_TEST_PATH=" .. metadata.selected_test_path,
-				"DDAD_PATH=" .. metadata.ddad_path,
-				"OUTPUT_PATH=" .. metadata.output_path,
+				"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
+				"SELECTED_TEST_PATH=" .. context.selected_test_path,
+				"DDAD_PATH=" .. context.ddad_path,
+				"OUTPUT_PATH=" .. context.output_path,
 				"bash",
 				"-c",
 				[[
@@ -80,12 +79,12 @@ local M = {
         ]],
 			}
 		end,
-		cmd = function(metadata)
+		cmd = function(context)
 			return {
 				"env",
-				"SELECTED_TEST_PATH=" .. metadata.selected_test_path,
-				"DDAD_PATH=" .. metadata.ddad_path,
-				"OUTPUT_PATH=" .. metadata.output_path,
+				"SELECTED_TEST_PATH=" .. context.selected_test_path,
+				"DDAD_PATH=" .. context.ddad_path,
+				"OUTPUT_PATH=" .. context.output_path,
 				"bash",
 				"-c",
 				[[
@@ -108,7 +107,7 @@ local M = {
 				type = "gdb",
 			},
 		},
-		resolve_metadata = function()
+		resolve_context = function()
 			local file_path =
 				require("utils.picker").pick_file(vim.fn.getcwd() .. "/bazel-bin", "Pick a file (./bazel-bin)")
 			if not file_path then
@@ -118,14 +117,14 @@ local M = {
 			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
 			return { cmd = cmd }
 		end,
-		cmd = function(metadata)
-			return metadata.cmd
+		cmd = function(context)
+			return context.cmd
 		end,
 	},
 	{
 		-- Inspired by https://github.com/alexander-born/cmp-bazel
 		name = "Build a bazel target",
-		resolve_metadata = function()
+		resolve_context = function()
 			-- Instead of manually defining a list of targets, I could automatically get a list of targets using something like:
 			--  `bazel query --keep_going --noshow_progress --output label '//tools/env_simulator/astas_cli/... except kind(cc_test, //tools/env_simulator/astas_cli/...) except kind(filegroup, //tools/env_simulator/astas_cli/...)' 2>/dev/null`
 			-- But it is hard to filter those for targets I actually care about so I'll just add to this list whenever I find one I need.
@@ -171,8 +170,8 @@ local M = {
 
 			return { cmd = cmd }
 		end,
-		cmd = function(metadata)
-			return metadata.cmd
+		cmd = function(context)
+			return context.cmd
 		end,
 	},
 }

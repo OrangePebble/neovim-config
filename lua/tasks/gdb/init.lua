@@ -8,7 +8,7 @@ local M = {
 				type = "gdb",
 			},
 		},
-		resolve_metadata = function()
+		resolve_context = function()
 			local file_path = require("utils.picker").pick_file(vim.fn.getcwd(), nil)
 			if not file_path then
 				return nil
@@ -17,8 +17,8 @@ local M = {
 			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
 			return { cmd = cmd }
 		end,
-		cmd = function(metadata)
-			return metadata.cmd
+		cmd = function(context)
+			return context.cmd
 		end,
 	},
 	{
@@ -37,7 +37,7 @@ local M = {
 				end,
 			},
 		},
-		resolve_metadata = function()
+		resolve_context = function()
 			local file_path = require("utils.picker").pick_file(vim.fn.getcwd(), nil)
 			if not file_path then
 				return nil
@@ -45,8 +45,8 @@ local M = {
 			local cmd = { file_path }
 			return { cmd = cmd }
 		end,
-		cmd = function(metadata)
-			return metadata.cmd
+		cmd = function(context)
+			return context.cmd
 		end,
 	},
 	{
@@ -62,7 +62,7 @@ local M = {
 				target = "localhost:1234",
 			},
 		},
-		resolve_metadata = function()
+		resolve_context = function()
 			local file_path = require("utils.picker").pick_file(vim.fn.getcwd(), nil)
 			if not file_path then
 				return nil
@@ -70,8 +70,8 @@ local M = {
 			local cmd = { file_path }
 			return { cmd = cmd }
 		end,
-		cmd = function(metadata)
-			return metadata.cmd
+		cmd = function(context)
+			return context.cmd
 		end,
 	},
 }

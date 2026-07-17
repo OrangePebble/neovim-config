@@ -41,24 +41,24 @@ local overseer_tasks = {}
 ---@type { name: string, run: fun() }[]
 local dap_tasks = {}
 
----@type { task: Task, metadata: TaskMetadata }
+---@type { task: Task, context: TaskContext }
 local last_overseer_task = nil
----@type { task: Task, metadata: TaskMetadata }|{ regular_dap: true }
+---@type { task: Task, context: TaskContext }|{ regular_dap: true }
 local last_dap_task = nil
 
 ---@param task Task
----@param metadata TaskMetadata
-local function run_overseer_task(task, metadata)
+---@param context TaskContext
+local function run_overseer_task(task, context)
 	local function start_main_and_post_tasks()
 		local main_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 			name = task.name,
-			cmd = task.cmd(metadata),
+			cmd = task.cmd(context),
 		}))
 		if task.post_run_cmd then
 			main_task:subscribe("on_complete", function(_, status)
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task.name,
-					cmd = task.post_run_cmd(metadata, status),
+					cmd = task.post_run_cmd(context, status),
 				}))
 				post_task:start()
 			end)
@@ -69,7 +69,7 @@ local function run_overseer_task(task, metadata)
 	if task.pre_run_cmd then
 		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 			name = "Pre: " .. task.name,
-			cmd = task.pre_run_cmd(metadata),
+			cmd = task.pre_run_cmd(context),
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			if pre_status ~= "SUCCESS" then
@@ -85,10 +85,10 @@ local function run_overseer_task(task, metadata)
 end
 
 ---@param task Task
----@param metadata TaskMetadata
-local function run_dap_task(task, metadata)
+---@param context TaskContext
+local function run_dap_task(task, context)
 	local function start_main_and_post_tasks()
-		local cmd = task.cmd(metadata)
+		local cmd = task.cmd(context)
 		local config = vim.tbl_deep_extend("force", task.dap.options, {
 			name = task.name,
 			program = cmd[1],
@@ -136,7 +136,7 @@ local function run_dap_task(task, metadata)
 				local status = body and body.exitCode and tostring(body.exitCode) or nil
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task.name,
-					cmd = task.post_run_cmd(metadata, status),
+					cmd = task.post_run_cmd(context, status),
 				}))
 				post_task:start()
 			end
@@ -154,7 +154,7 @@ local function run_dap_task(task, metadata)
 	if task.pre_run_cmd then
 		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 			name = "Pre: " .. task.name,
-			cmd = task.pre_run_cmd(metadata),
+			cmd = task.pre_run_cmd(context),
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			if pre_status ~= "SUCCESS" then
@@ -181,17 +181,17 @@ local function generic_to_overseer_tasks(generic_tasks)
 			table.insert(local_overseer_tasks, {
 				name = task.name,
 				run = function()
-					local metadata = task.resolve_metadata and task.resolve_metadata() or {}
-					if not metadata then
+					local context = task.resolve_context and task.resolve_context() or {}
+					if not context then
 						vim.notify(
-							"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
+							"The task '" .. task.name .. "' was cancelled or failed while resolving context",
 							vim.log.levels.ERROR
 						)
 						return
 					end
-					metadata.is_overseer_task = true
-					last_overseer_task = { task = task, metadata = metadata }
-					run_overseer_task(task, metadata)
+					context.is_overseer_task = true
+					last_overseer_task = { task = task, context = context }
+					run_overseer_task(task, context)
 				end,
 			})
 		end
@@ -212,17 +212,17 @@ local function generic_to_dap_tasks(generic_tasks)
 			table.insert(local_dap_tasks, {
 				name = task.name,
 				run = function()
-					local metadata = task.resolve_metadata and task.resolve_metadata() or {}
-					if not metadata then
+					local context = task.resolve_context and task.resolve_context() or {}
+					if not context then
 						vim.notify(
-							"The task '" .. task.name .. "' was cancelled or failed while resolving metadata",
+							"The task '" .. task.name .. "' was cancelled or failed while resolving context",
 							vim.log.levels.ERROR
 						)
 						return
 					end
-					metadata.is_dap_task = true
-					last_dap_task = { task = task, metadata = metadata }
-					run_dap_task(task, metadata)
+					context.is_dap_task = true
+					last_dap_task = { task = task, context = context }
+					run_dap_task(task, context)
 				end,
 			})
 		end
@@ -401,7 +401,7 @@ end
 
 M.run_last_overseer_task = function()
 	if last_overseer_task then
-		run_overseer_task(last_overseer_task.task, last_overseer_task.metadata)
+		run_overseer_task(last_overseer_task.task, last_overseer_task.context)
 	else
 		vim.notify("No task has been run.", vim.log.levels.WARN)
 	end
@@ -412,7 +412,7 @@ M.run_last_dap_task = function()
 		if last_dap_task.regular_dap then
 			dap.run_last()
 		else
-			run_dap_task(last_dap_task.task, last_dap_task.metadata)
+			run_dap_task(last_dap_task.task, last_dap_task.context)
 		end
 	else
 		vim.notify("No debugging task has been run.", vim.log.levels.WARN)

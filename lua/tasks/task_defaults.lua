@@ -17,7 +17,7 @@
 ---@field name? string Can be used to overwrite the name set in Task
 ---@field [string] any
 
----@class TaskMetadata
+---@class TaskContext
 ---@field is_overseer_task? true
 ---@field is_dap_task? true
 ---@field [string] any
@@ -25,10 +25,10 @@
 ---@class Task
 ---@field name string Name of the task. Defaults to the cmd output
 ---@field enabled? boolean
----@field resolve_metadata? fun(): TaskMetadata|nil The phase when the user is asked for input. Returns metadata for the cmds to use or nil if failed or cancelled
----@field pre_run_cmd? fun(metadata: table): string[] Returns a list of a cmd and args to run before the main cmd
----@field cmd fun(metadata: table): string[] Returns a list of a cmd and args
----@field post_run_cmd? fun(metadata: table, status?: string): string[] Returns a list of a cmd and args to run after the main cmd
+---@field resolve_context? fun(): TaskContext|nil The phase when the user is asked for input. Returns context for the cmds to use or nil if failed or cancelled
+---@field pre_run_cmd? fun(context: table): string[] Returns a list of a cmd and args to run before the main cmd
+---@field cmd fun(context: table): string[] Returns a list of a cmd and args
+---@field post_run_cmd? fun(context: table, status?: string): string[] Returns a list of a cmd and args to run after the main cmd
 ---@field overseer? { enabled: boolean, options?: OverseerOptions } 'options' is used by all cmds
 ---@field dap? { enabled: true, options: DapOptions } | { enabled: false, options?: DapOptions }
 
