@@ -74,28 +74,30 @@ local M = {
           mkdir -p "$OUTPUT_PATH"
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_TEST_PATH/UserSettings/UserSettings.ini"
 
-          bazel build --config=env_simulator_clang  --compilation_mode=dbg --cxxopt=-O0 --strip=never --override_repository=osi_query_library=/home/pedro/projects/osi-query-library -- //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
+          bazel build --config=env_simulator_clang --compilation_mode=dbg --cxxopt=-O0 --strip=never --override_repository=osi_query_library=/home/pedro/projects/osi-query-library -- //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
           cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_TEST_PATH"
         ]],
 			}
 		end,
 		cmd = function(context)
 			return {
-				"env",
-				"SELECTED_TEST_PATH=" .. context.selected_test_path,
-				"DDAD_PATH=" .. context.ddad_path,
-				"OUTPUT_PATH=" .. context.output_path,
-				"bash",
-				"-c",
-				[[
-          $DDAD_PATH/bazel-bin/tools/env_simulator/astas_cli/astas_cli \
-            -t 100 -n 1 -r 0 \
-            -s $SELECTED_TEST_PATH/Scenarios/XOSC/Scenario.xosc \
-            -d $SELECTED_TEST_PATH \
-            -p $OUTPUT_PATH \
-            -l $OUTPUT_PATH \
-            -o $OUTPUT_PATH/output.mcap
-        ]],
+				context.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
+				"-t",
+				"100",
+				"-n",
+				"1",
+				"-r",
+				"0",
+				"-s",
+				context.selected_test_path .. "/Scenarios/XOSC/Scenario.xosc",
+				"-d",
+				context.selected_test_path,
+				"-p",
+				context.output_path,
+				"-l",
+				context.output_path,
+				"-o",
+				context.output_path .. "/output.mcap",
 			}
 		end,
 	},
@@ -140,12 +142,22 @@ local M = {
 
 			local co = coroutine.running()
 			Snacks.picker.select(targets, {
-				prompt = "Select target",
-			}, function(v)
-				coroutine.resume(co, v)
-			end)
-			local selected_target = coroutine.yield()
-			if not selected_target then
+				prompt = "Select targets",
+				snacks = {
+					actions = {
+						confirm = function(picker, _)
+							local selected = picker:selected({ fallback = true })
+							picker:close()
+							local values = vim.tbl_map(function(entry)
+								return entry.item
+							end, selected)
+							coroutine.resume(co, values)
+						end,
+					},
+				},
+			}, function(_) end)
+			local selected_targets = coroutine.yield()
+			if not selected_targets then
 				return nil
 			end
 
@@ -166,7 +178,8 @@ local M = {
 				vim.list_extend(cmd, { "--config=" .. selected_config })
 			end
 			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
-			vim.list_extend(cmd, { "--", selected_target })
+			table.insert(cmd, "--")
+			vim.list_extend(cmd, selected_targets)
 
 			return { cmd = cmd }
 		end,
@@ -175,5 +188,13 @@ local M = {
 		end,
 	},
 }
+
+if string.match(vim.fn.getcwd(), ".*env_simulator.*") then
+	for _, task in ipairs(M) do
+		if task.dap then
+			task.dap.enabled = false
+		end
+	end
+end
 
 return M
