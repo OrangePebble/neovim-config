@@ -6,6 +6,7 @@ return {
 		"echasnovski/mini.icons",
 		-- Adds file operation support to LSPs.
 		-- Has to be loaded after nvim-tree.
+		-- snacks.nvim has an equivalent feature but it doesn't work as well.
 		"Crysthamus/nvim-file-operations",
 	},
 	config = function()
