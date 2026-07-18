@@ -191,6 +191,7 @@ return {
 				{ "<leader>gtw", icon = { icon = "", color = "yellow" } },
 				{ "<leader>gtd", icon = { icon = "󰆴", color = "red" } },
 				{ "<leader>gl", icon = { icon = "󰋣", color = "grey" } },
+				{ "<leader>go", icon = { icon = "󰖟", color = "grey" } },
 
 				-- Search
 				{ "<leader>s", mode = "nx", group = "Search", icon = { icon = "", color = "cyan" } },

@@ -10,6 +10,16 @@ return {
 	opts = {
 		dim = { enabled = true },
 		lazygit = { configure = true },
+		gitbrowse = {
+			url_patterns = {
+				["orangepebble.net"] = {
+					branch = "/src/branch/{branch}",
+					file = "/src/branch/{branch}/{file}#L{line_start}-L{line_end}",
+					permalink = "/src/commit/{commit}/{file}#L{line_start}-L{line_end}",
+					commit = "/src/commit/{commit}",
+				},
+			},
+		},
 		indent = {
 			enabled = true,
 			animate = { enabled = false },

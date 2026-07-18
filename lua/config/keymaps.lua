@@ -504,6 +504,12 @@ keymap({ "o", "x" }, "ag", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" 
 keymap("n", "<leader>gl", function()
 	Snacks.lazygit()
 end, { desc = "Lazygit" })
+keymap("n", "<leader>go", function()
+	---@type snacks.gitbrowse.Config
+	Snacks.gitbrowse.open({
+		what = "permalink",
+	})
+end, { desc = "Open in browser" })
 
 -- https://github.com/Muizzyranking/dot-files/blob/2681a4dd0ba7ed6995845877b49be1f789cd7720/config/nvim/lua/plugins/editor/git.lua#L22-L50
 vim.keymap.set("n", "q", function()
