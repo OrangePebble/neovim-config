@@ -3,10 +3,10 @@ local M = {}
 -- https://www.reddit.com/r/neovim/comments/1jlq1iz/comment/mk5hxh7/
 
 local diagnostic_signs = {
-	[vim.diagnostic.severity.ERROR] = "",
-	[vim.diagnostic.severity.WARN] = "",
-	[vim.diagnostic.severity.INFO] = "",
-	[vim.diagnostic.severity.HINT] = "",
+	[vim.diagnostic.severity.ERROR] = "",
+	[vim.diagnostic.severity.WARN] = "",
+	[vim.diagnostic.severity.INFO] = "",
+	[vim.diagnostic.severity.HINT] = "󰌶",
 }
 
 local shorter_source_names = {

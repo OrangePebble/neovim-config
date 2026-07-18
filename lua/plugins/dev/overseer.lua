@@ -5,8 +5,29 @@ return {
 		---@type overseer.SetupOpts
 		overseer.setup({
 			task_list = {
+				separator = "─────────────────────────────────────────────────────────────────────────────",
 				render = function(task)
-					return require("overseer.render").format_compact(task)
+					local overseer_render = require("overseer.render")
+					local status_icon = "󰄰"
+					if task.status == overseer.STATUS.PENDING then
+						status_icon = "󰟃"
+					elseif task.status == overseer.STATUS.RUNNING then
+						status_icon = "󰐌"
+					elseif task.status == overseer.STATUS.CANCELED then
+						status_icon = "󰏥"
+					elseif task.status == overseer.STATUS.SUCCESS then
+						status_icon = "󰗠"
+					elseif task.status == overseer.STATUS.FAILURE then
+						status_icon = "󰅙"
+					end
+					local status = { { status_icon, "Overseer" .. task.status } }
+					return {
+						overseer_render.join(status, overseer_render.name(task)),
+						overseer_render.join(
+							overseer_render.duration(task),
+							overseer_render.time_since_completed(task, { hl_group = "Comment" })
+						),
+					}
 				end,
 				-- Make it so the list is very thin to make more space for the output.
 				max_width = 5,

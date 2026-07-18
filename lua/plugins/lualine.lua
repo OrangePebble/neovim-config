@@ -2,6 +2,24 @@ return {
 	-- Fast and easy to configu statusline.
 	"nvim-lualine/lualine.nvim",
 	config = function()
+		-- Should be the same as the ones at ../utils/diagnostics.lua
+		local diagnostic_symbols = {
+			error = " ",
+			warn = " ",
+			info = " ",
+			hint = "󰌶 ",
+		}
+
+		-- Should be the same as the ones at ./dev/overseer.lua
+		local overseer_symbols = {
+			[require("overseer").STATUS.PENDING] = "󰟃 ",
+			[require("overseer").STATUS.RUNNING] = "󰐌 ",
+			[require("overseer").STATUS.CANCELED] = "󰏥 ",
+			[require("overseer").STATUS.SUCCESS] = "󰗠 ",
+			[require("overseer").STATUS.FAILURE] = "󰅙 ",
+			[require("overseer").STATUS.DISPOSED] = "󰄰 ",
+		}
+
 		-- See the default config here:
 		-- https://github.com/nvim-lualine/lualine.nvim?tab=readme-ov-file#default-configuration
 		require("lualine").setup({
@@ -60,12 +78,20 @@ return {
 				},
 				{
 					sections = {
-						lualine_c = { { "overseer", symbols = { [require("overseer").STATUS.PENDING] = "󱎫 " } } },
-						lualine_z = { "filetype" },
+						lualine_c = { { "overseer", symbols = overseer_symbols } },
+						lualine_z = {
+							function()
+								return " Overseer"
+							end,
+						},
 					},
 					inactive_sections = {
-						lualine_c = { { "overseer", symbols = { [require("overseer").STATUS.PENDING] = "󱎫 " } } },
-						lualine_x = { "filetype" },
+						lualine_c = { { "overseer", symbols = overseer_symbols } },
+						lualine_x = {
+							function()
+								return " Overseer"
+							end,
+						},
 					},
 					filetypes = { "OverseerOutput" },
 				},
@@ -77,18 +103,11 @@ return {
 					"diff",
 					{
 						"diagnostics",
-						symbols = {
-							error = " ",
-							warn = " ",
-							info = " ",
-							hint = " ",
-						},
+						symbols = diagnostic_symbols,
 					},
 					{
 						"overseer",
-						symbols = {
-							[require("overseer").STATUS.PENDING] = "󱎫 ",
-						},
+						symbols = overseer_symbols,
 						cond = function()
 							for _, win in ipairs(vim.api.nvim_list_wins()) do
 								local buf = vim.api.nvim_win_get_buf(win)

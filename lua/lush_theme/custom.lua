@@ -587,6 +587,19 @@ local theme = lush(function(injected_functions)
     NeotestIndent       { Conceal },
     NeotestExpandMarker { Conceal },
     NeotestAdapterName  { fg = pink, gui = 'bold'},
+
+    -- Overseer
+    OverseerPENDING    { Comment },
+    OverseerRUNNING    { Normal },
+    OverseerSUCCESS    { DiagnosticOk },
+    OverseerCANCELED   { DiagnosticWarn },
+    OverseerFAILURE    { DiagnosticError },
+    OverseerDISPOSED   { Conceal },
+    OverseerTask       { Title },
+    OverseerTaskBorder { FloatBorder },
+    OverseerOutput     { Normal },
+    OverseerComponent  { Constant },
+    OverseerField      { Keyword },
 	}
 end)
 
