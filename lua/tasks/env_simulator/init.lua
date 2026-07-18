@@ -175,7 +175,6 @@ local M = {
 			local selected_config = coroutine.yield()
 
 			-- TODO: add picker for external repos
-			-- TODO: change Overseer icons to nerd fonts' "person" icons
 
 			local cmd = { "bazel", "build" }
 			if selected_config ~= nil then

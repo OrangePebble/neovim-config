@@ -331,16 +331,11 @@ keymap("n", "<leader>sR", function()
 	Snacks.picker.resume()
 end, { desc = "Resume search" })
 keymap("n", "<leader>sf", function()
-	---@type snacks.picker.files.Config
-	Snacks.picker.files({
+	---@type snacks.picker.smart.Config
+	Snacks.picker.smart({
 		follow = true, -- Follow symlinks.
 		hidden = true, -- Search dot-files.
 	})
-	vim.notify(
-		string.format("Use <A-i> to toggle git-ignored files.", vim.fn.getcwd()),
-		vim.log.levels.INFO,
-		{ history = false }
-	)
 end, { desc = "Files" })
 keymap("n", "<leader>sF", function()
 	---@type snacks.picker.files.Config
@@ -374,11 +369,6 @@ keymap("n", "<leader>sg", function()
 	})
 	vim.notify(
 		string.format("Append '-- -g **/*' to glob filter directories.", vim.fn.getcwd()),
-		vim.log.levels.INFO,
-		{ history = false }
-	)
-	vim.notify(
-		string.format("Use <C-G> to toggle live mode and fuzzy filter results.", vim.fn.getcwd()),
 		vim.log.levels.INFO,
 		{ history = false }
 	)

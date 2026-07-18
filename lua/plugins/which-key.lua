@@ -197,7 +197,6 @@ return {
 				{ "<leader>st", icon = { icon = "󰷐", color = "yellow" } },
 				{ "<leader>sf", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>sF", icon = { icon = "󰈔", color = "green" } },
-				{ "<leader>si", icon = { icon = "󰘓", color = "green" } },
 				{ "<leader>sc", icon = "" },
 				{ "<leader>sg", icon = { icon = "󰈞", color = "cyan" } },
 				{ "<leader>s/", icon = { icon = "󰈞", color = "cyan" } },
