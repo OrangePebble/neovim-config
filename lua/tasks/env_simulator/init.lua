@@ -53,7 +53,6 @@ local M = {
 				.. context.selected_test
 				.. "/"
 				.. os.date("%y-%m-%d_%Hh%Mm%Ss")
-
 			return {
 				"env",
 				"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
@@ -63,6 +62,7 @@ local M = {
 				"bash",
 				"-c",
 				[[
+          set -e # Fail this script on first command failure
           cp "$COMMON_RESOURCES_PATH/MiscObjects"               "$SELECTED_TEST_PATH" -r --remove-destination
           cp "$COMMON_RESOURCES_PATH/UserSettings"              "$SELECTED_TEST_PATH" -r --remove-destination
           cp "$COMMON_RESOURCES_PATH/Vehicles"                  "$SELECTED_TEST_PATH" -r --remove-destination
@@ -136,8 +136,9 @@ local M = {
 				"//tools/env_simulator/astas_cli:astas_cli",
 				"//tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
 				"//tools/env_simulator/modules/stochastic_cognitive_model:stochastic_cognitive_model_lib",
-				"//third_party/googletest:googletest",
+				"//third_party/open_simulation_interface:open_simulation_interface",
 				"//tools/env_simulator/modules/stochastic_cognitive_model/tests/Core/Sensor_Tests:sensor_tests",
+				"//third_party/googletest:googletest",
 			}
 
 			local co = coroutine.running()
@@ -172,6 +173,9 @@ local M = {
 				end
 			)
 			local selected_config = coroutine.yield()
+
+			-- TODO: add picker for external repos
+			-- TODO: change Overseer icons to nerd fonts' "person" icons
 
 			local cmd = { "bazel", "build" }
 			if selected_config ~= nil then
