@@ -28,8 +28,19 @@ return {
 			},
 			extensions = {
 				"trouble",
-				"nvim-dap-ui",
 				{ sections = { lualine_y = { "filetype" } }, filetypes = { "help" } },
+				{
+					sections = { lualine_a = { { "filename", file_status = false } } },
+					inactive_sections = { lualine_c = { { "filename", file_status = false } } },
+					filetypes = {
+						"dap-repl",
+						"dapui_console",
+						"dapui_watches",
+						"dapui_stacks",
+						"dapui_breakpoints",
+						"dapui_scopes",
+					},
+				},
 				{
 					sections = {
 						lualine_a = {
