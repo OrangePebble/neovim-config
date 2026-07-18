@@ -20,6 +20,86 @@ return {
 			[require("overseer").STATUS.DISPOSED] = "󰄰 ",
 		}
 
+		local help_extension = { sections = { lualine_y = { "filetype" } }, filetypes = { "help" } }
+
+		local dapui_extension = {
+			sections = { lualine_a = { { "filename", file_status = false } } },
+			inactive_sections = { lualine_c = { { "filename", file_status = false } } },
+			filetypes = {
+				"dap-repl",
+				"dapui_console",
+				"dapui_watches",
+				"dapui_stacks",
+				"dapui_breakpoints",
+				"dapui_scopes",
+			},
+		}
+
+		local nvimtree_extension = {
+			sections = {
+				lualine_a = {
+					{
+						function()
+							return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+						end,
+						on_click = function()
+							require("nvim-tree.api").tree.toggle()
+						end,
+					},
+				},
+			},
+			inactive_sections = {
+				lualine_c = {
+					{
+						function()
+							return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+						end,
+						on_click = function()
+							require("nvim-tree.api").tree.toggle()
+						end,
+					},
+				},
+			},
+			filetypes = { "NvimTree" },
+		}
+
+		local overseer_list_extension = {
+			sections = {
+				lualine_a = {
+					function()
+						return "󰜎"
+					end,
+				},
+			},
+			inactive_sections = {
+				lualine_c = {
+					function()
+						return "󰜎"
+					end,
+				},
+			},
+			filetypes = { "OverseerList" },
+		}
+		local overseer_output_extension = {
+			sections = {
+				lualine_c = { { "overseer", symbols = overseer_symbols } },
+				lualine_z = {
+					function()
+						return " Overseer"
+					end,
+				},
+			},
+			inactive_sections = {
+				lualine_c = { { "overseer", symbols = overseer_symbols } },
+				lualine_x = {
+					function()
+						return " Overseer"
+					end,
+				},
+			},
+			filetypes = { "OverseerOutput" },
+		}
+
 		-- See the default config here:
 		-- https://github.com/nvim-lualine/lualine.nvim?tab=readme-ov-file#default-configuration
 		require("lualine").setup({
@@ -28,84 +108,11 @@ return {
 			},
 			extensions = {
 				"trouble",
-				{ sections = { lualine_y = { "filetype" } }, filetypes = { "help" } },
-				{
-					sections = { lualine_a = { { "filename", file_status = false } } },
-					inactive_sections = { lualine_c = { { "filename", file_status = false } } },
-					filetypes = {
-						"dap-repl",
-						"dapui_console",
-						"dapui_watches",
-						"dapui_stacks",
-						"dapui_breakpoints",
-						"dapui_scopes",
-					},
-				},
-				{
-					sections = {
-						lualine_a = {
-							{
-								function()
-									return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
-								end,
-								on_click = function()
-									require("nvim-tree.api").tree.toggle()
-								end,
-							},
-						},
-					},
-					inactive_sections = {
-						lualine_c = {
-							{
-								function()
-									return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
-								end,
-								on_click = function()
-									require("nvim-tree.api").tree.toggle()
-								end,
-							},
-						},
-					},
-					filetypes = { "NvimTree" },
-				},
-				{
-					sections = {
-						lualine_a = {
-							function()
-								-- Returning just the filetype icon because the window is usually very thin.
-								return "󰜎"
-							end,
-						},
-					},
-					inactive_sections = {
-						lualine_c = {
-							function()
-								-- Returning just the filetype icon because the window is usually very thin.
-								return "󰜎"
-							end,
-						},
-					},
-					filetypes = { "OverseerList" },
-				},
-				{
-					sections = {
-						lualine_c = { { "overseer", symbols = overseer_symbols } },
-						lualine_z = {
-							function()
-								return " Overseer"
-							end,
-						},
-					},
-					inactive_sections = {
-						lualine_c = { { "overseer", symbols = overseer_symbols } },
-						lualine_x = {
-							function()
-								return " Overseer"
-							end,
-						},
-					},
-					filetypes = { "OverseerOutput" },
-				},
+				help_extension,
+				dapui_extension,
+				nvimtree_extension,
+				overseer_list_extension,
+				overseer_output_extension,
 			},
 			sections = {
 				lualine_a = { "mode" },
