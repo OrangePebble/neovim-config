@@ -12,6 +12,7 @@ vim.g.autoformat = true
 -- Other colors require more complex modifications that will not be able to use the
 --  command above directly.
 
+-- https://github.com/EdenEast/nightfox.nvim
 -- Carbonfox with nordfox yellow and terafox orange
 -- stylua: ignore
 local carbonfox = {
@@ -60,12 +61,12 @@ local carbonfox = {
 	pink_dim =               "#ff4797", -- pink.darken(15)
 	comment =                "#6e6e6e", -- hsl(background_0).mix(hsl(foreground_0), 40)
 	-- Lualine
-	red_faded =              "#462a36", -- hsl(background_1).mix(hsl(red), 30)
-	green_faded =            "#23342a", -- hsl(background_1).mix(hsl(green), 30)
-	yellow_faded =           "#4d4432", -- hsl(background_1).mix(hsl(yellow), 30)
-	blue_faded =             "#2e3d56", -- hsl(background_1).mix(hsl(blue), 30)
-	magenta_faded =          "#40305a", -- hsl(background_1).mix(hsl(magenta), 30)
-	orange_faded =           "#4c3429", -- hsl(background_1).mix(hsl(orange), 30)
+	red_faded =              "#462a36", -- hsl(background_0).mix(hsl(red), 30)
+	green_faded =            "#23342a", -- hsl(background_0).mix(hsl(green), 30)
+	yellow_faded =           "#4d4432", -- hsl(background_0).mix(hsl(yellow), 30)
+	blue_faded =             "#2e3d56", -- hsl(background_0).mix(hsl(blue), 30)
+	magenta_faded =          "#40305a", -- hsl(background_0).mix(hsl(magenta), 30)
+	orange_faded =           "#4c3429", -- hsl(background_0).mix(hsl(orange), 30)
 }
 
 vim.g.colorscheme = carbonfox
