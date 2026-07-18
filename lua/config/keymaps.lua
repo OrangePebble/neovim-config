@@ -53,11 +53,11 @@ keymap({ "n", "i", "x", "s", "o" }, "<F1>", "<nop>")
 
 --== Toggles
 keymap("n", "<leader>tw", "<cmd>set wrap!<CR>", { desc = "Line wrap" })
-keymap("n", "<leader>tn", function()
+keymap("n", "<leader>tr", function()
 	vim.opt.relativenumber = not vim.opt.relativenumber._value
 	vim.g.togglerelativenumber = not vim.g.togglerelativenumber
 end, { desc = "Relative line numbers" })
-keymap("n", "<leader>tN", function()
+keymap("n", "<leader>tn", function()
 	if vim.opt.number._value then
 		vim.opt.number = false
 		vim.opt.relativenumber = false
