@@ -14,77 +14,47 @@
 local lush = require("lush")
 local hsl = lush.hsl
 
----- Carbonfox with nordfox yellow and terafox orange
-local bg1 = hsl("#161616")
-local fg1 = hsl("#f2f2f2")
--- Regular colors
-local black = -- 0
-	hsl("#282828")
-local red = -- 1
-	hsl("#ee5396")
-local green = -- 2
-	hsl("#25be6a")
-local yellow = -- 3
-	hsl("#ebcb8b")
-local blue = -- 4
-	hsl("#78a9ff")
-local magenta = -- 5
-	hsl("#be95ff")
-local cyan = -- 6
-	hsl("#33b1ff")
-local white = -- 7
-	hsl("#dfdfe0")
--- Bright colors
-local black_bright = -- 8
-	black.lighten(15)
-local red_bright = -- 9
-	red.lighten(15)
-local green_bright = -- 10
-	green.lighten(15)
-local yellow_bright = -- 11
-	yellow.lighten(15)
-local blue_bright = -- 12
-	blue.lighten(15)
-local magenta_bright = -- 13
-	magenta.lighten(15)
-local cyan_bright = -- 14
-	cyan.lighten(15)
-local white_bright = -- 15
-	white.lighten(15)
--- Extended colors
-local orange = -- 16
-	hsl("#ff8349")
-local pink = -- 17
-	hsl("#ff7eb6")
--- Non-standard colors
--- local bg_dark = bg.darken(4) -- Status line and float
--- local bg_bright1 = bg.lighten(6) -- Colorcolm folds
--- local bg_bright2 = bg.lighten(12) -- Cursor line
--- local bg_bright3 = bg.lighten(24) -- Conceal, border fg
--- local fg_light = fg.lighten(6)
--- local fg_dark1 = fg.darken(24) -- Status line
--- local fg_dark2 = fg.darken(48) -- Line numbers, fold colums
-local bg0 = hsl("#0c0c0c") -- Status line and float
-local bg2 = bg1.lighten(6) -- Colorcolm folds
-local bg3 = bg1.lighten(12) -- Cursor line
-local bg4 = bg1.lighten(24) -- Conceal, border fg
-local fg0 = fg1.lighten(6)
-local fg2 = fg1.darken(24) -- Status line
-local fg3 = fg1.darken(48) -- Line numbers, fold colums
-local comment = bg1.mix(fg1, 40)
-local sel0 = "#2a2a2a" -- Popup bg, visual selection bg
-local sel1 = "#525253" -- Popup sel bg, search bg
-local black_dark = black.darken(15)
-local red_dark = red.darken(15)
-local green_dark = green.darken(15)
-local yellow_dark = yellow.darken(15)
-local blue_dark = blue.darken(15)
-local magenta_dark = magenta.darken(15)
-local cyan_dark = cyan.darken(15)
-local white_dark = white.darken(15)
-local orange_bright = orange.lighten(15)
-local pink_bright = pink.lighten(15)
-local pink_dark = pink.darken(15)
+local bg0 = hsl(vim.g.colorscheme.background_0)
+local bg1 = hsl(vim.g.colorscheme.background_1) -- Status line and float
+local bg2 = hsl(vim.g.colorscheme.background_2) -- Colorcolm folds
+local bg3 = hsl(vim.g.colorscheme.background_3) -- Cursor line
+local bg4 = hsl(vim.g.colorscheme.background_4) -- Conceal, border fg
+local fg0 = hsl(vim.g.colorscheme.foreground_0)
+local fg1 = hsl(vim.g.colorscheme.foreground_1) -- Status line
+local fg2 = hsl(vim.g.colorscheme.foreground_2) -- Line numbers, fold colums
+local comment = hsl(vim.g.colorscheme.comment)
+local sel0 = hsl(vim.g.colorscheme.selection_background_0) -- Popup bg, visual selection bg
+local sel1 = hsl(vim.g.colorscheme.selection_background_1) -- Popup sel bg, search bg
+local black = hsl(vim.g.colorscheme.black)
+local black_bright = hsl(vim.g.colorscheme.black_bright)
+local black_dim = hsl(vim.g.colorscheme.black_dim)
+local red = hsl(vim.g.colorscheme.red)
+local red_bright = hsl(vim.g.colorscheme.red_bright)
+local red_dim = hsl(vim.g.colorscheme.red_dim)
+local green = hsl(vim.g.colorscheme.green)
+local green_bright = hsl(vim.g.colorscheme.green_bright)
+local green_dim = hsl(vim.g.colorscheme.green_dim)
+local yellow = hsl(vim.g.colorscheme.yellow)
+local yellow_bright = hsl(vim.g.colorscheme.yellow_bright)
+local yellow_dim = hsl(vim.g.colorscheme.yellow_dim)
+local blue = hsl(vim.g.colorscheme.blue)
+local blue_bright = hsl(vim.g.colorscheme.blue_bright)
+local blue_dim = hsl(vim.g.colorscheme.blue_dim)
+local magenta = hsl(vim.g.colorscheme.magenta)
+local magenta_bright = hsl(vim.g.colorscheme.magenta_bright)
+local magenta_dim = hsl(vim.g.colorscheme.magenta_dim)
+local cyan = hsl(vim.g.colorscheme.cyan)
+local cyan_bright = hsl(vim.g.colorscheme.cyan_bright)
+local cyan_dim = hsl(vim.g.colorscheme.cyan_dim)
+local white = hsl(vim.g.colorscheme.white)
+local white_bright = hsl(vim.g.colorscheme.white_bright)
+local white_dim = hsl(vim.g.colorscheme.white_dim)
+local orange = hsl(vim.g.colorscheme.orange)
+local orange_bright = hsl(vim.g.colorscheme.orange_bright)
+local orange_dim = hsl(vim.g.colorscheme.orange_dim)
+local pink = hsl(vim.g.colorscheme.pink)
+local pink_bright = hsl(vim.g.colorscheme.pink_bright)
+local pink_dim = hsl(vim.g.colorscheme.pink_dim)
 
 -- stylua: ignore
 ---@diagnostic disable: undefined-global
@@ -102,27 +72,27 @@ local theme = lush(function(injected_functions)
 
 		ColorColumn    { bg = bg2 }, -- Columns set with 'colorcolumn'
 		Conceal        { fg = bg4 }, -- Placeholder characters substituted for concealed text (see 'conceallevel')
-		Cursor         { fg = bg1, bg = fg1 }, -- Character under the cursor
+		Cursor         { fg = bg0, bg = fg0 }, -- Character under the cursor
 		lCursor        { Cursor }, -- Character under the cursor when |language-mapping| is used (see 'guicursor')
 		CursorIM       { Cursor }, -- Like Cursor, but used when in IME mode |CursorIM|
     CursorLine     { bg = bg3 }, -- Screen-line at the cursor, when 'cursorline' is set. Low-priority if foreground (ctermfg OR guifg) is not set.
 		CursorColumn   { CursorLine }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
 		Directory      { fg = blue_bright }, -- Directory names (and other special names in listings)
-		DiffAdd        { bg = bg1.mix(green_dark, 15) }, -- Diff mode: Added line |diff.txt|
-		DiffChange     { bg = bg1.mix(blue_dark, 15) }, -- Diff mode: Changed line |diff.txt|
-		DiffDelete     { bg = bg1.mix(red_dark, 15) }, -- Diff mode: Deleted line |diff.txt|
-		DiffText       { bg = bg1.mix(cyan_dark, 30) }, -- Diff mode: Changed text within a changed line |diff.txt|
-		EndOfBuffer    { fg = bg1 }, -- Filler lines (~) after the end of the buffer. By default, this is highlighted like |hl-NonText|.
+		DiffAdd        { bg = bg0.mix(green_dim, 15) }, -- Diff mode: Added line |diff.txt|
+		DiffChange     { bg = bg0.mix(blue_dim, 15) }, -- Diff mode: Changed line |diff.txt|
+		DiffDelete     { bg = bg0.mix(red_dim, 15) }, -- Diff mode: Deleted line |diff.txt|
+		DiffText       { bg = bg0.mix(cyan_dim, 30) }, -- Diff mode: Changed text within a changed line |diff.txt|
+		EndOfBuffer    { fg = bg0 }, -- Filler lines (~) after the end of the buffer. By default, this is highlighted like |hl-NonText|.
 		-- TermCursor     { }, -- Cursor in a focused terminal
 		-- TermCursorNC   { }, -- Cursor in an unfocused terminal
 		ErrorMsg       { fg = red }, -- Error messages on the command line
-		Winseparator   { fg = bg0, bg = bg0 }, -- Separator between window splits. Inherts from |hl-VertSplit| by default, which it will replace eventually.
+		Winseparator   { fg = bg1, bg = bg1 }, -- Separator between window splits. Inherts from |hl-VertSplit| by default, which it will replace eventually.
 		VertSplit      { Winseparator }, -- Column separating vertically split windows
-		Folded         { fg = fg3, bg = bg2 }, -- Line used for closed folds
-		FoldColumn     { fg = fg3 }, -- 'foldcolumn'
-		SignColumn     { fg = fg3 }, -- Column where |signs| are displayed
-		Substitute     { fg = bg1, bg = red }, -- |:substitute| replacement text highlighting
-		LineNr         { fg = fg3 }, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
+		Folded         { fg = fg2, bg = bg2 }, -- Line used for closed folds
+		FoldColumn     { fg = fg2 }, -- 'foldcolumn'
+		SignColumn     { fg = fg2 }, -- Column where |signs| are displayed
+		Substitute     { fg = bg0, bg = red }, -- |:substitute| replacement text highlighting
+		LineNr         { fg = fg2 }, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
 		-- LineNrAbove    { }, -- Line number for when the 'relativenumber' option is set, above the cursor line
 		-- LineNrBelow    { }, -- Line number for when the 'relativenumber' option is set, below the cursor line
 		CursorLineNr   { fg = magenta, gui = "bold" }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
@@ -134,12 +104,12 @@ local theme = lush(function(injected_functions)
 		-- MsgSeparator   { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
 		MoreMsg        { fg = blue, gui = "bold" }, -- |more-prompt|
 		NonText        { fg = bg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
-		Normal         { fg = fg1, bg = bg1 }, -- Normal text
-		NormalNC       { fg = fg1, bg = bg1 }, -- normal text in non-current windows
-		NormalFloat    { fg = fg1, bg = bg0 }, -- Normal text in floating windows.
-		FloatBorder    { fg = fg3, bg = bg0 }, -- Border of floating windows.
-		FloatTitle     { fg = blue_bright, bg = bg0, gui = "bold" }, -- Title of floating windows.
-		Pmenu          { fg = fg1, bg = sel0 }, -- Popup menu: Normal item.
+		Normal         { fg = fg0, bg = bg0 }, -- Normal text
+		NormalNC       { fg = fg0, bg = bg0 }, -- normal text in non-current windows
+		NormalFloat    { fg = fg0, bg = bg1 }, -- Normal text in floating windows.
+		FloatBorder    { fg = fg2, bg = bg1 }, -- Border of floating windows.
+		FloatTitle     { fg = blue_bright, bg = bg1, gui = "bold" }, -- Title of floating windows.
+		Pmenu          { fg = fg0, bg = sel0 }, -- Popup menu: Normal item.
 		PmenuSel       { bg = sel1 }, -- Popup menu: Selected item.
 		-- PmenuKind      { }, -- Popup menu: Normal item "kind"
 		-- PmenuKindSel   { }, -- Popup menu: Selected item "kind"
@@ -149,26 +119,26 @@ local theme = lush(function(injected_functions)
 		-- PmenuThumb     { }, -- Popup menu: Thumb of the scrollbar.
 		Question       { MoreMsg }, -- |hit-enter| prompt and yes/no questions
 		QuickFixLine   { CursorLine }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
-		Search         { fg = fg1, bg = sel1 }, -- Last search pattern highlighting (see 'hlsearch'). Also used for similar items that need to stand out.
-		IncSearch      { fg = bg1, bg = orange }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+		Search         { fg = fg0, bg = sel1 }, -- Last search pattern highlighting (see 'hlsearch'). Also used for similar items that need to stand out.
+		IncSearch      { fg = bg0, bg = orange }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
 		CurSearch      { IncSearch }, -- Highlighting a search pattern under the cursor (see 'hlsearch')
 		SpecialKey     { NonText }, -- Unprintable characters: text displayed differently from what it really is. But not 'listchars' whitespace. |hl-Whitespace|
 		SpellBad       { sp = red, gui = "undercurl" }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
 		SpellCap       { sp = magenta, gui = "undercurl" }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
 		SpellLocal     { sp = blue, gui = "undercurl" }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
 		SpellRare      { sp = blue, gui = "undercurl" }, -- Word that is recognized by the spellchecker as one that is hardly ever used. |spell| Combined with the highlighting used otherwise.
-		StatusLine     { fg = fg2, bg = bg0 }, -- Status line of current window
-		StatusLineNC   { fg = fg3, bg = bg0 }, -- Status lines of not-current windows. Note: If this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
-		TabLine        { fg = fg2, bg = bg2 }, -- Tab pages line, not active tab page label
-		TabLineFill    { bg = bg0 }, -- Tab pages line, where there are no labels
-		TabLineSel     { fg = bg1, bg = fg3 }, -- Tab pages line, active tab page label
+		StatusLine     { fg = fg1, bg = bg1 }, -- Status line of current window
+		StatusLineNC   { fg = fg2, bg = bg1 }, -- Status lines of not-current windows. Note: If this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
+		TabLine        { fg = fg1, bg = bg2 }, -- Tab pages line, not active tab page label
+		TabLineFill    { bg = bg1 }, -- Tab pages line, where there are no labels
+		TabLineSel     { fg = bg0, bg = fg2 }, -- Tab pages line, active tab page label
 		Title          { fg = blue_bright, gui = "bold" }, -- Titles for output from ":set all", ":autocmd" etc.
 		Visual         { bg = sel0 }, -- Visual mode selection
 		VisualNOS      { Visual }, -- Visual mode selection when vim is "Not Owning the Selection".
 		WarningMsg     { fg = red }, -- Warning messages
 		Whitespace     { fg = bg3 }, -- "nbsp", "space", "tab" and "trail" in 'listchars'
 		WildMenu       { Pmenu }, -- Current match in 'wildmenu' completion
-		WinBar         { fg = fg3, bg = bg1, gui = "bold" }, -- Window bar of current window
+		WinBar         { fg = fg2, bg = bg0, gui = "bold" }, -- Window bar of current window
 		WinBarNC       { WinBar }, -- Window bar of not-current windows
 
 		-- Common vim syntax groups used for all kinds of code and markup.
@@ -194,7 +164,7 @@ local theme = lush(function(injected_functions)
 		Repeat         { Conditional }, --   for, do, while, etc.
 		Label          { Conditional }, --   case, default, etc.
 
-		Operator       { fg = fg2 }, --   "sizeof", "+", "*", etc.
+		Operator       { fg = fg1 }, --   "sizeof", "+", "*", etc.
 		Keyword        { fg = magenta }, --   any other keyword
 		Exception      { Keyword }, --   try, catch, throw
 
@@ -219,7 +189,7 @@ local theme = lush(function(injected_functions)
 		Underlined     { gui = "underline" }, -- Text that stands out, HTML links
 		-- Ignore         { }, -- Left blank, hidden |hl-Ignore| (NOTE: May be invisible here in template)
 		Error          { fg = red }, -- Any erroneous construct
-		Todo           { fg = bg1, bg = magenta }, -- Anything that needs extra attention; mostly the keywords TODO FIXME and XXX
+		Todo           { fg = bg0, bg = magenta }, -- Anything that needs extra attention; mostly the keywords TODO FIXME and XXX
 
 		-- These groups are for the native LSP client and diagnostic system. Some
 		-- other LSP clients may use these groups, or use their own. Consult your
@@ -231,7 +201,7 @@ local theme = lush(function(injected_functions)
 		LspReferenceRead            { bg = sel0 }, -- Used for highlighting "read" references
 		LspReferenceWrite           { bg = sel0 }, -- Used for highlighting "write" references
 		LspCodeLens                 { fg = comment }, -- Used to color the virtual text of the codelens. See |nvim_buf_set_extmark()|.
-		LspCodeLensSeparator        { fg = fg3 }, -- Used to color the seperator between two or more code lens.
+		LspCodeLensSeparator        { fg = fg2 }, -- Used to color the seperator between two or more code lens.
 		LspSignatureActiveParameter { fg = sel1 }, -- Used to highlight the active parameter in the signature help. See |vim.lsp.handlers.signature_help()|.
 
 		-- See :h diagnostic-highlights, some groups may not be listed, submit a PR fix to lush-template!
@@ -323,7 +293,7 @@ local theme = lush(function(injected_functions)
     sym"@keyword"                     { Keyword }, -- keywords not fitting into specific categories
     sym"@keyword.coroutine"           { sym"@keyword" }, -- keywords related to coroutines (e.g. `go` in Go, `async/await` in Python)
     sym"@keyword.function"            { fg = magenta }, -- keywords that define a function (e.g. `func` in Go, `def` in Python)
-    sym"@keyword.operator"            { fg = fg2 }, -- operators that are English words (e.g. `and` / `or`)
+    sym"@keyword.operator"            { fg = fg1 }, -- operators that are English words (e.g. `and` / `or`)
     sym"@keyword.import"              { Include }, -- keywords for including modules (e.g. `import` / `from` in Python)
     sym"@keyword.storage"             { StorageClass }, -- modifiers that affect storage in memory or life-time
     sym"@keyword.repeat"              { Repeat }, -- keywords related to loops (e.g. `for` / `while`)
@@ -337,26 +307,26 @@ local theme = lush(function(injected_functions)
 
     -- Punctuation ------------------------------------------------------------
 		-- sym"@punctuation"           { Delimiter }, -- Delimiter
-    sym"@punctuation.delimiter" { fg = fg2 }, -- delimiters (e.g. `;` / `.` / `,`)
-    sym"@punctuation.bracket"   { fg = fg2 }, -- brackets (e.g. `()` / `{}` / `[]`)
+    sym"@punctuation.delimiter" { fg = fg1 }, -- delimiters (e.g. `;` / `.` / `,`)
+    sym"@punctuation.bracket"   { fg = fg1 }, -- brackets (e.g. `()` / `{}` / `[]`)
     sym"@punctuation.special"   { fg = cyan_bright }, -- special symbols (e.g. `{}` in string interpolation)
 
     -- Comments ---------------------------------------------------------------
     sym"@comment"               { Comment }, -- line and block comments
     -- sym"@comment.documentation" { link = "" }, -- comments documenting code
-    sym"@comment.error"         { fg = bg1, bg = red }, -- error-type comments (e.g. `ERROR`, `FIXME`, `DEPRECATED`)
-    sym"@comment.warning"       { fg = bg1, bg = orange }, -- warning-type comments (e.g. `WARNING`, `FIX`, `HACK`)
-    sym"@comment.todo"          { fg = bg1, bg = magenta }, -- todo-type comments (e.g. `TODO`, `WIP`, `FIXME`)
-    sym"@comment.note"          { fg = bg1, bg = blue }, -- note-type comments (e.g. `NOTE`, `INFO`, `XXX`)
+    sym"@comment.error"         { fg = bg0, bg = red }, -- error-type comments (e.g. `ERROR`, `FIXME`, `DEPRECATED`)
+    sym"@comment.warning"       { fg = bg0, bg = orange }, -- warning-type comments (e.g. `WARNING`, `FIX`, `HACK`)
+    sym"@comment.todo"          { fg = bg0, bg = magenta }, -- todo-type comments (e.g. `TODO`, `WIP`, `FIXME`)
+    sym"@comment.note"          { fg = bg0, bg = blue }, -- note-type comments (e.g. `NOTE`, `INFO`, `XXX`)
 
     -- Markup -----------------------------------------------------------------
-    sym"@markup"                { fg = fg1 }, -- For strings considerated text in a markup language.
+    sym"@markup"                { fg = fg0 }, -- For strings considerated text in a markup language.
     sym"@markup.strong"         { fg = red, gui = "bold" }, -- bold text
     sym"@markup.italic"         { gui = "italic" }, -- italic text
-    sym"@markup.strikethrough"  { fg = fg1, gui= "strikethrough" }, -- struck-through text
+    sym"@markup.strikethrough"  { fg = fg0, gui= "strikethrough" }, -- struck-through text
     sym"@markup.underline"      { Underlined }, -- underlined text (only for literal underline markup!)
     sym"@markup.heading"        { Title }, -- headings, titles (including markers)
-    sym"@markup.quote"          { fg = fg2 }, -- block quotes
+    sym"@markup.quote"          { fg = fg1 }, -- block quotes
     sym"@markup.math"           { Function }, -- math environments (e.g. `$ ... $` in LaTeX)
     -- sym"@markup.environment"    { }, -- environments (e.g. in LaTeX)
     sym"@markup.link"           { fg = magenta, gui = "bold" }, -- text references, footnotes, citations, etc.
@@ -384,9 +354,9 @@ local theme = lush(function(injected_functions)
     -- json
     sym"@label.json" { fg = blue_bright }, -- For labels: label: in C and :label: in Lua.
     -- lua
-    sym"@constructor.lua" { fg = fg2 }, -- Lua's constructor is { }
+    sym"@constructor.lua" { fg = fg1 }, -- Lua's constructor is { }
     -- rust
-    sym"@field.rust" { fg = fg2 },
+    sym"@field.rust" { fg = fg1 },
     -- yaml
     sym"@variable.member.yaml" { fg = blue_bright }, -- For fields.
 
@@ -490,20 +460,20 @@ local theme = lush(function(injected_functions)
     NvimTreeVertSplit         { VertSplit },
     NvimTreeIndentMarker      { fg = bg4 },
     NvimTreeRootFolder        { fg = comment, gui = "bold" },
-    NvimTreeFolderName        { fg = fg2 },
+    NvimTreeFolderName        { fg = fg1 },
     NvimTreeFolderIcon        { fg = yellow },
-    NvimTreeOpenedFolderName  { fg = fg2 },
-    NvimTreeEmptyFolderName   { fg = fg3 },
+    NvimTreeOpenedFolderName  { fg = fg1 },
+    NvimTreeEmptyFolderName   { fg = fg2 },
     NvimTreeSymlink           { fg = blue },
     NvimTreeSymlinkFolderName { fg = blue },
     NvimTreeSpecialFile       { fg = cyan },
-    NvimTreeImageFile         { fg = white_dark },
+    NvimTreeImageFile         { fg = white_dim },
     NvimTreeGitDeletedIcon    { fg = red },
     NvimTreeGitDirtyIcon      { fg = yellow },
     NvimTreeGitMergeIcon      { fg = orange },
     NvimTreeGitNewIcon        { fg = green },
     NvimTreeGitRenamedIcon    { fg = magenta },
-    NvimTreeGitStagedIcon     { fg = fg1 },
+    NvimTreeGitStagedIcon     { fg = fg0 },
 
     -- gitsigns
     GitSignsAdd    { fg = green }, -- diff mode: Added line |diff.txt|
@@ -515,19 +485,19 @@ local theme = lush(function(injected_functions)
     MiniIconsBlue   { fg = blue },
     MiniIconsCyan   { fg = cyan },
     MiniIconsGreen  { fg = green },
-    MiniIconsGrey   { fg = fg0 },
+    MiniIconsGrey   { fg = white },
     MiniIconsOrange { fg = orange },
     MiniIconsPurple { fg = magenta },
     MiniIconsRed    { fg = red },
     MiniIconsYellow { fg = yellow },
 
     -- blink.cmp
-    BlinkCmpDoc               { fg = fg1, bg = bg0 },
-    BlinkCmpDocBorder         { fg = sel0, bg = bg0 },
-    BlinkCmpLabel             { fg = fg1, },
-    BlinkCmpLabelDeprecated   { fg = fg3, gui = "strikethrough" },
+    BlinkCmpDoc               { fg = fg0, bg = bg1 },
+    BlinkCmpDocBorder         { fg = sel0, bg = bg1 },
+    BlinkCmpLabel             { fg = fg0, },
+    BlinkCmpLabelDeprecated   { fg = fg2, gui = "strikethrough" },
     BlinkCmpLabelMatch        { fg = blue_bright },
-    BlinkCmpKindDefault       { fg = fg2, },
+    BlinkCmpKindDefault       { fg = fg1, },
     BlinkCmpLabelDetail       { Comment },
     BlinkCmpKindKeyword       { Identifier },
     BlinkCmpKindVariable      { sym"@variable" },
@@ -549,7 +519,7 @@ local theme = lush(function(injected_functions)
     BlinkCmpKindTypeParameter { sym"@field" },
     BlinkCmpKindEnumMember    { sym"@field" },
     BlinkCmpKindOperator      { Operator },
-    BlinkCmpKindSnippet       { fg = fg2 },
+    BlinkCmpKindSnippet       { fg = fg1 },
 
     -- dapui
     DapUIVariable                { fg = white },
@@ -557,7 +527,7 @@ local theme = lush(function(injected_functions)
     DapUIType                    { Type },
     DapUIValue                   { fg = white },
     DapUIModifiedValue           { fg = white, gui = "bold" },
-    DapUIDecoration              { fg = fg3 },
+    DapUIDecoration              { fg = fg2 },
     DapUIThread                  { String },
     DapUIStoppedThread           { fg = cyan_bright },
     DapUIFrameName               { Normal },
@@ -579,8 +549,8 @@ local theme = lush(function(injected_functions)
     NeotestRunning      { fg = magenta },
     NeotestSkipped      { fg = orange },
     NeotestTest         { Normal},
-    NeotestNamespace    { fg = cyan_dark },
-    NeotestMarked       { fg = fg1, gui = 'bold' },
+    NeotestNamespace    { fg = cyan_dim },
+    NeotestMarked       { fg = fg0, gui = 'bold' },
     NeotestFocused      { gui = 'underline' },
     NeotestFile         { fg = blue },
     NeotestDir          { fg = cyan },

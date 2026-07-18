@@ -1,24 +1,20 @@
-local fg = "#f2f2f2"
-local red = "#ee5396" -- 1
-local green = "#25be6a" -- 2
-local yellow = "#ebcb8b" -- 3
-local blue = "#78a9ff" -- 4
-local magenta = "#be95ff" -- 5
-local orange = "#ff8349" -- 16
-
-local bg_dark = "#0c0c0c"
-local fg_dark1 = "#b8b8b8" -- hsl(fg1).darken(24).hex
-local fg_dark2 = "#7d7d7d" -- hsl(fg1).darken(48).hex
-local comment = "#595959" -- hsl(bg1).mix(hsl(fg1), 40).hex
-
--- To calculate run something like the following with the 1st hex being bg0 and 2nd being color:
--- :lua vim.print(require("lush").hsl("#0c0c0c").mix(require("lush").hsl("#78a9ff"), 30).hex)
-local red_faded = "#462a36"
-local green_faded = "#23342a"
-local yellow_faded = "#4d4432"
-local blue_faded = "#2e3d56"
-local magenta_faded = "#40305a"
-local orange_faded = "#4c3429"
+local fg = vim.g.colorscheme.foreground_0
+local red = vim.g.colorscheme.red
+local green = vim.g.colorscheme.green
+local yellow = vim.g.colorscheme.yellow
+local blue = vim.g.colorscheme.blue
+local magenta = vim.g.colorscheme.magenta
+local orange = vim.g.colorscheme.orange
+local bg_dark = vim.g.colorscheme.background_1
+local fg_dark1 = vim.g.colorscheme.foreground_1
+local fg_dark2 = vim.g.colorscheme.foreground_2
+local comment = vim.g.colorscheme.comment
+local red_faded = vim.g.colorscheme.red_faded
+local green_faded = vim.g.colorscheme.green_faded
+local yellow_faded = vim.g.colorscheme.yellow_faded
+local blue_faded = vim.g.colorscheme.blue_faded
+local magenta_faded = vim.g.colorscheme.magenta_faded
+local orange_faded = vim.g.colorscheme.orange_faded
 
 return {
 	normal = {
