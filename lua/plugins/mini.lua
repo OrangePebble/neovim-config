@@ -28,6 +28,7 @@ return {
 		},
 	},
 	-- Autohighlight word under cursor.
+	-- snacks.nvim has an equivalent feature but it only works with LSPs and works somewhat differently.
 	{
 		"echasnovski/mini.cursorword",
 		version = "*",

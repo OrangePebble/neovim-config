@@ -58,6 +58,10 @@ return {
 
 		--== LSP configurations
 
+		vim.lsp.config("*", {
+			capabilities = require("nvim-file-operations.config").default_capabilities(),
+		})
+
 		vim.filetype.add({
 			extension = {
 				-- Changing these extensions to match the OpenGL shader filetype.

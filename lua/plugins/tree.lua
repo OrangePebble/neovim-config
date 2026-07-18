@@ -2,7 +2,12 @@
 return {
 	"nvim-tree/nvim-tree.lua",
 	lazy = false,
-	dependencies = { "echasnovski/mini.icons" },
+	dependencies = {
+		"echasnovski/mini.icons",
+		-- Adds file operation support to LSPs.
+		-- Has to be loaded after nvim-tree.
+		"Crysthamus/nvim-file-operations",
+	},
 	config = function()
 		-- Remove background color from the NvimTree window (ui fix)
 		-- vim.cmd([[hi NvimTreeNormal guibg=NONE ctermbg=NONE]])
@@ -64,5 +69,7 @@ return {
 		api.events.subscribe(Event.TreeClose, function(data)
 			vim.g.nvim_tree_open = false
 		end)
+
+		require("nvim-file-operations").setup()
 	end,
 }
