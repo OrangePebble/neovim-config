@@ -447,8 +447,8 @@ local theme = lush(function(injected_functions)
     LazyProp         { LineNr },
 
     -- which-key
-    WhichKey          { Identifier },
-    WhichKeyGroup     { Function },
+    WhichKey          { Function },
+    WhichKeyGroup     { Identifier },
     WhichKeyDesc      { Keyword },
     WhichKeySeperator { Comment },
     WhichKeySeparator { Comment },

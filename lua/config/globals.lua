@@ -13,37 +13,41 @@ vim.g.autoformat = true
 --  command above directly.
 
 -- https://github.com/EdenEast/nightfox.nvim
--- Carbonfox with nordfox yellow and terafox orange
+-- Carbonfox with some changes:
+-- - Terafox red
+-- - Nordfox yellow
+-- - Nightfox cyan
+-- - Terafox orange
 -- stylua: ignore
 local carbonfox = {
 	---- Regular terminal colors
 	background_0 =           "#0c0c0c",
 	foreground_0 =           "#f2f2f2",
 	black =                  "#282828",
-	red =                    "#ee5396",
+	red =                    "#e85c51",
 	green =                  "#25be6a",
 	yellow =                 "#ebcb8b",
 	blue =                   "#78a9ff",
 	magenta =                "#be95ff",
-	cyan =                   "#33b1ff",
+	cyan =                   "#63cdcf",
 	white =                  "#dfdfe0",
 	black_bright =           "#4a4a4a", -- black.lighten(15)
-	red_bright =             "#f16fa7", -- red.lighten(15)
+	red_bright =             "#eb746b",
 	green_bright =           "#37d77f", -- green.lighten(15)
-	yellow_bright =          "#eed29b", -- yellow.lighten(15)
+	yellow_bright =          "#f0d399",
 	blue_bright =            "#8fb8ff", -- blue.lighten(15)
 	magenta_bright =         "#c6a3ff", -- magenta.lighten(15)
-	cyan_bright =            "#52bdff", -- cyan.lighten(15)
+	cyan_bright =            "#7ad5d6", -- cyan.lighten(15)
 	white_bright =           "#e5e5e6", -- white.lighten(15)
 	---- Extended terminal colors (used by terminals like 'foot')
 	selection_background_0 = "#2a2a2a",
 	black_dim =              "#242424", -- black.darken(15)
-	red_dim =                "#ea2a7d", -- red.darken(15)
+	red_dim =                "#c54e45",
 	green_dim =              "#20a25a", -- green.darken(15)
-	yellow_dim =             "#e3b559", -- yellow.darken(15)
+	yellow_dim =             "#d9b263",
 	blue_dim =               "#4287ff", -- blue.darken(15)
 	magenta_dim =            "#9757ff", -- magenta.darken(15)
-	cyan_dim =               "#059fff", -- cyan.darken(15)
+	cyan_dim =               "#40c2c4", -- cyan.darken(15)
 	white_dim =              "#bebec1", -- white.darken(15)
 	---- Neovim-only (maybe)
 	background_1 =           "#161616",
@@ -54,14 +58,14 @@ local carbonfox = {
 	foreground_2 =           "#7d7d7d", -- foreground_0.darken(48)
 	selection_background_1 = "#525253",
 	orange =                 "#ff8349",
-	orange_bright =          "#ff9361", -- orange.lighten(15)
-	orange_dim =             "#ff5f14", -- orange.darken(15)
+	orange_bright =          "#ff9664",
+	orange_dim =             "#d96f3e",
 	pink =                   "#ff7eb6",
 	pink_bright =            "#ff94c2", -- pink.lighten(15)
 	pink_dim =               "#ff4797", -- pink.darken(15)
 	comment =                "#6e6e6e", -- hsl(background_0).mix(hsl(foreground_0), 40)
 	-- Lualine
-	red_faded =              "#462a36", -- hsl(background_0).mix(hsl(red), 30)
+	red_faded =              "#5a3230", -- hsl(background_0).mix(hsl(red), 30)
 	green_faded =            "#23342a", -- hsl(background_0).mix(hsl(green), 30)
 	yellow_faded =           "#4d4432", -- hsl(background_0).mix(hsl(yellow), 30)
 	blue_faded =             "#2e3d56", -- hsl(background_0).mix(hsl(blue), 30)
