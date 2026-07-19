@@ -83,6 +83,11 @@ return {
 		local overseer_output_extension = {
 			sections = {
 				lualine_c = { { "overseer", symbols = overseer_symbols } },
+				lualine_x = {
+					function()
+						return vim.fn.line(".") .. "/" .. vim.fn.line("$")
+					end,
+				},
 				lualine_z = {
 					function()
 						return " Overseer"
