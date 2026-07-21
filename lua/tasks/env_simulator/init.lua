@@ -202,7 +202,7 @@ local M = {
 if string.match(vim.fn.getcwd(), ".*env_simulator.*") then
 	for _, task in ipairs(M) do
 		if task.dap then
-			task.dap.enabled = false
+			task.dap.options.cwd = ddad_path
 		end
 	end
 end

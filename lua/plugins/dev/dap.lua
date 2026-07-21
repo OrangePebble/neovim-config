@@ -31,24 +31,11 @@ return {
 				ensure_installed = {},
 			})
 
-			-- Highlight stopped line.
-			vim.api.nvim_set_hl(0, "DapStoppedLine", { default = true, link = "Visual" })
-
-			local breakpoint_icons = {
-				Stopped = { "󰁕 ", "DiagnosticWarn", "DapStoppedLine" },
-				Breakpoint = " ",
-				BreakpointCondition = " ",
-				BreakpointRejected = " ",
-				LogPoint = { ".>", "DiagnosticInfo" },
-			}
-			for name, sign in pairs(breakpoint_icons) do
-				sign = type(sign) == "table" and sign or { sign }
-				vim.fn.sign_define(
-					"Dap" .. name,
-					---@diagnostic disable-next-line: assign-type-mismatch
-					{ text = sign[1], texthl = sign[2] or "DiagnosticError", linehl = sign[3], numhl = sign[3] }
-				)
-			end
+			vim.fn.sign_define("DapStopped", { text = "󰁕 ", texthl = "DapStopped", linehl = "DapStoppedLine" })
+			vim.fn.sign_define("DapBreakpoint", { text = " ", texthl = "DapBreakpoint" })
+			vim.fn.sign_define("DapBreakpointCondition", { text = " ", texthl = "DapBreakpointCondition" })
+			vim.fn.sign_define("DapBreakpointRejected", { text = " ", texthl = "DapBreakpointRejected" })
+			vim.fn.sign_define("DapLogPoint", { text = ".>", texthl = "DapLogPoint" })
 
 			-- setup dap config by VsCode launch.json file
 			local vscode = require("dap.ext.vscode")
@@ -91,14 +78,6 @@ return {
 			end
 			dap.listeners.after.event_terminated["dapui_config"] = function()
 				repl_hint_shown = false
-			end
-
-			-- Reset cache so next explicit launch prompts again.
-			local function default_program()
-				return require("utils.picker").pick_file(vim.fn.getcwd(), nil) or dap.ABORT
-			end
-			local function default_args()
-				return vim.split(vim.fn.input("Args: "), " +", { trimempty = true })
 			end
 
 			-- https://codeberg.org/mfussenegger/nvim-dap/wiki/Debug-Adapter-installation#c-c-rust-via-gdb

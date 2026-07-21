@@ -252,7 +252,7 @@ local theme = lush(function(injected_functions)
     sym"@constant"           { Constant }, -- constant identifiers
     sym"@constant.builtin"   { Constant }, -- built-in constant values
     sym"@constant.macro"     { Macro }, -- constants defined by the preprocessor
-    sym"@module"             { fg = cyan_bright }, -- modules or namespaces
+    sym"@module"             { fg = cyan_dim }, -- modules or namespaces
     -- sym"@module.builtin"     { }, -- built-in modules or namespaces
     sym"@label"              { Label }, -- GOTO and other labels (e.g. `label:` in C), including heredoc labels
 
@@ -273,7 +273,7 @@ local theme = lush(function(injected_functions)
 
     -- Types ------------------------------------------------------------------
     sym"@type"            { Type }, -- type or class definitions and annotations
-    sym"@type.builtin"    { fg = cyan_bright }, -- built-in types
+    sym"@type.builtin"    { fg = cyan_dim }, -- built-in types
     sym"@type.definition" { sym"@type" }, -- identifiers in type definitions (e.g. `typedef <type> <identifier>` in C)
     sym"@type.qualifier"  { sym"@type" }, -- type qualifiers (e.g. `const`)
     sym"@attribute"       { Constant }, -- attribute annotations (e.g. Python decorators)
@@ -306,7 +306,7 @@ local theme = lush(function(injected_functions)
     -- sym"@keyword.directive.define"    { }, -- preprocessor definition directives
 
     -- Punctuation ------------------------------------------------------------
-		-- sym"@punctuation"           { Delimiter }, -- Delimiter
+    -- sym"@punctuation"           { Delimiter }, -- Delimiter
     sym"@punctuation.delimiter" { fg = fg1 }, -- delimiters (e.g. `;` / `.` / `,`)
     sym"@punctuation.bracket"   { fg = fg1 }, -- brackets (e.g. `()` / `{}` / `[]`)
     sym"@punctuation.special"   { fg = cyan_bright }, -- special symbols (e.g. `{}` in string interpolation)
@@ -520,6 +520,14 @@ local theme = lush(function(injected_functions)
     BlinkCmpKindEnumMember    { sym"@field" },
     BlinkCmpKindOperator      { Operator },
     BlinkCmpKindSnippet       { fg = fg1 },
+
+    -- dap (these are custom and set at ../plugins/dev/dap.lua)
+    DapStopped                   { DiagnosticWarn },
+    DapStoppedLine               { bg = bg0.mix(yellow, 15) },
+    DapBreakpoint                { fg = orange_dim },
+    DapBreakpointCondition       { DapBreakpoint },
+    DapBreakpointRejected        { DapBreakpoint },
+    DapLogPoint                  { DiagnosticInfo },
 
     -- dapui
     DapUIVariable                { fg = white },

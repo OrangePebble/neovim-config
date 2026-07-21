@@ -141,8 +141,8 @@ return {
 
 				-- DAP icons.
 				{ "<leader>d", group = "Debug" },
-				{ "<leader>db", icon = { icon = "", color = "red" } },
-				{ "<leader>dB", icon = { icon = "", color = "red" } },
+				{ "<leader>db", icon = { icon = "", color = "orange" } },
+				{ "<leader>dB", icon = { icon = "", color = "orange" } },
 				{ "<leader>dr", icon = { icon = "", color = "green" } },
 				{ "<leader>dl", icon = { icon = "", color = "green" } },
 				{ "<leader>dc", icon = { icon = "", color = "green" } },
