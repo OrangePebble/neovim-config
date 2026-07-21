@@ -14,7 +14,11 @@ local M = {
 				return nil
 			end
 			local cmd = { file_path }
-			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
+			local co = coroutine.running()
+			Snacks.input({ prompt = "Args:" }, function(value)
+				coroutine.resume(co, value)
+			end)
+			vim.list_extend(cmd, vim.split(coroutine.yield() or "", " +", { trimempty = true }))
 			return { cmd = cmd }
 		end,
 		cmd = function(context)
@@ -32,8 +36,12 @@ local M = {
 				type = "gdb",
 				request = "attach",
 				pid = function()
-					local name = vim.fn.input("Executable name (filter): ")
-					return require("dap.utils").pick_process({ filter = name })
+					return coroutine.create(function(dap_co)
+						Snacks.input({ prompt = "Executable name (filter):" }, function(value)
+							coroutine.resume(dap_co, require("dap.utils").pick_process({ filter = value or "" }))
+						end)
+						return coroutine.yield()
+					end)
 				end,
 			},
 		},

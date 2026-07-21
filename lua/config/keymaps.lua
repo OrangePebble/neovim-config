@@ -502,6 +502,7 @@ keymap({ "o", "x" }, "ig", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" 
 keymap({ "o", "x" }, "ag", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
 
 keymap("n", "<leader>gl", function()
+	-- TODO: make this fullscreen
 	Snacks.lazygit()
 end, { desc = "Lazygit" })
 keymap("n", "<leader>go", function()
@@ -654,7 +655,25 @@ keymap("n", "<leader>xtw", "<cmd>Trouble diagnostics toggle<cr>", { desc = "Work
 
 --== DAP
 keymap("n", "<leader>dB", function()
-	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+	Snacks.input({
+		prompt = "Breakpoint condition",
+		icon = "",
+		win = {
+			relative = "cursor",
+			row = 1,
+			col = -2,
+			wo = {
+				winhighlight = {
+					SnacksInputTitle = "SnacksInputTitleBreakpoint",
+					FloatBorder = "SnacksInputBorderBreakpoint",
+				},
+			},
+		},
+	}, function(value)
+		if value then
+			require("dap").set_breakpoint(value)
+		end
+	end)
 end, { desc = "Set breakpoint condition" })
 keymap("n", "<leader>db", function()
 	require("dap").toggle_breakpoint()

@@ -116,7 +116,11 @@ local M = {
 				return nil
 			end
 			local cmd = { file_path }
-			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
+			local co = coroutine.running()
+			Snacks.input({ prompt = "Args:" }, function(value)
+				coroutine.resume(co, value)
+			end)
+			vim.list_extend(cmd, vim.split(coroutine.yield() or "", " +", { trimempty = true }))
 			return { cmd = cmd }
 		end,
 		cmd = function(context)
@@ -230,7 +234,10 @@ local M = {
 					table.insert(cmd, "--override_repository=osi_query_library=/home/pedro/projects/osi-query-library")
 				end
 			end
-			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
+			Snacks.input({ prompt = "Args:" }, function(value)
+				coroutine.resume(co, value)
+			end)
+			vim.list_extend(cmd, vim.split(coroutine.yield() or "", " +", { trimempty = true }))
 			table.insert(cmd, "--")
 			vim.list_extend(cmd, selected_targets)
 

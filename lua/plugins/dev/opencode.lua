@@ -3,6 +3,14 @@ return {
 	version = "*", -- Latest stable release
 	config = function()
 		vim.g.opencode_opts = {
+			ask = {
+				snacks = {
+					icon = "󰚩",
+					win = {
+						col = -2,
+					},
+				},
+			},
 			lsp = {
 				enabled = true,
 				handlers = {

@@ -46,6 +46,17 @@ return {
 				vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(notif.msg, "\n"))
 			end,
 		},
+		input = {
+			enabled = true,
+			icon = "",
+			icon_pos = "title",
+			win = {
+				title_pos = "left",
+				row = function()
+					return vim.o.lines / 2 - 5
+				end,
+			},
+		},
 		picker = {
 			enabled = true,
 			layouts = {

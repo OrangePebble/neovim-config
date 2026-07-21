@@ -582,6 +582,15 @@ local theme = lush(function(injected_functions)
     OverseerOutput     { Normal },
     OverseerComponent  { Constant },
     OverseerField      { Keyword },
+
+    -- snacks.nvim (obtained via `Snacks.picker.highlights({pattern = "hl_group:^Snacks"})`)
+    SnacksInputTitle  { FloatTitle },
+    SnacksInputBorder { FloatBorder },
+    SnacksInputIcon   { SnacksInputTitle },
+    SnacksInputNormal { NormalFloat },
+    -- Custom groups for my breakpoint input
+    SnacksInputTitleBreakpoint  { FloatTitle, fg = red },
+    SnacksInputBorderBreakpoint { FloatBorder, fg = orange_dim },
   }
 end)
 
