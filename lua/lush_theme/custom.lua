@@ -59,190 +59,190 @@ local pink_dim = hsl(vim.g.colorscheme.pink_dim)
 -- stylua: ignore
 ---@diagnostic disable: undefined-global
 local theme = lush(function(injected_functions)
-	local sym = injected_functions.sym
-	return {
-		-- The following are the Neovim (as of 0.8.0-dev+100-g371dfb174) highlight
-		-- groups, mostly used for styling UI elements.
-		-- An empty definition `{}` will clear all styling, leaving elements looking
-		-- like the 'Normal' group.
-		-- To be able to link to a group, it must already be defined, so you may have
-		-- to reorder items as you go.
-		--
-		-- See :h highlight-groups
+  local sym = injected_functions.sym
+  return {
+    -- The following are the Neovim (as of 0.8.0-dev+100-g371dfb174) highlight
+    -- groups, mostly used for styling UI elements.
+    -- An empty definition `{}` will clear all styling, leaving elements looking
+    -- like the 'Normal' group.
+    -- To be able to link to a group, it must already be defined, so you may have
+    -- to reorder items as you go.
+    --
+    -- See :h highlight-groups
 
-		ColorColumn    { bg = bg2 }, -- Columns set with 'colorcolumn'
-		Conceal        { fg = bg4 }, -- Placeholder characters substituted for concealed text (see 'conceallevel')
-		Cursor         { fg = bg0, bg = fg0 }, -- Character under the cursor
-		lCursor        { Cursor }, -- Character under the cursor when |language-mapping| is used (see 'guicursor')
-		CursorIM       { Cursor }, -- Like Cursor, but used when in IME mode |CursorIM|
+    ColorColumn    { bg = bg2 }, -- Columns set with 'colorcolumn'
+    Conceal        { fg = bg4 }, -- Placeholder characters substituted for concealed text (see 'conceallevel')
+    Cursor         { fg = bg0, bg = fg0 }, -- Character under the cursor
+    lCursor        { Cursor }, -- Character under the cursor when |language-mapping| is used (see 'guicursor')
+    CursorIM       { Cursor }, -- Like Cursor, but used when in IME mode |CursorIM|
     CursorLine     { bg = bg3 }, -- Screen-line at the cursor, when 'cursorline' is set. Low-priority if foreground (ctermfg OR guifg) is not set.
-		CursorColumn   { CursorLine }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
-		Directory      { fg = blue_bright }, -- Directory names (and other special names in listings)
-		DiffAdd        { bg = bg0.mix(green_dim, 15) }, -- Diff mode: Added line |diff.txt|
-		DiffChange     { bg = bg0.mix(blue_dim, 15) }, -- Diff mode: Changed line |diff.txt|
-		DiffDelete     { bg = bg0.mix(red_dim, 15) }, -- Diff mode: Deleted line |diff.txt|
-		DiffText       { bg = bg0.mix(cyan_dim, 30) }, -- Diff mode: Changed text within a changed line |diff.txt|
-		EndOfBuffer    { fg = bg0 }, -- Filler lines (~) after the end of the buffer. By default, this is highlighted like |hl-NonText|.
-		-- TermCursor     { }, -- Cursor in a focused terminal
-		-- TermCursorNC   { }, -- Cursor in an unfocused terminal
-		ErrorMsg       { fg = red }, -- Error messages on the command line
-		Winseparator   { fg = bg1, bg = bg1 }, -- Separator between window splits. Inherts from |hl-VertSplit| by default, which it will replace eventually.
-		VertSplit      { Winseparator }, -- Column separating vertically split windows
-		Folded         { fg = fg2, bg = bg2 }, -- Line used for closed folds
-		FoldColumn     { fg = fg2 }, -- 'foldcolumn'
-		SignColumn     { fg = fg2 }, -- Column where |signs| are displayed
-		Substitute     { fg = bg0, bg = red }, -- |:substitute| replacement text highlighting
-		LineNr         { fg = fg2 }, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
-		-- LineNrAbove    { }, -- Line number for when the 'relativenumber' option is set, above the cursor line
-		-- LineNrBelow    { }, -- Line number for when the 'relativenumber' option is set, below the cursor line
-		CursorLineNr   { fg = magenta, gui = "bold" }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
-		-- CursorLineFold { }, -- Like FoldColumn when 'cursorline' is set for the cursor line
-		-- CursorLineSign { }, -- Like SignColumn when 'cursorline' is set for the cursor line
-		MatchParen     { fg = magenta, gui = "bold" }, -- Character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
-		ModeMsg        { fg = magenta, gui = "bold" }, -- 'showmode' message (e.g., "-- INSERT -- ")
-		-- MsgArea        { }, -- Area for messages and cmdline
-		-- MsgSeparator   { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
-		MoreMsg        { fg = blue, gui = "bold" }, -- |more-prompt|
-		NonText        { fg = bg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
-		Normal         { fg = fg0, bg = bg0 }, -- Normal text
-		NormalNC       { fg = fg0, bg = bg0 }, -- normal text in non-current windows
-		NormalFloat    { fg = fg0, bg = bg1 }, -- Normal text in floating windows.
-		FloatBorder    { fg = fg2, bg = bg1 }, -- Border of floating windows.
-		FloatTitle     { fg = blue_bright, bg = bg1, gui = "bold" }, -- Title of floating windows.
-		Pmenu          { fg = fg0, bg = sel0 }, -- Popup menu: Normal item.
-		PmenuSel       { bg = sel1 }, -- Popup menu: Selected item.
-		-- PmenuKind      { }, -- Popup menu: Normal item "kind"
-		-- PmenuKindSel   { }, -- Popup menu: Selected item "kind"
-		-- PmenuExtra     { }, -- Popup menu: Normal item "extra text"
-		-- PmenuExtraSel  { }, -- Popup menu: Selected item "extra text"
-		-- PmenuSbar      { }, -- Popup menu: Scrollbar.
-		-- PmenuThumb     { }, -- Popup menu: Thumb of the scrollbar.
-		Question       { MoreMsg }, -- |hit-enter| prompt and yes/no questions
-		QuickFixLine   { CursorLine }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
-		Search         { fg = fg0, bg = sel1 }, -- Last search pattern highlighting (see 'hlsearch'). Also used for similar items that need to stand out.
-		IncSearch      { fg = bg0, bg = orange }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
-		CurSearch      { IncSearch }, -- Highlighting a search pattern under the cursor (see 'hlsearch')
-		SpecialKey     { NonText }, -- Unprintable characters: text displayed differently from what it really is. But not 'listchars' whitespace. |hl-Whitespace|
-		SpellBad       { sp = red, gui = "undercurl" }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
-		SpellCap       { sp = magenta, gui = "undercurl" }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
-		SpellLocal     { sp = blue, gui = "undercurl" }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
-		SpellRare      { sp = blue, gui = "undercurl" }, -- Word that is recognized by the spellchecker as one that is hardly ever used. |spell| Combined with the highlighting used otherwise.
-		StatusLine     { fg = fg1, bg = bg1 }, -- Status line of current window
-		StatusLineNC   { fg = fg2, bg = bg1 }, -- Status lines of not-current windows. Note: If this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
-		TabLine        { fg = fg1, bg = bg2 }, -- Tab pages line, not active tab page label
-		TabLineFill    { bg = bg1 }, -- Tab pages line, where there are no labels
-		TabLineSel     { fg = bg0, bg = fg2 }, -- Tab pages line, active tab page label
-		Title          { fg = blue_bright, gui = "bold" }, -- Titles for output from ":set all", ":autocmd" etc.
-		Visual         { bg = sel0 }, -- Visual mode selection
-		VisualNOS      { Visual }, -- Visual mode selection when vim is "Not Owning the Selection".
-		WarningMsg     { fg = red }, -- Warning messages
-		Whitespace     { fg = bg3 }, -- "nbsp", "space", "tab" and "trail" in 'listchars'
-		WildMenu       { Pmenu }, -- Current match in 'wildmenu' completion
-		WinBar         { fg = fg2, bg = bg0, gui = "bold" }, -- Window bar of current window
-		WinBarNC       { WinBar }, -- Window bar of not-current windows
+    CursorColumn   { CursorLine }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
+    Directory      { fg = blue_bright }, -- Directory names (and other special names in listings)
+    DiffAdd        { bg = bg0.mix(green_dim, 15) }, -- Diff mode: Added line |diff.txt|
+    DiffChange     { bg = bg0.mix(blue_dim, 15) }, -- Diff mode: Changed line |diff.txt|
+    DiffDelete     { bg = bg0.mix(red_dim, 15) }, -- Diff mode: Deleted line |diff.txt|
+    DiffText       { bg = bg0.mix(cyan_dim, 30) }, -- Diff mode: Changed text within a changed line |diff.txt|
+    EndOfBuffer    { fg = bg0 }, -- Filler lines (~) after the end of the buffer. By default, this is highlighted like |hl-NonText|.
+    -- TermCursor     { }, -- Cursor in a focused terminal
+    -- TermCursorNC   { }, -- Cursor in an unfocused terminal
+    ErrorMsg       { fg = red }, -- Error messages on the command line
+    Winseparator   { fg = bg1, bg = bg1 }, -- Separator between window splits. Inherts from |hl-VertSplit| by default, which it will replace eventually.
+    VertSplit      { Winseparator }, -- Column separating vertically split windows
+    Folded         { fg = fg2, bg = bg2 }, -- Line used for closed folds
+    FoldColumn     { fg = fg2 }, -- 'foldcolumn'
+    SignColumn     { fg = fg2 }, -- Column where |signs| are displayed
+    Substitute     { fg = bg0, bg = red }, -- |:substitute| replacement text highlighting
+    LineNr         { fg = fg2 }, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
+    -- LineNrAbove    { }, -- Line number for when the 'relativenumber' option is set, above the cursor line
+    -- LineNrBelow    { }, -- Line number for when the 'relativenumber' option is set, below the cursor line
+    CursorLineNr   { fg = magenta, gui = "bold" }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
+    -- CursorLineFold { }, -- Like FoldColumn when 'cursorline' is set for the cursor line
+    -- CursorLineSign { }, -- Like SignColumn when 'cursorline' is set for the cursor line
+    MatchParen     { fg = magenta, gui = "bold" }, -- Character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
+    ModeMsg        { fg = magenta, gui = "bold" }, -- 'showmode' message (e.g., "-- INSERT -- ")
+    -- MsgArea        { }, -- Area for messages and cmdline
+    -- MsgSeparator   { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
+    MoreMsg        { fg = blue, gui = "bold" }, -- |more-prompt|
+    NonText        { fg = bg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
+    Normal         { fg = fg0, bg = bg0 }, -- Normal text
+    NormalNC       { fg = fg0, bg = bg0 }, -- normal text in non-current windows
+    NormalFloat    { fg = fg0, bg = bg1 }, -- Normal text in floating windows.
+    FloatBorder    { fg = fg2, bg = bg1 }, -- Border of floating windows.
+    FloatTitle     { fg = blue_bright, bg = bg1, gui = "bold" }, -- Title of floating windows.
+    Pmenu          { fg = fg0, bg = sel0 }, -- Popup menu: Normal item.
+    PmenuSel       { bg = sel1 }, -- Popup menu: Selected item.
+    -- PmenuKind      { }, -- Popup menu: Normal item "kind"
+    -- PmenuKindSel   { }, -- Popup menu: Selected item "kind"
+    -- PmenuExtra     { }, -- Popup menu: Normal item "extra text"
+    -- PmenuExtraSel  { }, -- Popup menu: Selected item "extra text"
+    -- PmenuSbar      { }, -- Popup menu: Scrollbar.
+    -- PmenuThumb     { }, -- Popup menu: Thumb of the scrollbar.
+    Question       { MoreMsg }, -- |hit-enter| prompt and yes/no questions
+    QuickFixLine   { CursorLine }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
+    Search         { fg = fg0, bg = sel1 }, -- Last search pattern highlighting (see 'hlsearch'). Also used for similar items that need to stand out.
+    IncSearch      { fg = bg0, bg = orange }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+    CurSearch      { IncSearch }, -- Highlighting a search pattern under the cursor (see 'hlsearch')
+    SpecialKey     { NonText }, -- Unprintable characters: text displayed differently from what it really is. But not 'listchars' whitespace. |hl-Whitespace|
+    SpellBad       { sp = red, gui = "undercurl" }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
+    SpellCap       { sp = magenta, gui = "undercurl" }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
+    SpellLocal     { sp = blue, gui = "undercurl" }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
+    SpellRare      { sp = blue, gui = "undercurl" }, -- Word that is recognized by the spellchecker as one that is hardly ever used. |spell| Combined with the highlighting used otherwise.
+    StatusLine     { fg = fg1, bg = bg1 }, -- Status line of current window
+    StatusLineNC   { fg = fg2, bg = bg1 }, -- Status lines of not-current windows. Note: If this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
+    TabLine        { fg = fg1, bg = bg2 }, -- Tab pages line, not active tab page label
+    TabLineFill    { bg = bg1 }, -- Tab pages line, where there are no labels
+    TabLineSel     { fg = bg0, bg = fg2 }, -- Tab pages line, active tab page label
+    Title          { fg = blue_bright, gui = "bold" }, -- Titles for output from ":set all", ":autocmd" etc.
+    Visual         { bg = sel0 }, -- Visual mode selection
+    VisualNOS      { Visual }, -- Visual mode selection when vim is "Not Owning the Selection".
+    WarningMsg     { fg = red }, -- Warning messages
+    Whitespace     { fg = bg3 }, -- "nbsp", "space", "tab" and "trail" in 'listchars'
+    WildMenu       { Pmenu }, -- Current match in 'wildmenu' completion
+    WinBar         { fg = fg2, bg = bg0, gui = "bold" }, -- Window bar of current window
+    WinBarNC       { WinBar }, -- Window bar of not-current windows
 
-		-- Common vim syntax groups used for all kinds of code and markup.
-		-- Commented-out groups should chain up to their preferred (*) group
-		-- by default.
-		--
-		-- See :h group-name
+    -- Common vim syntax groups used for all kinds of code and markup.
+    -- Commented-out groups should chain up to their preferred (*) group
+    -- by default.
+    --
+    -- See :h group-name
 
-		Comment        { fg = comment }, -- Any comment
+    Comment        { fg = comment }, -- Any comment
 
-		Constant       { fg = orange_bright }, -- (*) Any constant
-		String         { fg = green }, --   A string constant: "this is a string"
-		Character      { String }, --   A character constant: 'c', '\n'
-		Number         { fg = orange }, --   A number constant: 234, 0xff
+    Constant       { fg = orange_bright }, -- (*) Any constant
+    String         { fg = green }, --   A string constant: "this is a string"
+    Character      { String }, --   A character constant: 'c', '\n'
+    Number         { fg = orange }, --   A number constant: 234, 0xff
     Float          { Number }, --   A floating point constant: 2.3e10
-		Boolean        { Number }, --   A boolean constant: TRUE, false
+    Boolean        { Number }, --   A boolean constant: TRUE, false
 
-		Identifier     { fg = cyan }, -- (*) Any variable name
-		Function       { fg = blue_bright }, --   Function name (also: methods for classes)
+    Identifier     { fg = cyan }, -- (*) Any variable name
+    Function       { fg = blue_bright }, --   Function name (also: methods for classes)
 
-		Statement      { fg = magenta }, -- (*) Any statement
-		Conditional    { fg = magenta_bright }, --   if, then, else, endif, switch, etc.
-		Repeat         { Conditional }, --   for, do, while, etc.
-		Label          { Conditional }, --   case, default, etc.
+    Statement      { fg = magenta }, -- (*) Any statement
+    Conditional    { fg = magenta_bright }, --   if, then, else, endif, switch, etc.
+    Repeat         { Conditional }, --   for, do, while, etc.
+    Label          { Conditional }, --   case, default, etc.
 
-		Operator       { fg = fg1 }, --   "sizeof", "+", "*", etc.
-		Keyword        { fg = magenta }, --   any other keyword
-		Exception      { Keyword }, --   try, catch, throw
+    Operator       { fg = fg1 }, --   "sizeof", "+", "*", etc.
+    Keyword        { fg = magenta }, --   any other keyword
+    Exception      { Keyword }, --   try, catch, throw
 
-		PreProc        { fg = pink_bright }, -- (*) Generic Preprocessor
-		Include        { PreProc }, --   Preprocessor #include
-		Define         { PreProc }, --   Preprocessor #define
-		Macro          { PreProc }, --   Same as Define
-		PreCondit      { PreProc }, --   Preprocessor #if, #else, #endif, etc.
+    PreProc        { fg = pink_bright }, -- (*) Generic Preprocessor
+    Include        { PreProc }, --   Preprocessor #include
+    Define         { PreProc }, --   Preprocessor #define
+    Macro          { PreProc }, --   Same as Define
+    PreCondit      { PreProc }, --   Preprocessor #if, #else, #endif, etc.
 
-		Type           { fg = yellow }, -- (*) int, long, char, etc.
-		StorageClass   { Type }, --   static, register, volatile, etc.
-		Structure      { Type }, --   struct, union, enum, etc.
-		Typedef        { Type }, --   A typedef
+    Type           { fg = yellow }, -- (*) int, long, char, etc.
+    StorageClass   { Type }, --   static, register, volatile, etc.
+    Structure      { Type }, --   struct, union, enum, etc.
+    Typedef        { Type }, --   A typedef
 
-		Special        { fg = blue_bright }, -- (*) Any special symbol
-		SpecialChar    { Special }, --   Special character in a constant
-		Tag            { Special }, --   You can use CTRL-] on this
-		Delimiter      { Special }, --   Character that needs attention
-		SpecialComment { Special }, --   Special things inside a comment (e.g. '\n')
-		Debug          { Special }, --   Debugging statements
+    Special        { fg = blue_bright }, -- (*) Any special symbol
+    SpecialChar    { Special }, --   Special character in a constant
+    Tag            { Special }, --   You can use CTRL-] on this
+    Delimiter      { Special }, --   Character that needs attention
+    SpecialComment { Special }, --   Special things inside a comment (e.g. '\n')
+    Debug          { Special }, --   Debugging statements
 
-		Underlined     { gui = "underline" }, -- Text that stands out, HTML links
-		-- Ignore         { }, -- Left blank, hidden |hl-Ignore| (NOTE: May be invisible here in template)
-		Error          { fg = red }, -- Any erroneous construct
-		Todo           { fg = bg0, bg = magenta }, -- Anything that needs extra attention; mostly the keywords TODO FIXME and XXX
+    Underlined     { gui = "underline" }, -- Text that stands out, HTML links
+    -- Ignore         { }, -- Left blank, hidden |hl-Ignore| (NOTE: May be invisible here in template)
+    Error          { fg = red }, -- Any erroneous construct
+    Todo           { fg = bg0, bg = magenta }, -- Anything that needs extra attention; mostly the keywords TODO FIXME and XXX
 
-		-- These groups are for the native LSP client and diagnostic system. Some
-		-- other LSP clients may use these groups, or use their own. Consult your
-		-- LSP client's documentation.
+    -- These groups are for the native LSP client and diagnostic system. Some
+    -- other LSP clients may use these groups, or use their own. Consult your
+    -- LSP client's documentation.
 
-		-- See :h lsp-highlight, some groups may not be listed, submit a PR fix to lush-template!
+    -- See :h lsp-highlight, some groups may not be listed, submit a PR fix to lush-template!
 
-		LspReferenceText            { bg = sel0 }, -- Used for highlighting "text" references
-		LspReferenceRead            { bg = sel0 }, -- Used for highlighting "read" references
-		LspReferenceWrite           { bg = sel0 }, -- Used for highlighting "write" references
-		LspCodeLens                 { fg = comment }, -- Used to color the virtual text of the codelens. See |nvim_buf_set_extmark()|.
-		LspCodeLensSeparator        { fg = fg2 }, -- Used to color the seperator between two or more code lens.
-		LspSignatureActiveParameter { fg = sel1 }, -- Used to highlight the active parameter in the signature help. See |vim.lsp.handlers.signature_help()|.
+    LspReferenceText            { bg = sel0 }, -- Used for highlighting "text" references
+    LspReferenceRead            { bg = sel0 }, -- Used for highlighting "read" references
+    LspReferenceWrite           { bg = sel0 }, -- Used for highlighting "write" references
+    LspCodeLens                 { fg = comment }, -- Used to color the virtual text of the codelens. See |nvim_buf_set_extmark()|.
+    LspCodeLensSeparator        { fg = fg2 }, -- Used to color the seperator between two or more code lens.
+    LspSignatureActiveParameter { fg = sel1 }, -- Used to highlight the active parameter in the signature help. See |vim.lsp.handlers.signature_help()|.
 
-		-- See :h diagnostic-highlights, some groups may not be listed, submit a PR fix to lush-template!
+    -- See :h diagnostic-highlights, some groups may not be listed, submit a PR fix to lush-template!
 
-		DiagnosticError            { fg = red }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
-		DiagnosticWarn             { fg = yellow }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
-		DiagnosticInfo             { fg = blue }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
-		DiagnosticHint             { fg = magenta }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
-		DiagnosticOk               { fg = green }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
-		-- DiagnosticVirtualTextError { }, -- Used for "Error" diagnostic virtual text.
-		-- DiagnosticVirtualTextWarn  { }, -- Used for "Warn" diagnostic virtual text.
-		-- DiagnosticVirtualTextInfo  { }, -- Used for "Info" diagnostic virtual text.
-		-- DiagnosticVirtualTextHint  { }, -- Used for "Hint" diagnostic virtual text.
-		-- DiagnosticVirtualTextOk    { }, -- Used for "Ok" diagnostic virtual text.
-		DiagnosticUnderlineError   { sp = red, gui = "undercurl" }, -- Used to underline "Error" diagnostics.
-		DiagnosticUnderlineWarn    { sp = yellow, gui = "undercurl" }, -- Used to underline "Warn" diagnostics.
-		DiagnosticUnderlineInfo    { sp = blue, gui = "undercurl" }, -- Used to underline "Info" diagnostics.
-		DiagnosticUnderlineHint    { sp = magenta, gui = "undercurl" }, -- Used to underline "Hint" diagnostics.
-		DiagnosticUnderlineOk      { sp = green, gui = "undercurl" }, -- Used to underline "Ok" diagnostics.
-		-- DiagnosticFloatingError    { }, -- Used to color "Error" diagnostic messages in diagnostics float. See |vim.diagnostic.open_float()|
-		-- DiagnosticFloatingWarn     { }, -- Used to color "Warn" diagnostic messages in diagnostics float.
-		-- DiagnosticFloatingInfo     { }, -- Used to color "Info" diagnostic messages in diagnostics float.
-		-- DiagnosticFloatingHint     { }, -- Used to color "Hint" diagnostic messages in diagnostics float.
-		-- DiagnosticFloatingOk       { }, -- Used to color "Ok" diagnostic messages in diagnostics float.
-		-- DiagnosticSignError        { }, -- Used for "Error" signs in sign column.
-		-- DiagnosticSignWarn         { }, -- Used for "Warn" signs in sign column.
-		-- DiagnosticSignInfo         { }, -- Used for "Info" signs in sign column.
-		-- DiagnosticSignHint         { }, -- Used for "Hint" signs in sign column.
-		-- DiagnosticSignOk           { }, -- Used for "Ok" signs in sign column.
+    DiagnosticError            { fg = red }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
+    DiagnosticWarn             { fg = yellow }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
+    DiagnosticInfo             { fg = blue }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
+    DiagnosticHint             { fg = magenta }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
+    DiagnosticOk               { fg = green }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
+    -- DiagnosticVirtualTextError { }, -- Used for "Error" diagnostic virtual text.
+    -- DiagnosticVirtualTextWarn  { }, -- Used for "Warn" diagnostic virtual text.
+    -- DiagnosticVirtualTextInfo  { }, -- Used for "Info" diagnostic virtual text.
+    -- DiagnosticVirtualTextHint  { }, -- Used for "Hint" diagnostic virtual text.
+    -- DiagnosticVirtualTextOk    { }, -- Used for "Ok" diagnostic virtual text.
+    DiagnosticUnderlineError   { sp = red, gui = "undercurl" }, -- Used to underline "Error" diagnostics.
+    DiagnosticUnderlineWarn    { sp = yellow, gui = "undercurl" }, -- Used to underline "Warn" diagnostics.
+    DiagnosticUnderlineInfo    { sp = blue, gui = "undercurl" }, -- Used to underline "Info" diagnostics.
+    DiagnosticUnderlineHint    { sp = magenta, gui = "undercurl" }, -- Used to underline "Hint" diagnostics.
+    DiagnosticUnderlineOk      { sp = green, gui = "undercurl" }, -- Used to underline "Ok" diagnostics.
+    -- DiagnosticFloatingError    { }, -- Used to color "Error" diagnostic messages in diagnostics float. See |vim.diagnostic.open_float()|
+    -- DiagnosticFloatingWarn     { }, -- Used to color "Warn" diagnostic messages in diagnostics float.
+    -- DiagnosticFloatingInfo     { }, -- Used to color "Info" diagnostic messages in diagnostics float.
+    -- DiagnosticFloatingHint     { }, -- Used to color "Hint" diagnostic messages in diagnostics float.
+    -- DiagnosticFloatingOk       { }, -- Used to color "Ok" diagnostic messages in diagnostics float.
+    -- DiagnosticSignError        { }, -- Used for "Error" signs in sign column.
+    -- DiagnosticSignWarn         { }, -- Used for "Warn" signs in sign column.
+    -- DiagnosticSignInfo         { }, -- Used for "Info" signs in sign column.
+    -- DiagnosticSignHint         { }, -- Used for "Hint" signs in sign column.
+    -- DiagnosticSignOk           { }, -- Used for "Ok" signs in sign column.
 
-		-- Tree-Sitter syntax groups.
-		--
-		-- See :h treesitter-highlight-groups, some groups may not be listed,
-		-- submit a PR fix to lush-template!
-		--
-		-- Tree-Sitter groups are defined with an "@" symbol, which must be
-		-- specially handled to be valid lua code, we do this via the special
-		-- sym function.
-		-- for more details see https://www.lua.org/pil/5.html
-		--
-		-- For more information see https://github.com/rktjmp/lush.nvim/issues/109
+    -- Tree-Sitter syntax groups.
+    --
+    -- See :h treesitter-highlight-groups, some groups may not be listed,
+    -- submit a PR fix to lush-template!
+    --
+    -- Tree-Sitter groups are defined with an "@" symbol, which must be
+    -- specially handled to be valid lua code, we do this via the special
+    -- sym function.
+    -- for more details see https://www.lua.org/pil/5.html
+    --
+    -- For more information see https://github.com/rktjmp/lush.nvim/issues/109
 
     -- Identifiers ------------------------------------------------------------
     sym"@variable"           { fg = white }, -- various variable names
@@ -392,15 +392,15 @@ local theme = lush(function(injected_functions)
     sym"@text.diff.delete"      { sym"@diff.minus" },
     sym"@define"                { Define },
     sym"@preproc"               { PreProc },
-		sym"@macro"                 { Macro },
+    sym"@macro"                 { Macro },
     sym"@storageclass"          { sym"@keyword.storage" },
     sym"@conditional"           { sym"@keyword.conditional" },
     sym"@exception"             { sym"@keyword.exception" },
     sym"@include"               { sym"@keyword.import" },
     sym"@repeat"                { sym"@keyword.repeat" },
-		sym"@structure"             { Structure },
-		sym"@debug"                 { sym"@keyword.debug" },
-		sym"@error"                 { Error },
+    sym"@structure"             { Structure },
+    sym"@debug"                 { sym"@keyword.debug" },
+    sym"@error"                 { Error },
     -- sym"@variable.member.yaml"  { sym"@field.yaml" },
     -- sym"@text.title.1.markdown" { sym"@markup.heading.1.markdown" },
     -- sym"@text.title.2.markdown" { sym"@markup.heading.2.markdown" },
@@ -578,7 +578,7 @@ local theme = lush(function(injected_functions)
     OverseerOutput     { Normal },
     OverseerComponent  { Constant },
     OverseerField      { Keyword },
-	}
+  }
 end)
 
 -- Return our parsed theme for extension or use elsewhere.
