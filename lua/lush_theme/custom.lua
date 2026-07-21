@@ -78,10 +78,11 @@ local theme = lush(function(injected_functions)
     CursorLine     { bg = bg3 }, -- Screen-line at the cursor, when 'cursorline' is set. Low-priority if foreground (ctermfg OR guifg) is not set.
     CursorColumn   { CursorLine }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
     Directory      { fg = blue_bright }, -- Directory names (and other special names in listings)
-    DiffAdd        { bg = bg0.mix(green_dim, 15) }, -- Diff mode: Added line |diff.txt|
-    DiffChange     { bg = bg0.mix(blue_dim, 15) }, -- Diff mode: Changed line |diff.txt|
-    DiffDelete     { bg = bg0.mix(red_dim, 15) }, -- Diff mode: Deleted line |diff.txt|
-    DiffText       { bg = bg0.mix(cyan_dim, 30) }, -- Diff mode: Changed text within a changed line |diff.txt|
+    DiffAdd        { bg = bg0.mix(green, 30) }, -- Diff mode: Added line |diff.txt|
+    DiffChange     { bg = bg0.mix(yellow, 30) }, -- Diff mode: Changed line |diff.txt|
+    DiffDelete     { bg = bg0.mix(red, 30) }, -- Diff mode: Deleted line |diff.txt|
+    DiffText       { bg = bg0.mix(yellow, 40) }, -- Diff mode: Changed text within a changed line |diff.txt|
+    DiffTextAdd    { bg = bg0.mix(green, 40) }, --	Diff mode: Added text within a changed line.  Linked to |hl-DiffText| by default. |diff.txt|
     EndOfBuffer    { fg = bg0 }, -- Filler lines (~) after the end of the buffer. By default, this is highlighted like |hl-NonText|.
     -- TermCursor     { }, -- Cursor in a focused terminal
     -- TermCursorNC   { }, -- Cursor in an unfocused terminal
@@ -476,9 +477,12 @@ local theme = lush(function(injected_functions)
     NvimTreeGitStagedIcon     { fg = fg0 },
 
     -- gitsigns
-    GitSignsAdd    { fg = green }, -- diff mode: Added line |diff.txt|
-    GitSignsChange { fg = yellow }, -- diff mode: Changed line |diff.txt|
-    GitSignsDelete { fg = red }, -- diff mode: Deleted line |diff.txt|
+    GitSignsAdd    { fg = green },
+    GitSignsChange { fg = yellow },
+    GitSignsDelete { fg = red },
+    GitSignsAddInline { DiffAdd },
+    GitSignsChangeInline { DiffChange },
+    GitSignsDeleteInline { DiffDelete },
 
     -- mini.icons
     MiniIconsAzure  { fg = blue_bright },
