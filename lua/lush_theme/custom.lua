@@ -207,7 +207,7 @@ local theme = lush(function(injected_functions)
 		-- See :h diagnostic-highlights, some groups may not be listed, submit a PR fix to lush-template!
 
 		DiagnosticError            { fg = red }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
-		DiagnosticWarn             { fg = orange }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
+		DiagnosticWarn             { fg = yellow }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
 		DiagnosticInfo             { fg = blue }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
 		DiagnosticHint             { fg = magenta }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
 		DiagnosticOk               { fg = green }, -- Used as the base highlight group. Other Diagnostic highlights link to this by default (except Underline)
@@ -217,7 +217,7 @@ local theme = lush(function(injected_functions)
 		-- DiagnosticVirtualTextHint  { }, -- Used for "Hint" diagnostic virtual text.
 		-- DiagnosticVirtualTextOk    { }, -- Used for "Ok" diagnostic virtual text.
 		DiagnosticUnderlineError   { sp = red, gui = "undercurl" }, -- Used to underline "Error" diagnostics.
-		DiagnosticUnderlineWarn    { sp = orange, gui = "undercurl" }, -- Used to underline "Warn" diagnostics.
+		DiagnosticUnderlineWarn    { sp = yellow, gui = "undercurl" }, -- Used to underline "Warn" diagnostics.
 		DiagnosticUnderlineInfo    { sp = blue, gui = "undercurl" }, -- Used to underline "Info" diagnostics.
 		DiagnosticUnderlineHint    { sp = magenta, gui = "undercurl" }, -- Used to underline "Hint" diagnostics.
 		DiagnosticUnderlineOk      { sp = green, gui = "undercurl" }, -- Used to underline "Ok" diagnostics.
@@ -315,7 +315,7 @@ local theme = lush(function(injected_functions)
     sym"@comment"               { Comment }, -- line and block comments
     -- sym"@comment.documentation" { link = "" }, -- comments documenting code
     sym"@comment.error"         { fg = bg0, bg = red }, -- error-type comments (e.g. `ERROR`, `FIXME`, `DEPRECATED`)
-    sym"@comment.warning"       { fg = bg0, bg = orange }, -- warning-type comments (e.g. `WARNING`, `FIX`, `HACK`)
+    sym"@comment.warning"       { fg = bg0, bg = yellow }, -- warning-type comments (e.g. `WARNING`, `FIX`, `HACK`)
     sym"@comment.todo"          { fg = bg0, bg = magenta }, -- todo-type comments (e.g. `TODO`, `WIP`, `FIXME`)
     sym"@comment.note"          { fg = bg0, bg = blue }, -- note-type comments (e.g. `NOTE`, `INFO`, `XXX`)
 
@@ -547,7 +547,7 @@ local theme = lush(function(injected_functions)
     NeotestPassed       { fg = green },
     NeotestFailed       { fg = red },
     NeotestRunning      { fg = magenta },
-    NeotestSkipped      { fg = orange },
+    NeotestSkipped      { fg = yellow },
     NeotestTest         { Normal},
     NeotestNamespace    { fg = cyan_dim },
     NeotestMarked       { fg = fg0, gui = 'bold' },
