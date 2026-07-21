@@ -181,7 +181,10 @@ local function generic_to_overseer_tasks(generic_tasks)
 			table.insert(local_overseer_tasks, {
 				name = task.name,
 				run = function()
-					local context = task.resolve_context and task.resolve_context() or {}
+					local context = {}
+					if task.resolve_context then
+						context = task.resolve_context()
+					end
 					if not context then
 						vim.notify(
 							"The task '" .. task.name .. "' was cancelled or failed while resolving context",
@@ -212,7 +215,10 @@ local function generic_to_dap_tasks(generic_tasks)
 			table.insert(local_dap_tasks, {
 				name = task.name,
 				run = function()
-					local context = task.resolve_context and task.resolve_context() or {}
+					local context = {}
+					if task.resolve_context then
+						context = task.resolve_context()
+					end
 					if not context then
 						vim.notify(
 							"The task '" .. task.name .. "' was cancelled or failed while resolving context",

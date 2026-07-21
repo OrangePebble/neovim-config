@@ -142,22 +142,24 @@ local M = {
 			}
 
 			local co = coroutine.running()
+			local selected_targets = nil
 			Snacks.picker.select(targets, {
 				prompt = "Select targets",
 				snacks = {
 					actions = {
 						confirm = function(picker, _)
 							local selected = picker:selected({ fallback = true })
-							picker:close()
-							local values = vim.tbl_map(function(entry)
+							selected_targets = vim.tbl_map(function(entry)
 								return entry.item
 							end, selected)
-							coroutine.resume(co, values)
+							picker:close()
 						end,
 					},
 				},
-			}, function(_) end)
-			local selected_targets = coroutine.yield()
+			}, function()
+				coroutine.resume(co)
+			end)
+			coroutine.yield()
 			if not selected_targets then
 				return nil
 			end
@@ -167,6 +169,25 @@ local M = {
 				{ special_config, "env_simulator_debug", "env_simulator_clang", "env_simulator_release" },
 				{
 					prompt = "Select config",
+					snacks = {
+						-- Disable multi-selection
+						win = {
+							input = {
+								keys = {
+									["<Tab>"] = false,
+									["<S-Tab>"] = false,
+									["<c-a>"] = false,
+								},
+							},
+							list = {
+								keys = {
+									["<Tab>"] = false,
+									["<S-Tab>"] = false,
+									["<c-a>"] = false,
+								},
+							},
+						},
+					},
 				},
 				function(v)
 					coroutine.resume(co, v)
@@ -174,7 +195,24 @@ local M = {
 			)
 			local selected_config = coroutine.yield()
 
-			-- TODO: add picker for external repos
+			local selected_repositories = nil
+			Snacks.picker.select({ "osi_query_library" }, {
+				prompt = "Select repositories to override",
+				snacks = {
+					actions = {
+						confirm = function(picker, _)
+							local selected = picker:selected({ fallback = true })
+							selected_repositories = vim.tbl_map(function(entry)
+								return entry.item
+							end, selected)
+							picker:close()
+						end,
+					},
+				},
+			}, function()
+				coroutine.resume(co)
+			end)
+			coroutine.yield()
 
 			local cmd = { "bazel", "build" }
 			if selected_config ~= nil then
@@ -185,6 +223,11 @@ local M = {
 					)
 				else
 					vim.list_extend(cmd, { "--config=" .. selected_config })
+				end
+			end
+			for _, repository in ipairs(selected_repositories or {}) do
+				if repository == "osi_query_library" then
+					table.insert(cmd, "--override_repository=osi_query_library=/home/pedro/projects/osi-query-library")
 				end
 			end
 			vim.list_extend(cmd, vim.split(vim.fn.input("Args: "), " +", { trimempty = true }))
