@@ -502,7 +502,6 @@ keymap({ "o", "x" }, "ig", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" 
 keymap({ "o", "x" }, "ag", "<cmd>Gitsigns select_hunk<CR>", { desc = "Git hunk" })
 
 keymap("n", "<leader>gl", function()
-	-- TODO: make this fullscreen
 	Snacks.lazygit()
 end, { desc = "Lazygit" })
 keymap("n", "<leader>go", function()

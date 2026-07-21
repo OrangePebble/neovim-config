@@ -9,7 +9,16 @@ return {
 	---@type snacks.Config
 	opts = {
 		dim = { enabled = true },
-		lazygit = { configure = true },
+		lazygit = {
+			configure = true,
+			win = {
+				-- Fullscreen
+				row = 0,
+				col = 0,
+				width = 0,
+				height = 0,
+			},
+		},
 		gitbrowse = {
 			url_patterns = {
 				["orangepebble.net"] = {
