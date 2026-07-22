@@ -48,6 +48,12 @@ return {
 			local dapui = require("dapui")
 			---@diagnostic disable-next-line: missing-fields
 			dapui.setup({
+				floating = {
+					border = "single",
+					mappings = {
+						close = {},
+					},
+				},
 				layouts = {
 					{
 						elements = { "scopes", "breakpoints", "stacks", "watches" },
@@ -63,6 +69,24 @@ return {
 						position = "bottom",
 					},
 				},
+			})
+
+			-- Overwritting the closing keymaps for the eval floating window so it doesn't also close the dapui splits.
+			-- This required disabling floating mappings above, so all other floating dapui closing mappings don't work currently.
+			local dapui_hover_group = vim.api.nvim_create_augroup("DapuiHoverKeymaps", { clear = true })
+			vim.api.nvim_create_autocmd("FileType", {
+				group = dapui_hover_group,
+				pattern = "dapui_hover",
+				callback = function(event)
+					local close_hover = function()
+						require("dapui.windows").close_float("hover")
+						vim.api.nvim_win_close(0, true)
+					end
+
+					local opts = { buffer = event.buf, silent = true, nowait = true, desc = "Close DAP eval" }
+					vim.keymap.set("n", "q", close_hover, opts)
+					vim.keymap.set("n", "<Esc>", close_hover, opts)
+				end,
 			})
 
 			local repl_hint_shown = false
