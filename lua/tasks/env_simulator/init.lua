@@ -149,6 +149,8 @@ local M = {
 			local selected_repositories = select_override_repositories(co)
 			context.selected_repositories = table.concat(selected_repositories, " ")
 
+			-- TODO: add args? for both bazel and astas_cli?
+
 			return context
 		end,
 		pre_run_cmd = function(context)
@@ -157,6 +159,7 @@ local M = {
 				.. context.selected_test
 				.. "/"
 				.. os.date("%y-%m-%d_%Hh%Mm%Ss")
+			-- TODO: make this create a new directory also for the resources, not only the outputs, so that the repo isn't poluted
 			return {
 				"env",
 				"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
@@ -169,6 +172,9 @@ local M = {
 				"-c",
 				[[
           set -e # Fail this script on first command failure
+
+          bazel build $SELECTED_CONFIG $SELECTED_REPOSITORIES -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
+
           cp "$COMMON_RESOURCES_PATH/MiscObjects"               "$SELECTED_TEST_PATH" -r --remove-destination
           cp "$COMMON_RESOURCES_PATH/UserSettings"              "$SELECTED_TEST_PATH" -r --remove-destination
           cp "$COMMON_RESOURCES_PATH/Vehicles"                  "$SELECTED_TEST_PATH" -r --remove-destination
@@ -180,7 +186,6 @@ local M = {
           mkdir -p "$OUTPUT_PATH"
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_TEST_PATH/UserSettings/UserSettings.ini"
 
-          bazel build $SELECTED_CONFIG $SELECTED_REPOSITORIES -- //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
           cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_TEST_PATH"
         ]],
 			}
@@ -205,6 +210,58 @@ local M = {
 				"-o",
 				context.output_path .. "/output.mcap",
 			}
+		end,
+	},
+	{
+		name = "Run SCMHighway E2E test",
+		resolve_context = function()
+			local context = {}
+			context.ddad_path = ddad_path
+			context.tests_path = context.ddad_path
+				.. "/tools/env_simulator/ASTAS_DATA/E2EOpTestArtifacts/SCMHighway/Resources/Configurations/"
+			context.common_resources_path = context.ddad_path
+				.. "/tools/env_simulator/ExampleData/E2EOpTestArtifacts/SCMHighway/Resources/Common"
+
+			-- TODO: add picker for test json file/target
+			-- TODO: and probably also get possible tests from the json file
+
+			-- Pick a test configuration directory
+			local dirs = {}
+			for name, type in vim.fs.dir(context.tests_path) do
+				if type == "directory" then
+					table.insert(dirs, name)
+				end
+			end
+			table.sort(dirs)
+
+			-- TODO: change this to support multiple tests at once, and either do the same for the astas_cli version,
+			--  or disable multi-selection
+			local co = coroutine.running()
+			Snacks.picker.select(dirs, {
+				prompt = "Select configuration directory",
+			}, function(v)
+				coroutine.resume(co, v)
+			end)
+			context.selected_test = coroutine.yield()
+			if context.selected_test == nil then
+				return nil
+			end
+			context.selected_test_path = context.tests_path .. context.selected_test
+
+			return context
+		end,
+		cmd = function(context)
+			local cmd = {
+				"bazel",
+				"run",
+				"--config=env_simulator_release",
+				"//tools/env_simulator/e2e_tests:e2e_scm_highway_entry_tests",
+				"--",
+				"--store-artifacts",
+				"-vvv",
+				"-k=" .. context.selected_test,
+			}
+			return cmd
 		end,
 	},
 	{
@@ -243,8 +300,8 @@ local M = {
 			local targets = {
 				"//tools/env_simulator/astas_cli:astas_cli",
 				"//tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip",
-				"//tools/env_simulator/modules/stochastic_cognitive_model:stochastic_cognitive_model_lib",
 				"//third_party/open_simulation_interface:open_simulation_interface",
+				-- "//tools/env_simulator/modules/stochastic_cognitive_model:stochastic_cognitive_model_lib",
 				"//tools/env_simulator/modules/stochastic_cognitive_model/tests/Core/Sensor_Tests:sensor_tests",
 				"//third_party/googletest:googletest",
 			}
