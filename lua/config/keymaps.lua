@@ -857,7 +857,7 @@ keymap(
 	{ desc = "How many spaces a tab is represented by, and the number of spaces pressing tab writes" }
 )
 keymap("n", "<leader>cf", function()
-	Snacks.picker.select(vim.fn.getcompletion("", "filetype"), { prompt = "File type:" }, function(ft)
+	require("utils.picker").select_one(vim.fn.getcompletion("", "filetype"), { prompt = "File type:" }, function(ft)
 		if ft then
 			vim.bo.filetype = ft
 		end

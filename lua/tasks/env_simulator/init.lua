@@ -1,4 +1,5 @@
 local utils = require("tasks.env_simulator.utils")
+local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
 
@@ -47,20 +48,10 @@ local build = {
 	resolve_context = function()
 		local co = coroutine.running()
 		local selected_targets = nil
-		Snacks.picker.select(targets, {
+		picker.select_many(targets, {
 			prompt = "Select targets",
-			snacks = {
-				actions = {
-					confirm = function(picker, _)
-						local selected = picker:selected({ fallback = true })
-						selected_targets = vim.tbl_map(function(entry)
-							return entry.item
-						end, selected)
-						picker:close()
-					end,
-				},
-			},
-		}, function()
+		}, function(selected)
+			selected_targets = selected
 			coroutine.resume(co)
 		end)
 		coroutine.yield()
@@ -91,20 +82,10 @@ local compile_commands = {
 	resolve_context = function()
 		local co = coroutine.running()
 		local selected_targets = nil
-		Snacks.picker.select(targets, {
+		picker.select_many(targets, {
 			prompt = "Select targets",
-			snacks = {
-				actions = {
-					confirm = function(picker, _)
-						local selected = picker:selected({ fallback = true })
-						selected_targets = vim.tbl_map(function(entry)
-							return entry.item
-						end, selected)
-						picker:close()
-					end,
-				},
-			},
-		}, function()
+		}, function(selected)
+			selected_targets = selected
 			coroutine.resume(co)
 		end)
 		coroutine.yield()

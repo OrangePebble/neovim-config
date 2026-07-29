@@ -1,4 +1,5 @@
 local M = {}
+local picker = require("utils.picker")
 
 M.ddad_path = vim.fn.getcwd()
 if string.match(vim.fn.fnamemodify(M.ddad_path, ":t"), ".*env_simulator.*") then
@@ -9,27 +10,8 @@ end
 ---@param co thread
 function M.select_config(co)
 	local special_config = "env_simulator_clang with debug flags"
-	Snacks.picker.select({ special_config, "env_simulator_debug", "env_simulator_clang", "env_simulator_release" }, {
+	picker.select_one({ special_config, "env_simulator_debug", "env_simulator_clang", "env_simulator_release" }, {
 		prompt = "Select config",
-		snacks = {
-			-- Disable multi-selection
-			win = {
-				input = {
-					keys = {
-						["<Tab>"] = false,
-						["<S-Tab>"] = false,
-						["<c-a>"] = false,
-					},
-				},
-				list = {
-					keys = {
-						["<Tab>"] = false,
-						["<S-Tab>"] = false,
-						["<c-a>"] = false,
-					},
-				},
-			},
-		},
 	}, function(v)
 		coroutine.resume(co, v)
 	end)
@@ -53,28 +35,10 @@ end
 ---@param co thread
 function M.select_override_repositories(co)
 	local selected_repositories = nil
-	Snacks.picker.select({ "osi_query_library" }, {
+	picker.select_many_esc({ "osi_query_library" }, {
 		prompt = "Select repositories to override",
-		snacks = {
-			actions = {
-				confirm = function(picker, _)
-					local selected = picker:selected({ fallback = true })
-					selected_repositories = vim.tbl_map(function(entry)
-						return entry.item
-					end, selected)
-					picker:close()
-				end,
-			},
-			win = {
-				input = {
-					keys = {
-						-- Cancel on first <Esc>
-						["<Esc>"] = { "cancel", mode = { "n", "i" } },
-					},
-				},
-			},
-		},
-	}, function()
+	}, function(selected)
+		selected_repositories = selected
 		coroutine.resume(co)
 	end)
 	coroutine.yield()

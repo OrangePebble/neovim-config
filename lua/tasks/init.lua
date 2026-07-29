@@ -1,5 +1,6 @@
 local overseer = require("overseer")
 local dap = require("dap")
+local picker = require("utils.picker")
 
 ---@type Task[]
 local tasks = {}
@@ -285,7 +286,7 @@ M.choose_and_run_overseer_task = function()
 			vim.notify("No tasks found.", vim.log.levels.WARN)
 			return
 		end
-		Snacks.picker.select(items, {
+		picker.select_one(items, {
 			prompt = "Select task",
 			format_item = function(item)
 				if item.desc then
@@ -293,25 +294,6 @@ M.choose_and_run_overseer_task = function()
 				end
 				return item.name
 			end,
-			snacks = {
-				-- Disable multi-selection
-				win = {
-					input = {
-						keys = {
-							["<Tab>"] = false,
-							["<S-Tab>"] = false,
-							["<c-a>"] = false,
-						},
-					},
-					list = {
-						keys = {
-							["<Tab>"] = false,
-							["<S-Tab>"] = false,
-							["<c-a>"] = false,
-						},
-					},
-				},
-			},
 		}, function(item)
 			if item then
 				local co = coroutine.create(item.run)
@@ -370,30 +352,11 @@ M.choose_and_run_dap_task = function()
 		return
 	end
 
-	Snacks.picker.select(items, {
+	picker.select_one(items, {
 		prompt = "Select debugging task",
 		format_item = function(item)
 			return item.name
 		end,
-		snacks = {
-			-- Disable multi-selection
-			win = {
-				input = {
-					keys = {
-						["<Tab>"] = false,
-						["<S-Tab>"] = false,
-						["<c-a>"] = false,
-					},
-				},
-				list = {
-					keys = {
-						["<Tab>"] = false,
-						["<S-Tab>"] = false,
-						["<c-a>"] = false,
-					},
-				},
-			},
-		},
 	}, function(item)
 		if item then
 			local co = coroutine.create(item.run)

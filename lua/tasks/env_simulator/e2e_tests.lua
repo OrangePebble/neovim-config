@@ -1,4 +1,5 @@
 local utils = require("tasks.env_simulator.utils")
+local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
 
@@ -13,19 +14,6 @@ local function run_bazel_query(cmd)
 	end
 
 	return result.stdout or ""
-end
-
----@param items string[]
----@param prompt string
----@return string|nil
-local function select_item(items, prompt)
-	local co = coroutine.running()
-	Snacks.picker.select(items, {
-		prompt = prompt,
-	}, function(item)
-		coroutine.resume(co, item)
-	end)
-	return coroutine.yield()
 end
 
 ---@return string[]|nil
@@ -122,7 +110,13 @@ local e2e_tests = {
 			return nil
 		end
 
-		context.selected_target = select_item(bazel_targets, "Select E2E Bazel target")
+		local co = coroutine.running()
+		picker.select_one(bazel_targets, {
+			prompt = "Select E2E Bazel target",
+		}, function(item)
+			coroutine.resume(co, item)
+		end)
+		context.selected_target = coroutine.yield()
 		if context.selected_target == nil then
 			return nil
 		end
@@ -137,7 +131,12 @@ local e2e_tests = {
 			return nil
 		end
 
-		context.selected_test = select_item(test_names, "Select E2E test")
+		picker.select_one(test_names, {
+			prompt = "Select E2E test",
+		}, function(item)
+			coroutine.resume(co, item)
+		end)
+		context.selected_test = coroutine.yield()
 		if context.selected_test == nil then
 			return nil
 		end
@@ -183,7 +182,7 @@ local e2e_tests_astas_cli = {
 		table.sort(dirs)
 
 		local co = coroutine.running()
-		Snacks.picker.select(dirs, {
+		picker.select_one(dirs, {
 			prompt = "Select configuration directory",
 		}, function(v)
 			coroutine.resume(co, v)
