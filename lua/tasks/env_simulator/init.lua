@@ -96,15 +96,15 @@ local compile_commands = {
 		local cmd = { "bazel-compile-commands" }
 		local selected_config = utils.select_config(co)
 		for _, flag in ipairs(selected_config) do
-			vim.list_extend(cmd, { "-b", '"' .. flag .. '"' })
+			vim.list_extend(cmd, { "-b", flag })
 		end
 		local selected_repositories = utils.select_override_repositories(co)
 		for _, flag in ipairs(selected_repositories) do
-			vim.list_extend(cmd, { "-b", '"' .. flag .. '"' })
+			vim.list_extend(cmd, { "-b", flag })
 		end
 		local extra_args = utils.input_args(co)
 		for _, flag in ipairs(extra_args) do
-			vim.list_extend(cmd, { "-b", '"' .. flag .. '"' })
+			vim.list_extend(cmd, { "-b", flag })
 		end
 
 		vim.list_extend(cmd, selected_targets)
