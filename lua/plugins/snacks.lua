@@ -21,11 +21,18 @@ return {
 		},
 		gitbrowse = {
 			url_patterns = {
-				["orangepebble.net"] = {
+        -- "%" are lua escape characters
+				["orangepebble%.net"] = {
 					branch = "/src/branch/{branch}",
 					file = "/src/branch/{branch}/{file}#L{line_start}-L{line_end}",
 					permalink = "/src/commit/{commit}/{file}#L{line_start}-L{line_end}",
 					commit = "/src/commit/{commit}",
+				},
+				["cc%-github%.bmwgroup%.net"] = {
+					branch = "/tree/{branch}",
+					file = "/blob/{branch}/{file}#L{line_start}-L{line_end}",
+					permalink = "/blob/{commit}/{file}#L{line_start}-L{line_end}",
+					commit = "/commit/{commit}",
 				},
 			},
 		},
