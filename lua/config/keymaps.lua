@@ -889,7 +889,10 @@ keymap("n", "<leader>+:e", "<cmd>ene<CR>", {
 keymap("n", "<leader>+:m", "<cmd>marks<CR>", {
 	desc = "[:marks] Show marks, use [m*] to add a mark to * and [`*]/['*] to go to the mark at the cursor/line",
 })
-keymap("n", "<leader>+:d", ":delm ", {
+keymap("n", "<leader>+:d", ":diffsplit ", {
+	desc = "[:diffs <path>] Diff the current buffer with another. Get a path by <Y> in nvim-tree.",
+})
+keymap("n", "<leader>+:D", ":delm ", {
 	desc = "[:delm ] Delete a mark. Use [:delm z] to delete the 'z' mark.",
 })
 keymap("n", "<leader>+:r", "<cmd>registers<CR>", {
