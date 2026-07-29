@@ -16,8 +16,9 @@ local function run_bazel_query(cmd)
 	return result.stdout or ""
 end
 
----@return string[]|nil
-local function list_e2e_test_targets()
+---@param co thread
+---@return string|nil
+local function select_e2e_test_target(co)
 	local output = run_bazel_query({ "bazel", "query", "--output=label_kind", "//tools/env_simulator/e2e_tests:*" })
 	if not output then
 		return nil
@@ -33,16 +34,25 @@ local function list_e2e_test_targets()
 	table.sort(bazel_targets)
 
 	if vim.tbl_isempty(bazel_targets) then
-		vim.notify("No E2E py_test targets found.", vim.log.levels.WARN)
+		vim.notify("No py_test targets found.", vim.log.levels.WARN)
 		return nil
 	end
 
-	return bazel_targets
+	picker.select_one(bazel_targets, {
+		prompt = "Select bazel target",
+		format_item = function(item)
+			return item:match("^[^:]+:(.+)$") or item
+		end,
+	}, function(item)
+		coroutine.resume(co, item)
+	end)
+	return coroutine.yield()
 end
 
 ---@param bazel_target string
+---@param co thread
 ---@return string|nil
-local function get_e2e_test_json_path(bazel_target)
+local function select_e2e_test_name(bazel_target, co)
 	local target_output = run_bazel_query({ "bazel", "query", "--output=build", bazel_target })
 	if not target_output then
 		return nil
@@ -50,7 +60,7 @@ local function get_e2e_test_json_path(bazel_target)
 
 	local json_filegroup = target_output:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%)]+)%)")
 	if not json_filegroup then
-		vim.notify("Could not resolve E2E test JSON filegroup.", vim.log.levels.ERROR)
+		vim.notify("Could not resolve the JSON filegroup.", vim.log.levels.ERROR)
 		return nil
 	end
 
@@ -61,25 +71,20 @@ local function get_e2e_test_json_path(bazel_target)
 
 	local relative_json_path = filegroup_output:match('srcs = %[%"//tools/env_simulator/ExampleData:([^%"]+%.json)%"%]')
 	if not relative_json_path then
-		vim.notify("Could not resolve E2E test JSON path.", vim.log.levels.ERROR)
+		vim.notify("Could not resolve the JSON path.", vim.log.levels.ERROR)
 		return nil
 	end
 
-	return ddad_path .. "/tools/env_simulator/ExampleData/" .. relative_json_path
-end
-
----@param json_path string
----@return string[]|nil
-local function list_json_test_names(json_path)
+	local json_path = ddad_path .. "/tools/env_simulator/ExampleData/" .. relative_json_path
 	local ok, json_text = pcall(vim.fn.readfile, json_path)
 	if not ok then
-		vim.notify("Could not read E2E test JSON: " .. json_path, vim.log.levels.ERROR)
+		vim.notify("Could not read the JSON file: " .. json_path, vim.log.levels.ERROR)
 		return nil
 	end
 
 	local decode_ok, decoded = pcall(vim.json.decode, table.concat(json_text, "\n"))
 	if not decode_ok then
-		vim.notify("Could not decode E2E test JSON: " .. json_path, vim.log.levels.ERROR)
+		vim.notify("Could not decode the JSON file: " .. json_path, vim.log.levels.ERROR)
 		return nil
 	end
 
@@ -92,51 +97,31 @@ local function list_json_test_names(json_path)
 	table.sort(test_names)
 
 	if vim.tbl_isempty(test_names) then
-		vim.notify("No enabled tests found in E2E JSON.", vim.log.levels.WARN)
+		vim.notify("No enabled tests found in the JSON file: " .. json_path, vim.log.levels.WARN)
 		return nil
 	end
 
-	return test_names
+	picker.select_one(test_names, {
+		prompt = "Select test",
+	}, function(item)
+		coroutine.resume(co, item)
+	end)
+	return coroutine.yield()
 end
 
 local e2e_tests = {
-	name = "Run SCMHighway E2E test",
+	name = "Run E2E test",
 	resolve_context = function()
 		local context = {}
 		context.ddad_path = ddad_path
 
-		local bazel_targets = list_e2e_test_targets()
-		if not bazel_targets then
-			return nil
-		end
-
 		local co = coroutine.running()
-		picker.select_one(bazel_targets, {
-			prompt = "Select E2E Bazel target",
-		}, function(item)
-			coroutine.resume(co, item)
-		end)
-		context.selected_target = coroutine.yield()
+		context.selected_target = select_e2e_test_target(co)
 		if context.selected_target == nil then
 			return nil
 		end
 
-		context.selected_test_json_path = get_e2e_test_json_path(context.selected_target)
-		if context.selected_test_json_path == nil then
-			return nil
-		end
-
-		local test_names = list_json_test_names(context.selected_test_json_path)
-		if not test_names then
-			return nil
-		end
-
-		picker.select_one(test_names, {
-			prompt = "Select E2E test",
-		}, function(item)
-			coroutine.resume(co, item)
-		end)
-		context.selected_test = coroutine.yield()
+		context.selected_test = select_e2e_test_name(context.selected_target, co)
 		if context.selected_test == nil then
 			return nil
 		end

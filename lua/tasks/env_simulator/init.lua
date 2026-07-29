@@ -117,13 +117,14 @@ local compile_commands = {
 }
 
 ---@type Task[]
-local M = {
+local M = {}
+
+vim.list_extend(M, require("tasks.env_simulator.e2e_tests"))
+vim.list_extend(M, {
 	bazel_bin,
 	build,
 	compile_commands,
-}
-
-vim.list_extend(M, require("tasks.env_simulator.e2e_tests"))
+})
 
 if string.match(vim.fn.getcwd(), ".*env_simulator.*") then
 	for _, task in ipairs(M) do
