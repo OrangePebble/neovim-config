@@ -32,99 +32,6 @@ local function run_bazel_query(cmd, co)
 	return result.stdout or ""
 end
 
----@param co thread
----@return string|nil
-local function select_e2e_test_target(co)
-	local output = run_bazel_query({ "bazel", "query", "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, co)
-	if not output then
-		return nil
-	end
-
-	local bazel_targets = {}
-	for line in vim.gsplit(output, "\n", { trimempty = true }) do
-		local target = line:match("^py_test rule (//tools/env_simulator/e2e_tests:[^%s]+)$")
-		if target then
-			table.insert(bazel_targets, target)
-		end
-	end
-	table.sort(bazel_targets)
-
-	if vim.tbl_isempty(bazel_targets) then
-		vim.notify("No py_test targets found.", vim.log.levels.WARN)
-		return nil
-	end
-
-	picker.select_one(bazel_targets, {
-		prompt = "Select bazel target",
-		format_item = function(item)
-			return item:match("^[^:]+:(.+)$") or item
-		end,
-	}, function(item)
-		coroutine.resume(co, item)
-	end)
-	return coroutine.yield()
-end
-
----@param bazel_target string
----@param co thread
----@return string|nil
-local function select_e2e_test_name(bazel_target, co)
-	local target_output = run_bazel_query({ "bazel", "query", "--output=build", bazel_target }, co)
-	if not target_output then
-		return nil
-	end
-
-	local json_filegroup = target_output:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%)]+)%)")
-	if not json_filegroup then
-		vim.notify("Could not resolve the JSON filegroup.", vim.log.levels.ERROR)
-		return nil
-	end
-
-	local filegroup_output = run_bazel_query({ "bazel", "query", "--output=build", json_filegroup }, co)
-	if not filegroup_output then
-		return nil
-	end
-
-	local relative_json_path = filegroup_output:match('srcs = %[%"//tools/env_simulator/ExampleData:([^%"]+%.json)%"%]')
-	if not relative_json_path then
-		vim.notify("Could not resolve the JSON path.", vim.log.levels.ERROR)
-		return nil
-	end
-
-	local json_path = ddad_path .. "/tools/env_simulator/ExampleData/" .. relative_json_path
-	local ok, json_text = pcall(vim.fn.readfile, json_path)
-	if not ok then
-		vim.notify("Could not read the JSON file: " .. json_path, vim.log.levels.ERROR)
-		return nil
-	end
-
-	local decode_ok, decoded = pcall(vim.json.decode, table.concat(json_text, "\n"))
-	if not decode_ok then
-		vim.notify("Could not decode the JSON file: " .. json_path, vim.log.levels.ERROR)
-		return nil
-	end
-
-	local test_names = {}
-	for test_name in pairs(decoded.tests or {}) do
-		if not vim.startswith(test_name, "DISABLED_") then
-			table.insert(test_names, test_name)
-		end
-	end
-	table.sort(test_names)
-
-	if vim.tbl_isempty(test_names) then
-		vim.notify("No enabled tests found in the JSON file: " .. json_path, vim.log.levels.WARN)
-		return nil
-	end
-
-	picker.select_one(test_names, {
-		prompt = "Select test",
-	}, function(item)
-		coroutine.resume(co, item)
-	end)
-	return coroutine.yield()
-end
-
 local e2e_tests = {
 	name = "Run E2E test",
 	resolve_context = function()
@@ -132,16 +39,110 @@ local e2e_tests = {
 		context.ddad_path = ddad_path
 
 		local co = coroutine.running()
-		context.selected_target = select_e2e_test_target(co)
+
+		-- List all e2e_tests targets
+		local targets =
+			run_bazel_query({ "bazel", "query", "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, co)
+		if not targets then
+			return nil
+		end
+
+		-- Filter the targets to the py_test ones
+		local test_targets = {}
+		for line in vim.gsplit(targets, "\n", { trimempty = true }) do
+			local target = line:match("^py_test rule (//tools/env_simulator/e2e_tests:[^%s]+)$")
+			if target then
+				table.insert(test_targets, target)
+			end
+		end
+		table.sort(test_targets)
+		if vim.tbl_isempty(test_targets) then
+			vim.notify("No py_test targets found.", vim.log.levels.WARN)
+			return nil
+		end
+
+		picker.select_one(test_targets, {
+			prompt = "Select bazel target",
+			format_item = function(item)
+				return item:match("^[^:]+:(.+)$") or item
+			end,
+		}, function(item)
+			coroutine.resume(co, item)
+		end)
+		context.selected_target = coroutine.yield()
 		if not context.selected_target then
 			return nil
 		end
 
-		context.selected_test = select_e2e_test_name(context.selected_target, co)
+		-- Get build data about the selected_target
+		local build_data = run_bazel_query({ "bazel", "query", "--output=build", context.selected_target }, co)
+		if not build_data then
+			return nil
+		end
+
+		-- Get the file group for the JSON file
+		-- This matches the first location so it depends on the order defined in the bazel file
+		local json_filegroup = build_data:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%)]+)%)")
+		if not json_filegroup then
+			vim.notify("Could not resolve the JSON filegroup.", vim.log.levels.ERROR)
+			return nil
+		end
+
+		-- Get build data about the JSON file group
+		local json_filegroup_build_data = run_bazel_query({ "bazel", "query", "--output=build", json_filegroup }, co)
+		if not json_filegroup_build_data then
+			return nil
+		end
+
+		-- Get the JSON file's path
+		local relative_json_path =
+			json_filegroup_build_data:match('srcs = %["//tools/env_simulator/ExampleData:([^%"]+%.json)"%]')
+		if not relative_json_path then
+			vim.notify("Could not resolve the JSON path.", vim.log.levels.ERROR)
+			return nil
+		end
+		local json_path = ddad_path .. "/tools/env_simulator/ExampleData/" .. relative_json_path
+		local ok, json_text = pcall(vim.fn.readfile, json_path)
+		if not ok then
+			vim.notify("Could not read the JSON file: " .. json_path, vim.log.levels.ERROR)
+			return nil
+		end
+
+    -- Read the JSON file and get available tests
+		local decode_ok, decoded_json = pcall(vim.json.decode, table.concat(json_text, "\n"))
+		if not decode_ok then
+			vim.notify("Could not decode the JSON file: " .. json_path, vim.log.levels.ERROR)
+			return nil
+		end
+		local test_names = {}
+		for test_name in pairs(decoded_json.tests or {}) do
+			if not vim.startswith(test_name, "DISABLED_") then
+				table.insert(test_names, test_name)
+			end
+		end
+		table.sort(test_names)
+		if vim.tbl_isempty(test_names) then
+			vim.notify("No enabled tests found in the JSON file: " .. json_path, vim.log.levels.WARN)
+			return nil
+		end
+
+		picker.select_one(test_names, {
+			prompt = "Select test",
+		}, function(item)
+			coroutine.resume(co, item)
+		end)
+		context.selected_test = coroutine.yield()
 		if not context.selected_test then
 			return nil
 		end
+
 		context.context_name = "Run " .. context.selected_test .. " E2E test"
+
+		context.output_path = vim.fn.expand("~")
+			.. "/simulation_outputs/e2e-tests/"
+			.. context.selected_test
+			.. "/"
+			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
 		return context
 	end,
@@ -155,6 +156,7 @@ local e2e_tests = {
 			"--store-artifacts",
 			"-vvv",
 			"-k=" .. context.selected_test,
+			"--artifacts-path=" .. context.output_path .. "/E2E-Artifacts",
 		}
 	end,
 }
@@ -219,12 +221,10 @@ local e2e_tests_astas_cli = {
 		local selected_repositories = utils.select_override_repositories(co)
 		context.selected_repositories = table.concat(selected_repositories, " ")
 
-		-- TODO: add args input
-
 		context.context_name = "Run " .. selected_scenario .. " E2E test in astas_cli"
 
 		context.output_path = vim.fn.expand("~")
-			.. "/simulation_outputs/"
+			.. "/simulation_outputs/e2e-tests-astas_cli/"
 			.. selected_scenario
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
