@@ -1,3 +1,4 @@
+-- TODO: see if it is possible to collapse empty folders with only 1 child folder into their children
 -- A file explorer tree.
 return {
 	"nvim-tree/nvim-tree.lua",

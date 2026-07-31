@@ -4,10 +4,25 @@ local picker = require("utils.picker")
 local ddad_path = utils.ddad_path
 
 ---@param cmd string[]
+---@param co thread
 ---@return string|nil
-local function run_bazel_query(cmd)
-	-- TODO: add something like a fidget notification to show something is happening
-	local result = vim.system(cmd, { text = true, cwd = ddad_path }):wait()
+local function run_bazel_query(cmd, co)
+	local progress = require("fidget.progress").handle.create({
+		title = "Running query",
+		lsp_client = { name = "Bazel" },
+		message = table.concat(cmd, " "),
+		percentage = 0,
+	})
+
+	vim.system(cmd, { text = true, cwd = ddad_path }, function(result)
+		vim.schedule(function()
+			progress.title = result.code == 0 and "Query finished" or "Query failed"
+			progress:finish()
+			coroutine.resume(co, result)
+		end)
+	end)
+
+	local result = coroutine.yield()
 	if result.code ~= 0 then
 		local stderr = vim.trim(result.stderr or "")
 		vim.notify(stderr ~= "" and stderr or "Bazel query failed", vim.log.levels.ERROR)
@@ -20,7 +35,7 @@ end
 ---@param co thread
 ---@return string|nil
 local function select_e2e_test_target(co)
-	local output = run_bazel_query({ "bazel", "query", "--output=label_kind", "//tools/env_simulator/e2e_tests:*" })
+	local output = run_bazel_query({ "bazel", "query", "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, co)
 	if not output then
 		return nil
 	end
@@ -54,7 +69,7 @@ end
 ---@param co thread
 ---@return string|nil
 local function select_e2e_test_name(bazel_target, co)
-	local target_output = run_bazel_query({ "bazel", "query", "--output=build", bazel_target })
+	local target_output = run_bazel_query({ "bazel", "query", "--output=build", bazel_target }, co)
 	if not target_output then
 		return nil
 	end
@@ -65,7 +80,7 @@ local function select_e2e_test_name(bazel_target, co)
 		return nil
 	end
 
-	local filegroup_output = run_bazel_query({ "bazel", "query", "--output=build", json_filegroup })
+	local filegroup_output = run_bazel_query({ "bazel", "query", "--output=build", json_filegroup }, co)
 	if not filegroup_output then
 		return nil
 	end
