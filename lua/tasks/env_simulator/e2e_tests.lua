@@ -6,6 +6,7 @@ local ddad_path = utils.ddad_path
 ---@param cmd string[]
 ---@return string|nil
 local function run_bazel_query(cmd)
+	-- TODO: add something like a fidget notification to show something is happening
 	local result = vim.system(cmd, { text = true, cwd = ddad_path }):wait()
 	if result.code ~= 0 then
 		local stderr = vim.trim(result.stderr or "")
@@ -125,6 +126,7 @@ local e2e_tests = {
 		if context.selected_test == nil then
 			return nil
 		end
+		context.context_name = "Run " .. context.selected_test .. " E2E test"
 
 		return context
 	end,
@@ -157,6 +159,8 @@ local e2e_tests_astas_cli = {
 			.. "/tools/env_simulator/ASTAS_DATA/E2EOpTestArtifacts/SCMHighway/Resources/Configurations/"
 		context.common_resources_path = context.ddad_path
 			.. "/tools/env_simulator/ExampleData/E2EOpTestArtifacts/SCMHighway/Resources/Common"
+
+		-- TODO: change this to first list test category directories, like SCMHighway, then the configuration directories inside it
 
 		local dirs = {}
 		for name, type in vim.fs.dir(context.tests_path) do
@@ -191,6 +195,7 @@ local e2e_tests_astas_cli = {
 			.. context.selected_test
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
+		-- TODO: Change this script to not overwrite already existing files, like ProfilesCatalog.xml and systemConfigBlueprint.xml as those may have been changed for the test
 		return {
 			"env",
 			"COMMON_RESOURCES_PATH=" .. context.common_resources_path,

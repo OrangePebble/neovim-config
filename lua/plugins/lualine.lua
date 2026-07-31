@@ -203,6 +203,7 @@ return {
 						end,
 					},
 					{
+            -- TODO: Is there maybe a way to instead of shortenning the path directory names to instead scroll the full thing?
 						"filename",
 						path = 1, -- Relative path
 						on_click = function()

@@ -50,15 +50,19 @@ local last_dap_task = nil
 ---@param task Task
 ---@param context TaskContext
 local function run_overseer_task(task, context)
+	local task_name = task.name
+	if context.context_name then
+		task_name = context.context_name
+	end
 	local function start_main_and_post_tasks()
 		local main_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-			name = task.name,
+			name = task_name,
 			cmd = task.cmd(context),
 		}))
 		if task.post_run_cmd then
 			main_task:subscribe("on_complete", function(_, status)
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-					name = "Post: " .. task.name,
+					name = "Post: " .. task_name,
 					cmd = task.post_run_cmd(context, status),
 				}))
 				post_task:start()
@@ -69,12 +73,12 @@ local function run_overseer_task(task, context)
 
 	if task.pre_run_cmd then
 		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-			name = "Pre: " .. task.name,
+			name = "Pre: " .. task_name,
 			cmd = task.pre_run_cmd(context),
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			if pre_status ~= "SUCCESS" then
-				vim.notify("The task 'Pre: " .. task.name .. "' failed", vim.log.levels.ERROR)
+				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
 				return
 			end
 			start_main_and_post_tasks()
@@ -88,16 +92,20 @@ end
 ---@param task Task
 ---@param context TaskContext
 local function run_dap_task(task, context)
+	local task_name = task.name
+	if context.context_name then
+		task_name = context.context_name
+	end
 	local function start_main_and_post_tasks()
 		local cmd = task.cmd(context)
 		local config = vim.tbl_deep_extend("force", task.dap.options, {
-			name = task.name,
+			name = task_name,
 			program = cmd[1],
 			args = vim.list_slice(cmd, 2),
 		})
 
 		local time_start = os.time()
-		local listener_key = "tasks.dap_complete." .. task.name .. "." .. tostring(time_start)
+		local listener_key = "tasks.dap_complete." .. task_name .. "." .. tostring(time_start)
 		local repl_output = {}
 		local function on_dap_complete(_, body)
 			dap.listeners.after.event_terminated[listener_key] = nil
@@ -116,8 +124,8 @@ local function run_dap_task(task, context)
 			local output = repl_buffer_found and table.concat(lines, "\n") or table.concat(repl_output)
 
 			local repl_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-				name = "DAP Output: " .. task.name,
-				cmd = task.name,
+				name = "DAP Output: " .. task_name,
+				cmd = cmd,
 			}))
 			repl_task.status = "SUCCESS"
 			repl_task.time_start = time_start
@@ -130,13 +138,15 @@ local function run_dap_task(task, context)
 			pcall(vim.api.nvim_chan_send, term_id, repl_task.metadata.raw_output)
 			vim.bo[bufnr].filetype = "OverseerOutput"
 			vim.b[bufnr].overseer_task = repl_task.id
+			---@diagnostic disable-next-line: invisible, inject-field
 			repl_task.strategy.bufnr = bufnr
+			---@diagnostic disable-next-line: invisible, inject-field
 			repl_task.strategy.term_id = term_id
 
 			if task.post_run_cmd then
 				local status = body and body.exitCode and tostring(body.exitCode) or nil
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-					name = "Post: " .. task.name,
+					name = "Post: " .. task_name,
 					cmd = task.post_run_cmd(context, status),
 				}))
 				post_task:start()
@@ -154,12 +164,12 @@ local function run_dap_task(task, context)
 
 	if task.pre_run_cmd then
 		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-			name = "Pre: " .. task.name,
+			name = "Pre: " .. task_name,
 			cmd = task.pre_run_cmd(context),
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			if pre_status ~= "SUCCESS" then
-				vim.notify("The task 'Pre: " .. task.name .. "' failed", vim.log.levels.ERROR)
+				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
 				return
 			end
 			start_main_and_post_tasks()
@@ -182,6 +192,7 @@ local function generic_to_overseer_tasks(generic_tasks)
 			table.insert(local_overseer_tasks, {
 				name = task.name,
 				run = function()
+					---@type TaskContext|nil
 					local context = {}
 					if task.resolve_context then
 						context = task.resolve_context()
@@ -216,6 +227,7 @@ local function generic_to_dap_tasks(generic_tasks)
 			table.insert(local_dap_tasks, {
 				name = task.name,
 				run = function()
+					---@type TaskContext|nil
 					local context = {}
 					if task.resolve_context then
 						context = task.resolve_context()
