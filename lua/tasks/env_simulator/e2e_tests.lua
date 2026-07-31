@@ -144,6 +144,8 @@ local e2e_tests = {
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
+    context.raw_artifacts_path = context.output_path .. "/E2E-Artifacts"
+
 		return context
 	end,
 	cmd = function(context)
@@ -156,9 +158,25 @@ local e2e_tests = {
 			"--store-artifacts",
 			"-vvv",
 			"-k=" .. context.selected_test,
-			"--artifacts-path=" .. context.output_path .. "/E2E-Artifacts",
+			"--artifacts-path=" .. context.raw_artifacts_path
 		}
 	end,
+  post_run_cmd = function (context)
+		return {
+			"env",
+      "OUTPUT_PATH=" .. context.output_path,
+			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
+			"bash",
+			"-c",
+			[[
+          set -e # Fail this script on first command failure
+
+          mkdir $OUTPUT_PATH/artifacts
+          mv $RAW_ARTIFACTS_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* $OUTPUT_PATH/artifacts
+          rm -rf $RAW_ARTIFACTS_PATH
+        ]],
+		}
+  end
 }
 
 local e2e_tests_astas_cli = {
