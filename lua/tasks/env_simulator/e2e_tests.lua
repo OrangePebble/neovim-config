@@ -118,12 +118,12 @@ local e2e_tests = {
 
 		local co = coroutine.running()
 		context.selected_target = select_e2e_test_target(co)
-		if context.selected_target == nil then
+		if not context.selected_target then
 			return nil
 		end
 
 		context.selected_test = select_e2e_test_name(context.selected_target, co)
-		if context.selected_test == nil then
+		if not context.selected_test then
 			return nil
 		end
 		context.context_name = "Run " .. context.selected_test .. " E2E test"
@@ -145,7 +145,7 @@ local e2e_tests = {
 }
 
 local e2e_tests_astas_cli = {
-	name = "Run SCMHighway E2E test in astas_cli",
+	name = "Run E2E test in astas_cli",
 	dap = {
 		enabled = true,
 		options = {
@@ -155,51 +155,73 @@ local e2e_tests_astas_cli = {
 	resolve_context = function()
 		local context = {}
 		context.ddad_path = ddad_path
-		context.tests_path = context.ddad_path
-			.. "/tools/env_simulator/ASTAS_DATA/E2EOpTestArtifacts/SCMHighway/Resources/Configurations/"
-		context.common_resources_path = context.ddad_path
-			.. "/tools/env_simulator/ExampleData/E2EOpTestArtifacts/SCMHighway/Resources/Common"
+		local co = coroutine.running()
 
-		-- TODO: change this to first list test category directories, like SCMHighway, then the configuration directories inside it
+		local test_groups_path = context.ddad_path .. "/tools/env_simulator/ExampleData/E2EOpTestArtifacts"
+		local test_groups = {}
+		for name, type in vim.fs.dir(test_groups_path) do
+			if type == "directory" then
+				table.insert(test_groups, name)
+			end
+		end
+		table.sort(test_groups)
+		picker.select_one(test_groups, {
+			prompt = "Select test group",
+		}, function(v)
+			coroutine.resume(co, v)
+		end)
+		local selected_test_group = coroutine.yield()
+		if not selected_test_group then
+			return nil
+		end
+
+		local scenarios_path = test_groups_path .. "/" .. selected_test_group .. "/Resources/Configurations/"
+		context.common_resources_path = test_groups_path .. "/" .. selected_test_group .. "/Resources/Common"
 
 		local dirs = {}
-		for name, type in vim.fs.dir(context.tests_path) do
+		for name, type in vim.fs.dir(scenarios_path) do
 			if type == "directory" then
 				table.insert(dirs, name)
 			end
 		end
 		table.sort(dirs)
-
-		local co = coroutine.running()
 		picker.select_one(dirs, {
-			prompt = "Select configuration directory",
+			prompt = "Select scenario",
 		}, function(v)
 			coroutine.resume(co, v)
 		end)
-		context.selected_test = coroutine.yield()
-		if context.selected_test == nil then
+		local selected_scenario = coroutine.yield()
+		if not selected_scenario then
 			return nil
 		end
-		context.selected_test_path = context.tests_path .. context.selected_test
+		context.selected_scenario_path = scenarios_path .. selected_scenario
 
 		local selected_config = utils.select_config(co)
+		if not selected_config then
+			return nil
+		end
 		context.selected_config = table.concat(selected_config, " ")
 		local selected_repositories = utils.select_override_repositories(co)
 		context.selected_repositories = table.concat(selected_repositories, " ")
 
+		-- TODO: add args input
+
+		context.context_name = "Run " .. selected_scenario .. " E2E test in astas_cli"
+
+		context.output_path = vim.fn.expand("~")
+			.. "/simulation_outputs/"
+			.. selected_scenario
+			.. "/"
+			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
+
 		return context
 	end,
 	pre_run_cmd = function(context)
-		context.output_path = vim.fn.expand("~")
-			.. "/simulation_outputs/"
-			.. context.selected_test
-			.. "/"
-			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 		-- TODO: Change this script to not overwrite already existing files, like ProfilesCatalog.xml and systemConfigBlueprint.xml as those may have been changed for the test
 		return {
 			"env",
 			"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
-			"SELECTED_TEST_PATH=" .. context.selected_test_path,
+			"SELECTED_SCENARIO_PATH=" .. context.selected_scenario_path,
 			"DDAD_PATH=" .. context.ddad_path,
 			"OUTPUT_PATH=" .. context.output_path,
 			"SELECTED_CONFIG=" .. context.selected_config,
@@ -211,22 +233,23 @@ local e2e_tests_astas_cli = {
 
           bazel build $SELECTED_CONFIG $SELECTED_REPOSITORIES -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
 
-          cp "$COMMON_RESOURCES_PATH/MiscObjects"               "$SELECTED_TEST_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/UserSettings"              "$SELECTED_TEST_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/Vehicles"                  "$SELECTED_TEST_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/systemConfigBlueprint.xml" "$SELECTED_TEST_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/ProfilesCatalog.xml"       "$SELECTED_TEST_PATH" -r --remove-destination
-          sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, $DDAD_PATH/bazel-bin/external/gecco_default/src/controller}|" "$SELECTED_TEST_PATH/UserSettings/UserSettings.ini"
-          sed -i "s|"/path/to/update"|"$SELECTED_TEST_PATH"|" "$SELECTED_TEST_PATH/Scenarios/XOSC/Scenario.xosc"
+          cp "$COMMON_RESOURCES_PATH/MiscObjects"               "$SELECTED_SCENARIO_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/UserSettings"              "$SELECTED_SCENARIO_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/Vehicles"                  "$SELECTED_SCENARIO_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/systemConfigBlueprint.xml" "$SELECTED_SCENARIO_PATH" -r --remove-destination
+          cp "$COMMON_RESOURCES_PATH/ProfilesCatalog.xml"       "$SELECTED_SCENARIO_PATH" -r --remove-destination
+          sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, $DDAD_PATH/bazel-bin/external/gecco_default/src/controller}|" "$SELECTED_SCENARIO_PATH/UserSettings/UserSettings.ini"
+          sed -i "s|"/path/to/update"|"$SELECTED_SCENARIO_PATH"|" "$SELECTED_SCENARIO_PATH/Scenarios/XOSC/Scenario.xosc"
 
           mkdir -p "$OUTPUT_PATH"
-          sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_TEST_PATH/UserSettings/UserSettings.ini"
+          sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_SCENARIO_PATH/UserSettings/UserSettings.ini"
 
-          cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_TEST_PATH"
+          cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_SCENARIO_PATH"
         ]],
 		}
 	end,
 	cmd = function(context)
+		vim.notify("Started cmd")
 		return {
 			context.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
 			"-t",
@@ -236,9 +259,9 @@ local e2e_tests_astas_cli = {
 			"-r",
 			"0",
 			"-s",
-			context.selected_test_path .. "/Scenarios/XOSC/Scenario.xosc",
+			context.selected_scenario_path .. "/Scenarios/XOSC/Scenario.xosc",
 			"-d",
-			context.selected_test_path,
+			context.selected_scenario_path,
 			"-p",
 			context.output_path,
 			"-l",

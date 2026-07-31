@@ -27,6 +27,8 @@ function M.select_config(co)
 		else
 			table.insert(cmd_args, "--config=" .. selected_config)
 		end
+	else
+		return nil
 	end
 
 	return cmd_args
