@@ -108,7 +108,7 @@ local e2e_tests = {
 			return nil
 		end
 
-    -- Read the JSON file and get available tests
+		-- Read the JSON file and get available tests
 		local decode_ok, decoded_json = pcall(vim.json.decode, table.concat(json_text, "\n"))
 		if not decode_ok then
 			vim.notify("Could not decode the JSON file: " .. json_path, vim.log.levels.ERROR)
@@ -137,14 +137,14 @@ local e2e_tests = {
 		end
 
 		context.context_name = "Run " .. context.selected_test .. " E2E test"
-
-		context.output_path = vim.fn.expand("~")
-			.. "/simulation_outputs/e2e-tests/"
+		context.json_name = vim.fs.basename(json_path)
+		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
+		context.output_path = context.output_parent_path
+			.. "/"
 			.. context.selected_test
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
-
-    context.raw_artifacts_path = context.output_path .. "/E2E-Artifacts"
+		context.raw_artifacts_path = context.output_path .. "/E2E-Artifacts"
 
 		return context
 	end,
@@ -158,25 +158,38 @@ local e2e_tests = {
 			"--store-artifacts",
 			"-vvv",
 			"-k=" .. context.selected_test,
-			"--artifacts-path=" .. context.raw_artifacts_path
+			"--artifacts-path=" .. context.raw_artifacts_path,
 		}
 	end,
-  post_run_cmd = function (context)
+	post_run_cmd = function(context)
 		return {
 			"env",
-      "OUTPUT_PATH=" .. context.output_path,
+			"DDAD_PATH=" .. context.ddad_path,
+			"JSON_NAME=" .. context.json_name,
+			"SELECTED_TEST=" .. context.selected_test,
+			"OUTPUT_PARENT_PATH=" .. context.output_parent_path,
+			"OUTPUT_PATH=" .. context.output_path,
 			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
 			"bash",
 			"-c",
 			[[
           set -e # Fail this script on first command failure
 
+          TEST_GROUP=$(basename $RAW_ARTIFACTS_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*)
+
           mkdir $OUTPUT_PATH/artifacts
           mv $RAW_ARTIFACTS_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* $OUTPUT_PATH/artifacts
           rm -rf $RAW_ARTIFACTS_PATH
+
+          cp $DDAD_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/$TEST_GROUP/Resources/$JSON_NAME $OUTPUT_PATH
+          cp -r $DDAD_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/$TEST_GROUP/Resources/Configurations/$SELECTED_TEST $OUTPUT_PATH/configuration
+
+          rm -rf $OUTPUT_PARENT_PATH/_latest_artifacts
+          mkdir $OUTPUT_PARENT_PATH/_latest_artifacts
+          cp -r $OUTPUT_PATH/artifacts/*/* $OUTPUT_PARENT_PATH/_latest_artifacts
         ]],
 		}
-  end
+	end,
 }
 
 local e2e_tests_astas_cli = {
