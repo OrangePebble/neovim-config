@@ -174,20 +174,20 @@ local e2e_tests = {
 			"bash",
 			"-c",
 			[[
-          set -e # Fail this script on first command failure
+          set -euo pipefail # Fail this script on first command failure
 
-          TEST_GROUP=$(basename $RAW_ARTIFACTS_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*)
+          TEST_GROUP=$(basename "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*)
 
-          mkdir $OUTPUT_PATH/artifacts
-          mv $RAW_ARTIFACTS_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* $OUTPUT_PATH/artifacts
-          rm -rf $RAW_ARTIFACTS_PATH
+          mkdir "${OUTPUT_PATH}"/artifacts
+          mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* "${OUTPUT_PATH}"/artifacts
+          rm -rf "${RAW_ARTIFACTS_PATH}"
 
-          cp $DDAD_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/$TEST_GROUP/Resources/$JSON_NAME $OUTPUT_PATH
-          cp -r $DDAD_PATH/tools/env_simulator/ExampleData/E2EOpTestArtifacts/$TEST_GROUP/Resources/Configurations/$SELECTED_TEST $OUTPUT_PATH/configuration
+          cp "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/"${JSON_NAME}" "${OUTPUT_PATH}"
+          cp -r "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/Configurations/"${SELECTED_TEST}" "${OUTPUT_PATH}"/configuration
 
-          rm -rf $OUTPUT_PARENT_PATH/_latest_artifacts
-          mkdir $OUTPUT_PARENT_PATH/_latest_artifacts
-          cp -r $OUTPUT_PATH/artifacts/*/* $OUTPUT_PARENT_PATH/_latest_artifacts
+          rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          cp -r "${OUTPUT_PATH}"/artifacts/*/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
       ]],
 		}
 	end,
