@@ -326,13 +326,31 @@ local e2e_tests_astas_cli = {
 			[[
           set -euo pipefail # Fail this script on first command failure
 
-          sed -i "s|schemaVersion=\"0.0.3\"|schemaVersion=\"0.3.1\"|" "${OUTPUT_DIR}"/artifacts/simulationOutput.xml
+          VENV="${OUTPUT_PARENT_PATH}"/.venv
+          if [ ! -f "${VENV}"/bin/activate ]; then
+              # Uses system packages
+              python3.12 -m venv --system-site-packages "${VENV}"
+          fi
+          source "${VENV}"/bin/activate
+
+          # Install the pytest plugin into the venv if it is not importable yet.
+          if ! python3.12 -c 'import pytest_optestrunner' >/dev/null 2>&1; then
+               bazel fetch @op_test_runner//:op_test_runner
+               OPTR_FOLDER="$(bazel info output_base)/external/op_test_runner"
+               python3.12 -m pip install -e "$OPTR_FOLDER/plugin/optestrunner"
+           fi
+
+          cp "${OUTPUT_PATH}"/configuration/*.xodr "${OUTPUT_PATH}"/artifacts
+          python3.12 -m pytest_optestrunner.merge_csv2csv -r "${OUTPUT_PATH}"/artifacts
+          python3.12 -m pytest_optestrunner.merge -r "${OUTPUT_PATH}"/artifacts
+
+          sed -i "s|schemaVersion=\"0.0.3\"|schemaVersion=\"0.3.1\"|" "${OUTPUT_PATH}"/artifacts/simulationOutput.xml
+
           rm "${OUTPUT_PATH}"/configuration/AlgorithmScm.fmu
 
           rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
           mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
           cp -r "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-
           mv default.profraw "${OUTPUT_PARENT_PATH}"/_latest_artifacts
       ]],
 		}
