@@ -81,8 +81,7 @@ local e2e_tests = {
 		end
 
 		-- Get the file group for the JSON file
-		-- This matches the first location so it depends on the order defined in the bazel file
-		local json_filegroup = build_data:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%)]+)%)")
+		local json_filegroup = build_data:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%s%)]+_json_file)%)")
 		if not json_filegroup then
 			vim.notify("Could not resolve the JSON filegroup.", vim.log.levels.ERROR)
 			return nil
@@ -116,7 +115,7 @@ local e2e_tests = {
 		end
 		local test_names = {}
 		for test_name in pairs(decoded_json.tests or {}) do
-			if not vim.startswith(test_name, "DISABLED_") then
+			if not vim.startswith(test_name:upper(), "DISABLED_") then
 				table.insert(test_names, test_name)
 			end
 		end
