@@ -22,9 +22,7 @@
 ---@field is_overseer_task? true
 ---@field is_dap_task? true
 ---@field pre_task_overseer? overseer.Task
----@field pre_task_status? overseer.Status
 ---@field task_overseer? overseer.Task
----@field task_status? overseer.Status
 ---@field [string] any
 
 ---@class Task
@@ -43,9 +41,7 @@ local M = {
 		enabled = true,
 		options = {
 			ephemeral = true,
-			components = {
-				{ "on_exit_set_status", "default" },
-			},
+			components = { "default" },
 		},
 	},
 	dap = {

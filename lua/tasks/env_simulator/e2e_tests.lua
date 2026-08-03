@@ -140,6 +140,10 @@ local e2e_tests = {
 		context.context_name = "Run " .. context.selected_test .. " E2E test"
 		context.json_name = vim.fs.basename(json_path)
 		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
+		return context
+	end,
+	cmd = function(context)
+		-- output_path is not inside resolve_context so that the date is different when run_last is used
 		context.output_path = context.output_parent_path
 			.. "/"
 			.. context.selected_test
@@ -147,9 +151,6 @@ local e2e_tests = {
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 		context.raw_artifacts_path = context.output_path .. "/E2E-Artifacts"
 
-		return context
-	end,
-	cmd = function(context)
 		return {
 			"bazel",
 			"run",
@@ -163,6 +164,18 @@ local e2e_tests = {
 		}
 	end,
 	post_run_cmd = function(context)
+		local exit_code = context.task_overseer.exit_code
+		local lines = {
+			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
+			"",
+		}
+
+		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
+		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
+		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
+
+		vim.fn.writefile(lines, context.output_path .. "/runlog.txt")
+
 		return {
 			"env",
 			"DDAD_PATH=" .. context.ddad_path,
@@ -181,6 +194,7 @@ local e2e_tests = {
           mkdir "${OUTPUT_PATH}"/artifacts
           mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* "${OUTPUT_PATH}"/artifacts
           rm -rf "${RAW_ARTIFACTS_PATH}"
+          mv "${OUTPUT_PATH}"/runlog.txt "${OUTPUT_PATH}"/artifacts/*/
 
           cp "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/"${JSON_NAME}" "${OUTPUT_PATH}"
           cp -r "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/Configurations/"${SELECTED_TEST}" "${OUTPUT_PATH}"/configuration
@@ -195,7 +209,7 @@ local e2e_tests = {
 
 ---@type Task
 local e2e_tests_astas_cli = {
-	name = "Run E2E test in astas_cli",
+	name = "Run E2E test scenario in astas_cli",
 	dap = {
 		enabled = true,
 		options = {
@@ -240,11 +254,11 @@ local e2e_tests_astas_cli = {
 		}, function(v)
 			coroutine.resume(co, v)
 		end)
-		local selected_scenario = coroutine.yield()
-		if not selected_scenario then
+		context.selected_scenario = coroutine.yield()
+		if not context.selected_scenario then
 			return nil
 		end
-		context.selected_scenario_path = scenarios_path .. selected_scenario
+		context.selected_scenario_path = scenarios_path .. context.selected_scenario
 
 		local selected_config = utils.select_config(co)
 		if not selected_config then
@@ -254,18 +268,20 @@ local e2e_tests_astas_cli = {
 		local selected_repositories = utils.select_override_repositories(co)
 		context.selected_repositories = table.concat(selected_repositories, " ")
 
-		context.context_name = "Run " .. selected_scenario .. " E2E test in astas_cli"
+		context.context_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
 
 		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
-		context.output_path = context.output_parent_path
-			.. "/"
-			.. selected_scenario
-			.. "/"
-			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
 		return context
 	end,
 	pre_run_cmd = function(context)
+		-- output_path is not inside resolve_context so that the date is different when run_last is used
+		context.output_path = context.output_parent_path
+			.. "/"
+			.. context.selected_scenario
+			.. "/"
+			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
+
 		return {
 			"env",
 			"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
@@ -294,7 +310,6 @@ local e2e_tests_astas_cli = {
 		}
 	end,
 	cmd = function(context)
-		vim.notify("Started cmd")
 		return {
 			context.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
 			"-t",
@@ -316,7 +331,18 @@ local e2e_tests_astas_cli = {
 		}
 	end,
 	post_run_cmd = function(context)
-		-- TODO: copy the overseer output content into a file, for this and the other task
+		local exit_code = context.task_overseer.exit_code
+		local lines = {
+			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
+			"",
+		}
+
+		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
+		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
+		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
+
+		vim.fn.writefile(lines, context.output_path .. "/artifacts/runlog.txt")
+
 		return {
 			"env",
 			"OUTPUT_PATH=" .. context.output_path,

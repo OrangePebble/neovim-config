@@ -63,7 +63,6 @@ local function run_overseer_task(task, context)
 		if task.post_run_cmd then
 			main_task:subscribe("on_complete", function(_, status)
 				context.task_overseer = main_task
-				context.task_status = status
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task_name,
 					cmd = task.post_run_cmd(context),
@@ -81,7 +80,6 @@ local function run_overseer_task(task, context)
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			context.pre_task_overseer = pre_task
-			context.pre_task_status = pre_status
 			if pre_status ~= "SUCCESS" then
 				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
 				return
@@ -149,6 +147,7 @@ local function run_dap_task(task, context)
 				cmd = cmd,
 			}))
 			repl_task.status = status
+			repl_task.exit_code = exit_code
 			repl_task.time_start = time_start
 			repl_task.time_end = os.time()
 			repl_task.metadata.raw_output = output
@@ -166,7 +165,6 @@ local function run_dap_task(task, context)
 
 			if task.post_run_cmd then
 				context.task_overseer = repl_task
-				context.task_status = status
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task_name,
 					cmd = task.post_run_cmd(context),
@@ -200,7 +198,6 @@ local function run_dap_task(task, context)
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			context.pre_task_overseer = pre_task
-			context.pre_task_status = pre_status
 			if pre_status ~= "SUCCESS" then
 				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
 				return
