@@ -256,8 +256,9 @@ local e2e_tests_astas_cli = {
 
 		context.context_name = "Run " .. selected_scenario .. " E2E test in astas_cli"
 
-		context.output_path = vim.fn.expand("~")
-			.. "/simulation_outputs/e2e-tests-astas_cli/"
+		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
+		context.output_path = context.output_parent_path
+			.. "/"
 			.. selected_scenario
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
@@ -265,7 +266,6 @@ local e2e_tests_astas_cli = {
 		return context
 	end,
 	pre_run_cmd = function(context)
-		-- TODO: Change this script to not overwrite already existing files, like ProfilesCatalog.xml and systemConfigBlueprint.xml as those may have been changed for the test
 		return {
 			"env",
 			"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
@@ -277,22 +277,19 @@ local e2e_tests_astas_cli = {
 			"bash",
 			"-c",
 			[[
-          set -e # Fail this script on first command failure
+          set -euo pipefail # Fail this script on first command failure
 
           bazel build $SELECTED_CONFIG $SELECTED_REPOSITORIES -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
 
-          cp "$COMMON_RESOURCES_PATH/MiscObjects"               "$SELECTED_SCENARIO_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/UserSettings"              "$SELECTED_SCENARIO_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/Vehicles"                  "$SELECTED_SCENARIO_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/systemConfigBlueprint.xml" "$SELECTED_SCENARIO_PATH" -r --remove-destination
-          cp "$COMMON_RESOURCES_PATH/ProfilesCatalog.xml"       "$SELECTED_SCENARIO_PATH" -r --remove-destination
-          sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, $DDAD_PATH/bazel-bin/external/gecco_default/src/controller}|" "$SELECTED_SCENARIO_PATH/UserSettings/UserSettings.ini"
-          sed -i "s|"/path/to/update"|"$SELECTED_SCENARIO_PATH"|" "$SELECTED_SCENARIO_PATH/Scenarios/XOSC/Scenario.xosc"
+          mkdir -p "${OUTPUT_PATH}"/artifacts
+          cp -r "${SELECTED_SCENARIO_PATH}" "${OUTPUT_PATH}"/configuration
+          # Using rsync because cp without overwriting is a mess
+  				rsync -a --ignore-existing "${COMMON_RESOURCES_PATH}/" "${OUTPUT_PATH}"/configuration/
+          cp "${DDAD_PATH}"/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu "${OUTPUT_PATH}"/configuration
 
-          mkdir -p "$OUTPUT_PATH"
-          sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_SCENARIO_PATH/UserSettings/UserSettings.ini"
-
-          cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_SCENARIO_PATH"
+          sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, ${DDAD_PATH}/bazel-bin/external/gecco_default/src/controller}|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
+          sed -i "s|\"/path/to/update\"|\"${OUTPUT_PATH}/configuration\"|" "${OUTPUT_PATH}"/configuration/Scenarios/XOSC/Scenario.xosc
+          sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH/artifacts|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
       ]],
 		}
 	end,
@@ -307,15 +304,37 @@ local e2e_tests_astas_cli = {
 			"-r",
 			"0",
 			"-s",
-			context.selected_scenario_path .. "/Scenarios/XOSC/Scenario.xosc",
+			context.output_path .. "/configuration/Scenarios/XOSC/Scenario.xosc",
 			"-d",
-			context.selected_scenario_path,
+			context.output_path .. "/configuration",
 			"-p",
-			context.output_path,
+			context.output_path .. "/artifacts",
 			"-l",
-			context.output_path,
+			context.output_path .. "/artifacts",
 			"-o",
-			context.output_path .. "/output.mcap",
+			context.output_path .. "/artifacts/output.mcap",
+		}
+	end,
+	post_run_cmd = function(context)
+		-- TODO: copy the overseer output content into a file, for this and the other task
+		return {
+			"env",
+			"OUTPUT_PATH=" .. context.output_path,
+			"OUTPUT_PARENT_PATH=" .. context.output_parent_path,
+			"bash",
+			"-c",
+			[[
+          set -euo pipefail # Fail this script on first command failure
+
+          sed -i "s|schemaVersion=\"0.0.3\"|schemaVersion=\"0.3.1\"|" "${OUTPUT_DIR}"/artifacts/simulationOutput.xml
+          rm "${OUTPUT_PATH}"/configuration/AlgorithmScm.fmu
+
+          rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          cp -r "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+
+          mv default.profraw "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+      ]],
 		}
 	end,
 }
