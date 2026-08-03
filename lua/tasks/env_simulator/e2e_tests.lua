@@ -32,6 +32,7 @@ local function run_bazel_query(cmd, co)
 	return result.stdout or ""
 end
 
+---@type Task
 local e2e_tests = {
 	name = "Run E2E test",
 	resolve_context = function()
@@ -81,7 +82,8 @@ local e2e_tests = {
 		end
 
 		-- Get the file group for the JSON file
-		local json_filegroup = build_data:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%s%)]+_json_file)%)")
+		local json_filegroup =
+			build_data:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%s%)]+_json_file)%)")
 		if not json_filegroup then
 			vim.notify("Could not resolve the JSON filegroup.", vim.log.levels.ERROR)
 			return nil
@@ -186,11 +188,12 @@ local e2e_tests = {
           rm -rf $OUTPUT_PARENT_PATH/_latest_artifacts
           mkdir $OUTPUT_PARENT_PATH/_latest_artifacts
           cp -r $OUTPUT_PATH/artifacts/*/* $OUTPUT_PARENT_PATH/_latest_artifacts
-        ]],
+      ]],
 		}
 	end,
 }
 
+---@type Task
 local e2e_tests_astas_cli = {
 	name = "Run E2E test in astas_cli",
 	dap = {
@@ -290,7 +293,7 @@ local e2e_tests_astas_cli = {
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH|" "$SELECTED_SCENARIO_PATH/UserSettings/UserSettings.ini"
 
           cp "$DDAD_PATH/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu" "$SELECTED_SCENARIO_PATH"
-        ]],
+      ]],
 		}
 	end,
 	cmd = function(context)

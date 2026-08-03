@@ -33,7 +33,7 @@
 ---@field resolve_context? fun(): TaskContext|nil The phase when the user is asked for input. Returns context for the cmds to use or nil if failed or cancelled
 ---@field pre_run_cmd? fun(context: table): string[] Returns a list of a cmd and args to run before the main cmd
 ---@field cmd fun(context: table): string[] Returns a list of a cmd and args. Has to be the actual executable as 1st value for use in dap
----@field post_run_cmd? fun(context: table, status?: string): string[] Returns a list of a cmd and args to run after the main cmd
+---@field post_run_cmd? fun(context: table): string[] Returns a list of a cmd and args to run after the main cmd
 ---@field overseer? { enabled: boolean, options?: OverseerOptions } 'options' is used by all cmds
 ---@field dap? { enabled: true, options: DapOptions } | { enabled: false, options?: DapOptions }
 

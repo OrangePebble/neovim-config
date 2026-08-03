@@ -50,6 +50,7 @@ local last_dap_task = nil
 ---@param task Task
 ---@param context TaskContext
 local function run_overseer_task(task, context)
+	context.is_overseer_task = true
 	local task_name = task.name
 	if context.context_name then
 		task_name = context.context_name
@@ -61,9 +62,11 @@ local function run_overseer_task(task, context)
 		}))
 		if task.post_run_cmd then
 			main_task:subscribe("on_complete", function(_, status)
+				context.task_overseer = main_task
+				context.task_status = status
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task_name,
-					cmd = task.post_run_cmd(context, status),
+					cmd = task.post_run_cmd(context),
 				}))
 				post_task:start()
 			end)
@@ -77,6 +80,8 @@ local function run_overseer_task(task, context)
 			cmd = task.pre_run_cmd(context),
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
+			context.pre_task_overseer = pre_task
+			context.pre_task_status = pre_status
 			if pre_status ~= "SUCCESS" then
 				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
 				return
@@ -92,6 +97,7 @@ end
 ---@param task Task
 ---@param context TaskContext
 local function run_dap_task(task, context)
+	context.is_dap_task = true
 	local task_name = task.name
 	if context.context_name then
 		task_name = context.context_name
@@ -107,9 +113,24 @@ local function run_dap_task(task, context)
 		local time_start = os.time()
 		local listener_key = "tasks.dap_complete." .. task_name .. "." .. tostring(time_start)
 		local repl_output = {}
-		local function on_dap_complete(_, body)
+		local exit_code = nil
+		local was_canceled = false
+		local function on_dap_complete()
+			dap.listeners.before.terminate[listener_key] = nil
+			dap.listeners.before.disconnect[listener_key] = nil
 			dap.listeners.after.event_terminated[listener_key] = nil
+			dap.listeners.after.event_exited[listener_key] = nil
 			dap.listeners.after.event_output[listener_key] = nil
+
+			---@type overseer.Status
+			local status
+			if was_canceled then
+				status = "CANCELED"
+			elseif exit_code == 0 then
+				status = "SUCCESS"
+			else
+				status = "FAILURE"
+			end
 
 			local lines = {}
 			local repl_buffer_found = false
@@ -127,7 +148,7 @@ local function run_dap_task(task, context)
 				name = "DAP Output: " .. task_name,
 				cmd = cmd,
 			}))
-			repl_task.status = "SUCCESS"
+			repl_task.status = status
 			repl_task.time_start = time_start
 			repl_task.time_end = os.time()
 			repl_task.metadata.raw_output = output
@@ -144,15 +165,25 @@ local function run_dap_task(task, context)
 			repl_task.strategy.term_id = term_id
 
 			if task.post_run_cmd then
-				local status = body and body.exitCode and tostring(body.exitCode) or nil
+				context.task_overseer = repl_task
+				context.task_status = status
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task_name,
-					cmd = task.post_run_cmd(context, status),
+					cmd = task.post_run_cmd(context),
 				}))
 				post_task:start()
 			end
 		end
+		dap.listeners.before.terminate[listener_key] = function()
+			was_canceled = true
+		end
+		dap.listeners.before.disconnect[listener_key] = function()
+			was_canceled = true
+		end
 		dap.listeners.after.event_terminated[listener_key] = on_dap_complete
+		dap.listeners.after.event_exited[listener_key] = function(_, body)
+			exit_code = body and body.exitCode or nil
+		end
 		dap.listeners.after.event_output[listener_key] = function(_, body)
 			if body and body.category ~= "telemetry" and body.output and body.output ~= "" then
 				table.insert(repl_output, body.output)
@@ -168,6 +199,8 @@ local function run_dap_task(task, context)
 			cmd = task.pre_run_cmd(context),
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
+			context.pre_task_overseer = pre_task
+			context.pre_task_status = pre_status
 			if pre_status ~= "SUCCESS" then
 				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
 				return
@@ -204,7 +237,6 @@ local function generic_to_overseer_tasks(generic_tasks)
 						)
 						return
 					end
-					context.is_overseer_task = true
 					last_overseer_task = { task = task, context = context }
 					run_overseer_task(task, context)
 				end,
@@ -239,7 +271,6 @@ local function generic_to_dap_tasks(generic_tasks)
 						)
 						return
 					end
-					context.is_dap_task = true
 					last_dap_task = { task = task, context = context }
 					run_dap_task(task, context)
 				end,
@@ -380,6 +411,8 @@ M.choose_and_run_dap_task = function()
 	end)
 end
 
+-- TODO: make this work with :OverseerShell, probably create a new way to run a shell command with my system
+--  this new command should have history so it would probably be a command and not an input
 M.run_last_overseer_task = function()
 	if last_overseer_task then
 		run_overseer_task(last_overseer_task.task, last_overseer_task.context)

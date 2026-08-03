@@ -1,3 +1,6 @@
+-- TODO: replace this plugin with more basic functinality as I don't use the accept/reject/edit prompts
+--  I just want to replicate the sending requests functinality so I have more control,
+--  like sending the full path because I often use opencode from my home directory
 return {
 	"nickjvandyke/opencode.nvim",
 	version = "*", -- Latest stable release
