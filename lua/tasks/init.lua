@@ -416,8 +416,6 @@ M.choose_and_run_dap_task = function()
 	end)
 end
 
--- TODO: make this work with :OverseerShell, probably create a new way to run a shell command with my system
---  this new command should have history so it would probably be a command and not an input
 M.run_last_overseer_task = function()
 	if last_overseer_task then
 		run_overseer_task(last_overseer_task.task, last_overseer_task.context)
@@ -437,5 +435,28 @@ M.run_last_dap_task = function()
 		vim.notify("No debugging task has been run.", vim.log.levels.WARN)
 	end
 end
+
+M.init_shell_task_command = function()
+	vim.api.nvim_create_user_command("ShellTask", function(args)
+		local task = vim.tbl_deep_extend("keep", {
+			name = args.args,
+			cmd = function()
+				return args.args
+			end,
+		}, task_defaults)
+		local context = {}
+
+		last_overseer_task = { task = task, context = context }
+		if not args.bang then
+			run_overseer_task(task, context)
+		end
+	end, {
+		bang = true,
+		complete = "shellcmdline",
+		desc = "Run a shell command as a task",
+		nargs = "+",
+	})
+end
+M.init_shell_task_command()
 
 return M
