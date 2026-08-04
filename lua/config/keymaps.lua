@@ -39,6 +39,14 @@ keymap("n", "<leader>P", '"+P', { desc = "Paste from clipboard before" })
 keymap("x", "<leader>d", '"_d', { desc = "Delete without yanking" })
 keymap("x", "<leader>p", '"_dP', { desc = "Paste without yanking" })
 
+-- Print absoulute file path and yank it to clipboard
+keymap("n", "<leader>%", function()
+	local path = vim.fn.expand("%:p")
+	vim.fn.setreg("+", path)
+	vim.notify("Printed and yanked file path to clipboard.", vim.log.levels.INFO)
+	vim.print(path)
+end, { desc = "Get file path" })
+
 -- Clear search highlighting by pressing <Esc> in normal mode.
 keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
 

@@ -43,6 +43,7 @@ return {
 				{ "<leader>u", icon = { icon = "", color = "yellow" } },
 				{ "<leader>e", icon = { icon = "", color = "yellow" } },
 				{ "<leader>d", mode = "x", icon = { icon = "󰆴", color = "red" } },
+				{ "<leader>%", icon = { icon = "󰈔", color = "grey" } },
 				{ "]t", icon = { icon = "󰷐", color = "grey" } },
 				{ "[t", icon = { icon = "󰷐", color = "grey" } },
 
