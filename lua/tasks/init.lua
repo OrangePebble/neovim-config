@@ -420,7 +420,14 @@ M.run_last_overseer_task = function()
 	if last_overseer_task then
 		run_overseer_task(last_overseer_task.task, last_overseer_task.context)
 	else
-		vim.notify("No task has been run.", vim.log.levels.WARN)
+		local task = overseer.list_tasks({
+			sort = require("overseer.task_list").sort_finished_recently,
+		})[1]
+		if task then
+			task:clone():start()
+		else
+			vim.notify("No tasks found.", vim.log.levels.WARN)
+		end
 	end
 end
 
@@ -432,7 +439,7 @@ M.run_last_dap_task = function()
 			run_dap_task(last_dap_task.task, last_dap_task.context)
 		end
 	else
-		vim.notify("No debugging task has been run.", vim.log.levels.WARN)
+		vim.notify("No debugging tasks found.", vim.log.levels.WARN)
 	end
 end
 
@@ -443,6 +450,9 @@ M.init_shell_task_command = function()
 			cmd = function()
 				return args.args
 			end,
+			overseer = {
+				options = { ephemeral = false },
+			},
 		}, task_defaults)
 		local context = {}
 
