@@ -1,4 +1,3 @@
--- TODO: see if it is possible to collapse empty folders with only 1 child folder into their children
 -- A file explorer tree.
 return {
 	"nvim-tree/nvim-tree.lua",
@@ -26,6 +25,7 @@ return {
 				git_ignored = false, -- Show files in .gitignore. Hide them with 'I'.
 			},
 			renderer = {
+				group_empty = true,
 				root_folder_label = function()
 					return ".."
 				end,

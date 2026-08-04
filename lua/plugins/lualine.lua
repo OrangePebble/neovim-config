@@ -20,6 +20,41 @@ return {
 			[require("overseer").STATUS.DISPOSED] = "󰄰 ",
 		}
 
+		local scrolling_text_focused_at = {}
+		vim.api.nvim_create_autocmd("BufEnter", {
+			callback = function(args)
+				scrolling_text_focused_at[args.buf] = vim.uv.now()
+			end,
+		})
+		local function scrolling_text(width, text)
+			if vim.fn.strchars(text) <= width then
+				return text
+			end
+
+			local now = vim.uv.now()
+			local buffer = vim.api.nvim_get_current_buf()
+			local loop = text .. "   "
+			local interval = 100
+			local pause_duration = 5000
+			local pause_offset = vim.fn.strchars(text) - width
+			local pause_start = pause_offset * interval
+			scrolling_text_focused_at[buffer] = scrolling_text_focused_at[buffer] or now
+			local elapsed = (pause_start + now - scrolling_text_focused_at[buffer])
+				% (vim.fn.strchars(loop) * interval + pause_duration)
+			local offset
+
+			if elapsed < pause_start then
+				offset = math.floor(elapsed / interval)
+			elseif elapsed < pause_start + pause_duration then
+				offset = pause_offset
+			else
+				offset = math.floor((elapsed - pause_duration) / interval)
+			end
+
+			offset = (2 * pause_offset - offset) % vim.fn.strchars(loop)
+			return vim.fn.strcharpart(loop .. loop, offset, width)
+		end
+
 		local help_extension = { sections = { lualine_y = { "filetype" } }, filetypes = { "help" } }
 
 		local dapui_extension = {
@@ -40,7 +75,8 @@ return {
 				lualine_a = {
 					{
 						function()
-							return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+							local path = vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+							return scrolling_text(vim.api.nvim_win_get_width(0) - 3, path)
 						end,
 						on_click = function()
 							require("nvim-tree.api").tree.toggle()
@@ -52,7 +88,8 @@ return {
 				lualine_c = {
 					{
 						function()
-							return vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+							local path = vim.fn.fnamemodify(vim.fn.getcwd(), ":~")
+							return scrolling_text(vim.api.nvim_win_get_width(0) - 3, path)
 						end,
 						on_click = function()
 							require("nvim-tree.api").tree.toggle()
@@ -105,11 +142,36 @@ return {
 			filetypes = { "OverseerOutput" },
 		}
 
+		local scrolling_file_path_component = {
+			function()
+				local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":.")
+				if path == "" then
+					path = "[No Name]"
+				end
+
+				local width = vim.fn.strchars(vim.fn.fnamemodify(path, ":t"))
+				local text = scrolling_text(width, path):gsub("%%", "%%%%")
+				local symbols = {}
+				if vim.bo.modified then
+					table.insert(symbols, "[+]")
+				end
+				if not vim.bo.modifiable or vim.bo.readonly then
+					table.insert(symbols, "[-]")
+				end
+
+				return text .. (#symbols > 0 and " " .. table.concat(symbols) or "")
+			end,
+			on_click = function()
+				require("nvim-tree.api").tree.toggle({ focus = false })
+			end,
+		}
+
 		-- See the default config here:
 		-- https://github.com/nvim-lualine/lualine.nvim?tab=readme-ov-file#default-configuration
 		require("lualine").setup({
 			options = {
 				icons_enabled = true,
+				refresh = { statusline = 100 },
 			},
 			extensions = {
 				"trouble",
@@ -155,25 +217,7 @@ return {
 							return vim.bo.buftype ~= ""
 						end,
 					},
-					{
-						"filename",
-						on_click = function()
-							require("nvim-tree.api").tree.toggle({ focus = false })
-						end,
-						cond = function()
-							return not vim.g.nvim_tree_open
-						end,
-					},
-					{
-						"filename",
-						path = 1, -- Relative path
-						on_click = function()
-							require("nvim-tree.api").tree.close()
-						end,
-						cond = function()
-							return vim.g.nvim_tree_open
-						end,
-					},
+					scrolling_file_path_component,
 				},
 			},
 			inactive_sections = {
@@ -193,26 +237,7 @@ return {
 							return vim.bo.buftype ~= ""
 						end,
 					},
-					{
-						"filename",
-						on_click = function()
-							require("nvim-tree.api").tree.toggle({ focus = false })
-						end,
-						cond = function()
-							return not vim.g.nvim_tree_open
-						end,
-					},
-					{
-            -- TODO: Is there maybe a way to instead of shortenning the path directory names to instead scroll the full thing?
-						"filename",
-						path = 1, -- Relative path
-						on_click = function()
-							require("nvim-tree.api").tree.close()
-						end,
-						cond = function()
-							return vim.g.nvim_tree_open
-						end,
-					},
+					scrolling_file_path_component,
 				},
 			},
 		})
