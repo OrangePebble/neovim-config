@@ -5,7 +5,9 @@ return {
 		---@type overseer.SetupOpts
 		overseer.setup({
 			task_list = {
-				separator = "─────────────────────────────────────────────────────────────────────────────",
+        -- https://en.wikipedia.org/wiki/Box_Drawing
+				separator = "────────────────────────────────────────",
+        child_indent = { "│ ", "├─", "┴─" },
 				render = function(task)
 					local overseer_render = require("overseer.render")
 					local status_icon = "󰄰"
