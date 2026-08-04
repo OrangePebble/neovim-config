@@ -100,44 +100,51 @@ return {
 			filetypes = { "NvimTree" },
 		}
 
+		local function on_click_toggle_overseer(component)
+			return vim.tbl_extend("force", component, {
+				on_click = function()
+					require("overseer").toggle({ enter = false })
+				end,
+			})
+		end
 		local overseer_list_extension = {
 			sections = {
-				lualine_a = {
+				lualine_a = { on_click_toggle_overseer({
 					function()
 						return "󰜎"
 					end,
-				},
+				}) },
 			},
 			inactive_sections = {
-				lualine_c = {
+				lualine_c = { on_click_toggle_overseer({
 					function()
 						return "󰜎"
 					end,
-				},
+				}) },
 			},
 			filetypes = { "OverseerList" },
 		}
 		local overseer_output_extension = {
 			sections = {
-				lualine_c = { { "overseer", symbols = overseer_symbols } },
+				lualine_c = { on_click_toggle_overseer({ "overseer", symbols = overseer_symbols }) },
 				lualine_x = {
 					function()
 						return vim.fn.line(".") .. "/" .. vim.fn.line("$")
 					end,
 				},
-				lualine_z = {
+				lualine_z = { on_click_toggle_overseer({
 					function()
 						return " Overseer"
 					end,
-				},
+				}) },
 			},
 			inactive_sections = {
-				lualine_c = { { "overseer", symbols = overseer_symbols } },
-				lualine_x = {
+				lualine_c = { on_click_toggle_overseer({ "overseer", symbols = overseer_symbols }) },
+				lualine_x = { on_click_toggle_overseer({
 					function()
 						return " Overseer"
 					end,
-				},
+				}) },
 			},
 			filetypes = { "OverseerOutput" },
 		}
@@ -190,7 +197,7 @@ return {
 						"diagnostics",
 						symbols = diagnostic_symbols,
 					},
-					{
+					on_click_toggle_overseer({
 						"overseer",
 						symbols = overseer_symbols,
 						cond = function()
@@ -202,7 +209,7 @@ return {
 							end
 							return true
 						end,
-					},
+					}),
 				},
 				lualine_x = { "filetype" },
 				lualine_y = {},
