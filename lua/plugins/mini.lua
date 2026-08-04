@@ -5,7 +5,7 @@ return {
 	-- - Allows matching objects I'm not inside of.
 	-- - Adds keymap to go to edge of object I'm inside of.
 	-- - Extra matches and more...
-	{ "echasnovski/mini.ai", version = "*", opts = {} },
+	{ "echasnovski/mini.ai", version = "*", opts = { n_lines = 1000 } },
 	-- Improved commenting.
 	{ "echasnovski/mini.comment", version = "*", opts = {} },
 	-- Move text using Ctrl.
