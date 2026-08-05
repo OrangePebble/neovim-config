@@ -174,7 +174,7 @@ local e2e_tests = {
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
 
-		vim.fn.writefile(lines, context.output_path .. "/runlog.txt")
+		vim.fn.writefile(lines, context.output_path .. "/console_output.txt")
 
 		return {
 			"env",
@@ -194,7 +194,7 @@ local e2e_tests = {
           mkdir "${OUTPUT_PATH}"/artifacts
           mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* "${OUTPUT_PATH}"/artifacts
           rm -rf "${RAW_ARTIFACTS_PATH}"
-          mv "${OUTPUT_PATH}"/runlog.txt "${OUTPUT_PATH}"/artifacts/*/
+          mv "${OUTPUT_PATH}"/console_output.txt "${OUTPUT_PATH}"/artifacts/*/
 
           cp "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/"${JSON_NAME}" "${OUTPUT_PATH}"
           cp -r "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/Configurations/"${SELECTED_TEST}" "${OUTPUT_PATH}"/configuration
@@ -341,7 +341,7 @@ local e2e_tests_astas_cli = {
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
 
-		vim.fn.writefile(lines, context.output_path .. "/artifacts/runlog.txt")
+		vim.fn.writefile(lines, context.output_path .. "/artifacts/console_output.txt")
 
 		return {
 			"env",
