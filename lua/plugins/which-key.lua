@@ -18,13 +18,14 @@ return {
 		--  - purple
 		--  - red
 		--  - yellow
-		-- This is the loose rules I have for colors:
+		-- This are the loose rules I have for colors:
 		--  Purple is for misc because it's the default.
-		--  Cyan is for searching.
+		--  Blue is for searching.
 		--  Green is for showing/selecting/opening.
 		--  Red is for diagnostics/debugging/testing.
 		--  Yellow is for toggling.
 		--  Grey is for action.
+		--  Cyan is for LSP and related things.
 
 		local which_key = require("which-key")
 		which_key.setup({
@@ -133,8 +134,8 @@ return {
 				{ "<leader>x", group = "Diagnostics", icon = { icon = "󱖫", color = "red" } },
 				{ "<leader>xc", icon = { icon = "󰗧", color = "red" } },
 				{ "<leader>xl", icon = { icon = "", color = "red" } },
-				{ "<leader>xd", icon = { icon = "󰈞", color = "cyan" } },
-				{ "<leader>xw", icon = { icon = "", color = "cyan" } },
+				{ "<leader>xd", icon = { icon = "󰈞", color = "blue" } },
+				{ "<leader>xw", icon = { icon = "", color = "blue" } },
 				{ "<leader>xt", group = "Toggle" },
 				{ "<leader>xtv", icon = { icon = "󱖫", color = "yellow" } },
 				{ "<leader>xtd", icon = { icon = "󰈔", color = "yellow" } },
@@ -161,8 +162,8 @@ return {
 				{ "<leader>di", icon = { icon = "", color = "grey" } },
 				{ "<leader>dS", icon = { icon = "", color = "grey" } },
 				{ "<leader>dI", icon = { icon = "", color = "grey" } },
-				{ "<leader>dw", icon = { icon = "", color = "purple" } },
-				{ "<leader>de", icon = { icon = "", color = "purple" } },
+				{ "<leader>dw", icon = { icon = "", color = "azure" } },
+				{ "<leader>de", icon = { icon = "", color = "azure" } },
 				{ "<leader>dt", icon = { icon = "󰙵", color = "yellow" } },
 				{ "<leader>dT", group = "Toggle" },
 				{ "<leader>dTr", icon = { icon = "", color = "yellow" } },
@@ -195,14 +196,14 @@ return {
 				{ "<leader>go", icon = { icon = "󰖟", color = "grey" } },
 
 				-- Search
-				{ "<leader>s", mode = "nx", group = "Search", icon = { icon = "", color = "cyan" } },
+				{ "<leader>s", mode = "nx", group = "Search", icon = { icon = "", color = "blue" } },
 				{ "<leader>st", icon = { icon = "󰷐", color = "yellow" } },
 				{ "<leader>sf", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>sF", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>sc", icon = "" },
-				{ "<leader>sg", icon = { icon = "󰈞", color = "cyan" } },
-				{ "<leader>s/", icon = { icon = "󰈞", color = "cyan" } },
-				{ "<leader>sw", mode = "nx", icon = { icon = "󰈞", color = "cyan" } },
+				{ "<leader>sg", icon = { icon = "󰈞", color = "blue" } },
+				{ "<leader>s/", icon = { icon = "󰈞", color = "blue" } },
+				{ "<leader>sw", mode = "nx", icon = { icon = "󰈞", color = "blue" } },
 				{ "<leader>sh", icon = { icon = "󰞋", color = "grey" } },
 				{ "<leader>sN", icon = { icon = "", color = "grey" } },
 				{ "<leader>sR", icon = "" },
@@ -256,11 +257,11 @@ return {
 				{ "<leader><leader>a", icon = { icon = "", color = "grey" } },
 				{ "<leader><leader>p", icon = { icon = "󰍠", color = "green" } },
 				{ "<leader><leader>n", icon = { icon = "󰍝", color = "green" } },
-				{ "<leader><leader><leader>", icon = { icon = "", color = "cyan" } },
+				{ "<leader><leader><leader>", icon = { icon = "", color = "blue" } },
 
 				-- Resession
 				{ "<leader>\\", group = "Session", icon = "" },
-				{ "<leader>\\i", icon = { icon = "", color = "cyan" } },
+				{ "<leader>\\i", icon = { icon = "", color = "blue" } },
 				{ "<leader>\\d", icon = { icon = "󰆴", color = "red" } },
 				{ "<leader>\\l", icon = { icon = "", color = "orange" } },
 				{ "<leader>\\s", icon = { icon = "", color = "green" } },
@@ -272,13 +273,13 @@ return {
 				{ "<leader>Tl", icon = { icon = "", color = "orange" } },
 				{ "<leader>TF", icon = { icon = "󰈢", color = "green" } },
 				{ "<leader>Ts", icon = { icon = "", color = "red" } },
-				{ "<leader>To", icon = { icon = "󰈇", color = "cyan" } },
+				{ "<leader>To", icon = { icon = "󰈇", color = "azure" } },
 				{ "<leader>Ta", icon = { icon = "󱘖", color = "grey" } },
 				{ "<leader>Tt", group = "Toggle" },
 				{ "<leader>Ttx", icon = { icon = "󱖫", color = "red" } },
-				{ "<leader>Tto", icon = { icon = "󰈇", color = "cyan" } },
-				{ "<leader>Tts", icon = { icon = "", color = "cyan" } },
-				{ "<leader>TtS", icon = { icon = "", color = "green" } },
+				{ "<leader>Tto", icon = { icon = "󰈇", color = "azure" } },
+				{ "<leader>Tts", icon = { icon = "", color = "azure" } },
+				{ "<leader>TtS", icon = { icon = "", color = "grey" } },
 				{ "<leader>Ttw", icon = { icon = "󰈈", color = "grey" } },
 
 				-- Overseer
@@ -286,7 +287,7 @@ return {
 				{ "<leader>rr", icon = { icon = "󰷐", color = "green" } },
 				{ "<leader>rl", icon = { icon = "", color = "orange" } },
 				{ "<leader>rs", icon = { icon = "", color = "grey" } },
-				{ "<leader>rS", icon = { icon = "", color = "cyan" } },
+				{ "<leader>rS", icon = { icon = "", color = "azure" } },
 
 				-- OpenCode
 				{ "<leader>a", mode = "nx", group = "AI", icon = { icon = "󰚩", color = "green" } },
@@ -325,8 +326,8 @@ return {
 				{ "g;", desc = "Go to older position in change list", icon = { icon = "", color = "purple" } },
 				{ "gt", desc = "Go to next tab page", icon = { icon = "󰓩", color = "green" } },
 				{ "gT", desc = "Go to previous tab page", icon = { icon = "󰓩", color = "green" } },
-				{ "gn", desc = "Search forwards and select", icon = { icon = "󰈞", color = "cyan" } },
-				{ "gN", desc = "Search backwards and select", icon = { icon = "󰈞", color = "cyan" } },
+				{ "gn", desc = "Search forwards and select", icon = { icon = "󰈞", color = "blue" } },
+				{ "gN", desc = "Search backwards and select", icon = { icon = "󰈞", color = "blue" } },
 				{ "gf", desc = "Open file", icon = { icon = "󰈔", color = "green" } },
 				-- Remove LSP keymaps
 				{ "gr", mode = "nx", hidden = true },
@@ -355,9 +356,9 @@ return {
 				{ "zs", desc = "Left this line", icon = { icon = "󰘟", color = "grey" } },
 				{ "zH", desc = "Half screen to the left", icon = { icon = "󱂪", color = "grey" } },
 				{ "zL", desc = "Half screen to the right", icon = { icon = "󱂫", color = "grey" } },
-				{ "z=", group = "Spelling suggestions", icon = { icon = "󰓆", color = "cyan" } },
-				{ "zw", desc = "Mark work as bad/misspelling", icon = { icon = "󰓆", color = "cyan" } },
-				{ "zg", desc = "Add word to spell list", icon = { icon = "󰓆", color = "cyan" } },
+				{ "z=", group = "Spelling suggestions", icon = { icon = "󰓆", color = "azure" } },
+				{ "zw", desc = "Mark work as bad/misspelling", icon = { icon = "󰓆", color = "azure" } },
+				{ "zg", desc = "Add word to spell list", icon = { icon = "󰓆", color = "azure" } },
 
 				-- Operators
 				{
@@ -379,8 +380,8 @@ return {
 					{ "z", group = "Fold", icon = { icon = "", color = "green" } },
 					{ "Q", desc = "Repeat last register", icon = { icon = "󰑊", color = "red" } },
 					{ "@", desc = "Execute register", icon = { icon = "󰑊", color = "red" } },
-					{ "#", desc = "Search selection backwards", icon = { icon = "󰈞", color = "cyan" } },
-					{ "*", desc = "Search selection forwards", icon = { icon = "󰈞", color = "cyan" } },
+					{ "#", desc = "Search selection backwards", icon = { icon = "󰈞", color = "blue" } },
+					{ "*", desc = "Search selection forwards", icon = { icon = "󰈞", color = "blue" } },
 					{ "<C-w>", group = "Window" },
 				},
 
@@ -413,10 +414,10 @@ return {
 
 					{ "$", desc = "End of line", icon = { icon = "󰘠", color = "purple" } },
 					{ "%", desc = "Matching (){}[]", icon = { icon = "󰅩", color = "grey" } },
-					{ ",", desc = "<count> Prev f|t|F|T", icon = { icon = "", color = "cyan" } },
-					{ "/", desc = "Search forward", icon = { icon = "󰈞", color = "cyan" } },
-					{ ";", desc = "<count> Next f|t|F|T", icon = { icon = "", color = "cyan" } },
-					{ "?", desc = "Search backward", icon = { icon = "󰈞", color = "cyan" } },
+					{ ",", desc = "<count> Prev f|t|F|T", icon = { icon = "", color = "blue" } },
+					{ "/", desc = "Search forward", icon = { icon = "󰈞", color = "blue" } },
+					{ ";", desc = "<count> Next f|t|F|T", icon = { icon = "", color = "blue" } },
+					{ "?", desc = "Search backward", icon = { icon = "󰈞", color = "blue" } },
 					{ "^", desc = "Start of line (non ws)", icon = { icon = "󰘟", color = "purple" } },
 					{ "{", desc = "Prev empty line", icon = { icon = "󰘣", color = "grey" } },
 					{ "}", desc = "Next empty line", icon = { icon = "󰘡", color = "grey" } },
@@ -476,8 +477,8 @@ return {
 					{ "i*", desc = "*", icon = "" },
 					{ "aq", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
 					{ "iq", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-					{ "a?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
-					{ "i?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+					{ "a?", desc = "User prompt", icon = { icon = "", color = "blue" } },
+					{ "i?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 					{ "af", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 					{ "if", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 					{ "aa", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
@@ -502,7 +503,7 @@ return {
 						{ "g[<Space>", desc = "󱁐", icon = "" },
 						{ "g[*", desc = "*", icon = "" },
 						{ "g[q", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-						{ "g[?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+						{ "g[?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 						{ "g[f", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 						{ "g[a", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 
@@ -524,7 +525,7 @@ return {
 						{ "g]<Space>", desc = "󱁐", icon = "" },
 						{ "g]*", desc = "*", icon = "" },
 						{ "g]q", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-						{ "g]?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+						{ "g]?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 						{ "g]f", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 						{ "g]a", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 					},
@@ -547,7 +548,7 @@ return {
 						{ "al<Space>", desc = "󱁐", icon = "" },
 						{ "al*", desc = "*", icon = "" },
 						{ "alq", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-						{ "al?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+						{ "al?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 						{ "alf", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 						{ "ala", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 
@@ -569,7 +570,7 @@ return {
 						{ "il<Space>", desc = "󱁐", icon = "" },
 						{ "il*", desc = "*", icon = "" },
 						{ "ilq", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-						{ "il?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+						{ "il?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 						{ "ilf", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 						{ "ila", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 
@@ -591,7 +592,7 @@ return {
 						{ "an<Space>", desc = "󱁐", icon = "" },
 						{ "an*", desc = "*", icon = "" },
 						{ "anq", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-						{ "an?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+						{ "an?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 						{ "anf", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 						{ "ana", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 
@@ -613,7 +614,7 @@ return {
 						{ "in<Space>", desc = "󱁐", icon = "" },
 						{ "in*", desc = "*", icon = "" },
 						{ "inq", desc = "Quote", icon = { icon = "󰉾", color = "grey" } },
-						{ "in?", desc = "User prompt", icon = { icon = "", color = "cyan" } },
+						{ "in?", desc = "User prompt", icon = { icon = "", color = "blue" } },
 						{ "inf", desc = "Function call", icon = { icon = "󰊕", color = "grey" } },
 						{ "ina", desc = "Argument", icon = { icon = "󰊕", color = "grey" } },
 					},
