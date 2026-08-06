@@ -210,6 +210,7 @@ return {
 							return true
 						end,
 					}),
+					"b:obsidian_status",
 				},
 				lualine_x = { "filetype" },
 				lualine_y = {},
