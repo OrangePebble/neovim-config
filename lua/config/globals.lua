@@ -36,7 +36,7 @@ local carbonfox = {
 	green_bright =           "#5ddf98", -- green.lighten(30)
 	yellow_bright =          "#f1daac", -- yellow.lighten(30)
 	blue_bright =            "#a3c5ff", -- blue.lighten(30)
-	magenta_bright =         "#D9C2FF", -- magenta.lighten(45)
+	magenta_bright =         "#d9c2ff", -- magenta.lighten(45)
 	cyan_bright =            "#92dcdd", -- cyan.lighten(30)
 	white_bright =           "#eaeaeb", -- white.lighten(30)
 	---- Extended terminal colors (used by terminals like 'foot')
