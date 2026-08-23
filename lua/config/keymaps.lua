@@ -873,6 +873,43 @@ keymap("n", "<leader>cf", function()
 end, { desc = "File type" })
 
 --== Extras
+-- Useful because lualine doesn't print the full buffer name.
+keymap("n", "<leader>+b", function()
+	vim.print(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()))
+end, {
+	desc = "Print the current buffer's name.",
+})
+keymap("n", "<leader>+!", "!", {
+	desc = "[!] Print the contents of a command in the buffer.",
+})
+keymap("n", "<leader>+~", "~", {
+	desc = "[~] Toggle the case of the character under the cursor.",
+})
+
+-- Extras for <C-
+keymap("n", "<leader>+ci", "<C-i>", {
+	desc = "[<C-i>] Jump to next cursor position",
+})
+keymap("n", "<leader>+co", "<C-o>", {
+	desc = "[<C-o>] Jump to last cursor position",
+})
+keymap("n", "<leader>+cN", "<C-a>", {
+	desc = "[<C-c>] Increment number under cursor. Original keymap is <C-a>.",
+})
+keymap("n", "<leader>+cn", "<C-x>", {
+	desc = "[<C-x>] Decrement number under cursor.",
+})
+keymap("n", "<leader>+cl", "<C-l>", {
+	desc = "[<C-l>] Move to previous snippet field.",
+})
+keymap("n", "<leader>+ch", "<C-h>", {
+	desc = "[<C-h>] Move to next snippet field.",
+})
+keymap("n", "<leader>+c]", "<C-]>", {
+	desc = "[<C-]>] Follow link in buffers like help.",
+})
+
+-- Extras for :
 keymap("n", "<leader>+:q", ":cdo ", {
 	desc = "[:cdo ] Do something for each quickfix item, like 's/' (use '/gc' flags as 'c' asks you every item if it is to apply)",
 })
@@ -884,12 +921,6 @@ keymap("n", "<leader>+::", "q: ", {
 })
 keymap("n", "<leader>+:w", "<cmd>W<CR>", {
 	desc = "[:W] Custom command to save without formatting",
-})
-keymap("n", "<leader>+i", "<C-i>", {
-	desc = "[<C-i>] Jump to next cursor position",
-})
-keymap("n", "<leader>+o", "<C-o>", {
-	desc = "[<C-o>] Jump to last cursor position",
 })
 keymap("n", "<leader>+:e", "<cmd>ene<CR>", {
 	desc = "[:ene] Edit new and unnamed buffer",
@@ -906,12 +937,6 @@ keymap("n", "<leader>+:D", ":delm ", {
 keymap("n", "<leader>+:r", "<cmd>registers<CR>", {
 	desc = "[:registers] Show registers, use [\"#p] to paste the '#' register (alternate file)",
 })
-keymap("n", "<leader>+N", "<C-a>", {
-	desc = "[<C-c>] Increment number under cursor. Original keymap is <C-a>.",
-})
-keymap("n", "<leader>+n", "<C-x>", {
-	desc = "[<C-x>] Decrement number under cursor.",
-})
 keymap("n", "<leader>+:S", ":Sops ", {
 	desc = "[:Sops ] Edit/encrypt/decrypt/... files with sops.",
 })
@@ -921,6 +946,8 @@ keymap("n", "<leader>+:M", "<cmd>mes<CR>", {
 keymap("n", "<leader>+:s", "<cmd>sort<CR>", {
 	desc = "[:sort i] Sort the buffer's lines alphabetically case-insensitively. Can be used on a selection. Add '!' for reverse, 'u' for removing duplicates, and 'n' for numeric sort.",
 })
+
+-- Extras for g
 keymap("n", "<leader>+gt", "gt", {
 	desc = "[gt] Go to next tab.",
 })
@@ -938,22 +965,4 @@ keymap("n", "<leader>+g<", "g<", {
 })
 keymap("n", "<leader>+gv", "gv", {
 	desc = "[gv] Reselect last visual selection.",
-})
--- Useful because lualine doesn't print the full buffer name.
-keymap("n", "<leader>+b", function()
-	vim.print(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()))
-end, {
-	desc = "Print the current buffer's name.",
-})
-keymap("n", "<leader>+l", "<C-l>", {
-	desc = "[<C-l>] Move to previous snippet field.",
-})
-keymap("n", "<leader>+h", "<C-h>", {
-	desc = "[<C-h>] Move to next snippet field.",
-})
-keymap("n", "<leader>+!", "!", {
-	desc = "[!] Print the contents of a command in the buffer.",
-})
-keymap("n", "<leader>+~", "~", {
-	desc = "[~] Toggle the case of the character under the cursor.",
 })
