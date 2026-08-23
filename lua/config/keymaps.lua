@@ -873,14 +873,8 @@ keymap("n", "<leader>cf", function()
 end, { desc = "File type" })
 
 --== Extras
--- Useful because lualine doesn't print the full buffer name.
-keymap("n", "<leader>+b", function()
-	vim.print(vim.api.nvim_buf_get_name(vim.api.nvim_get_current_buf()))
-end, {
-	desc = "Print the current buffer's name.",
-})
 keymap("n", "<leader>+!", "!", {
-	desc = "[!] Print the contents of a command in the buffer.",
+	desc = "[!] Print the contents of a command in the buffer. For example, '!echo 123', replaces selected text with '123'.",
 })
 keymap("n", "<leader>+~", "~", {
 	desc = "[~] Toggle the case of the character under the cursor.",
