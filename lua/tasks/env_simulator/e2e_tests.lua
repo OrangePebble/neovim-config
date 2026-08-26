@@ -137,6 +137,12 @@ local e2e_tests = {
 			return nil
 		end
 
+		context.selected_config_args = utils.select_config(co)
+		if not context.selected_config_args then
+			return nil
+		end
+		context.selected_repository_args = utils.select_override_repositories(co)
+
 		context.context_name = "Run " .. context.selected_test .. " E2E test"
 		context.json_name = vim.fs.basename(json_path)
 		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
@@ -147,21 +153,30 @@ local e2e_tests = {
 		context.output_path = context.output_parent_path
 			.. "/"
 			.. context.selected_test
+				:gsub("(%a)([%w']*)", function(first, rest)
+					return first:upper() .. rest:lower()
+				end)
+				:gsub("%s+", "")
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 		context.raw_artifacts_path = context.output_path .. "/E2E-Artifacts"
 
-		return {
+		local cmd = {
 			"bazel",
 			"run",
-			"--config=env_simulator_release",
 			context.selected_target,
+		}
+		vim.list_extend(cmd, context.selected_config_args)
+		vim.list_extend(cmd, context.selected_repository_args)
+		vim.list_extend(cmd, {
 			"--",
 			"--store-artifacts",
 			"-vvv",
-			"-k=" .. context.selected_test,
+			"-k=" .. vim.split(context.selected_test, " +", { trimempty = true })[1],
 			"--artifacts-path=" .. context.raw_artifacts_path,
-		}
+		})
+
+		return cmd
 	end,
 	post_run_cmd = function(context)
 		local exit_code = context.task_overseer.exit_code
@@ -260,13 +275,21 @@ local e2e_tests_astas_cli = {
 		end
 		context.selected_scenario_path = scenarios_path .. context.selected_scenario
 
-		local selected_config = utils.select_config(co)
-		if not selected_config then
+		local selected_config_args = utils.select_config(co)
+		if not selected_config_args then
 			return nil
 		end
-		context.selected_config = table.concat(selected_config, " ")
-		local selected_repositories = utils.select_override_repositories(co)
-		context.selected_repositories = table.concat(selected_repositories, " ")
+		context.selected_config_args = table.concat(selected_config_args, " ")
+		local selected_repository_args = utils.select_override_repositories(co)
+		context.selected_repository_args = table.concat(selected_repository_args, " ")
+
+		Snacks.input({ prompt = "Number of runs:", default = "1" }, function(value)
+			coroutine.resume(co, value)
+		end)
+		context.run_count = coroutine.yield()
+		if not context.run_count or not context.run_count:match("^%d+$") then
+			return nil
+		end
 
 		context.context_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
 
@@ -288,14 +311,14 @@ local e2e_tests_astas_cli = {
 			"SELECTED_SCENARIO_PATH=" .. context.selected_scenario_path,
 			"DDAD_PATH=" .. context.ddad_path,
 			"OUTPUT_PATH=" .. context.output_path,
-			"SELECTED_CONFIG=" .. context.selected_config,
-			"SELECTED_REPOSITORIES=" .. context.selected_repositories,
+			"SELECTED_CONFIG_ARGS=" .. context.selected_config_args,
+			"SELECTED_REPOSITORY_ARGS=" .. context.selected_repository_args,
 			"bash",
 			"-c",
 			[[
           set -euo pipefail # Fail this script on first command failure
 
-          bazel build $SELECTED_CONFIG $SELECTED_REPOSITORIES -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
+          bazel build $SELECTED_CONFIG_ARGS $SELECTED_REPOSITORY_ARGS -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
 
           mkdir -p "${OUTPUT_PATH}"/artifacts
           cp -r "${SELECTED_SCENARIO_PATH}" "${OUTPUT_PATH}"/configuration
@@ -314,10 +337,10 @@ local e2e_tests_astas_cli = {
 			context.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
 			"-t",
 			"100",
-			"-n",
-			"1",
 			"-r",
 			"0",
+			"-n",
+			context.run_count,
 			"-s",
 			context.output_path .. "/configuration/Scenarios/XOSC/Scenario.xosc",
 			"-d",
@@ -349,7 +372,7 @@ local e2e_tests_astas_cli = {
 			"OUTPUT_PARENT_PATH=" .. context.output_parent_path,
 			"bash",
 			"-c",
-			[[
+			[=[
           set -euo pipefail # Fail this script on first command failure
 
           VENV="${OUTPUT_PARENT_PATH}"/.venv
@@ -377,8 +400,10 @@ local e2e_tests_astas_cli = {
           rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
           mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
           cp -r "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-          mv default.profraw "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-      ]],
+          if [[ -e default.profraw ]]; then
+            mv default.profraw "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          fi
+      ]=],
 		}
 	end,
 }

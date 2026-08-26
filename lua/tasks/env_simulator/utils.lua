@@ -37,7 +37,10 @@ end
 ---@param co thread
 function M.select_override_repositories(co)
 	local selected_repositories = nil
-	picker.select_many_esc({ "osi_query_library" }, {
+	picker.select_many_esc({
+		-- "osi_query_library",
+		"stochastics-library",
+	}, {
 		prompt = "Select repositories to override",
 	}, function(selected)
 		selected_repositories = selected
@@ -49,6 +52,8 @@ function M.select_override_repositories(co)
 	for _, repository in ipairs(selected_repositories or {}) do
 		if repository == "osi_query_library" then
 			table.insert(cmd_args, "--override_repository=osi_query_library=/home/pedro/projects/osi-query-library")
+		elseif repository == "stochastics-library" then
+			table.insert(cmd_args, "--override_repository=stochastics_library=/home/pedro/projects/stochastics-library")
 		end
 	end
 
