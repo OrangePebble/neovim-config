@@ -18,8 +18,8 @@ keymap("n", "<C-d>", "<C-d>zz", { desc = "Half page down (centered)" })
 keymap("n", "<C-u>", "<C-u>zz", { desc = "Half page up (centered)" })
 
 -- Better indenting in visual mode
-keymap("v", "<", "<gv", { desc = "Indent left and reselect" })
-keymap("v", ">", ">gv", { desc = "Indent right and reselect" })
+keymap("x", "<", "<gv", { desc = "Indent left and reselect" })
+keymap("x", ">", ">gv", { desc = "Indent right and reselect" })
 
 -- Better J behavior
 keymap("n", "J", function()
@@ -481,11 +481,11 @@ keymap("n", "[c", function()
 	end
 end, { desc = "Previous change" })
 
-keymap({ "n", "v" }, "<leader>gs", function()
+keymap({ "n", "x" }, "<leader>gs", function()
 	require("gitsigns").stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
 end, { desc = "Stage hunk" })
 keymap("n", "<leader>gS", "<cmd>Gitsigns stage_buffer<CR>", { desc = "Stage buffer" })
-keymap({ "n", "v" }, "<leader>gr", function()
+keymap({ "n", "x" }, "<leader>gr", function()
 	require("gitsigns").reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
 end, { desc = "Reset hunk" })
 keymap("n", "<leader>gr", "<cmd>Gitsigns reset_hunk<CR>", { desc = "Reset hunk" })
