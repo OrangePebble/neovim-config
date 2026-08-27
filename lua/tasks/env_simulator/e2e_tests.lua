@@ -154,7 +154,7 @@ local e2e_tests = {
 			.. "/"
 			.. context.selected_test
 				:gsub("(%a)([%w']*)", function(first, rest)
-					return first:upper() .. rest:lower()
+					return first:upper() .. rest
 				end)
 				:gsub("%s+", "")
 			.. "/"

@@ -10,7 +10,12 @@ end
 ---@param co thread
 function M.select_config(co)
 	local special_config = "env_simulator_clang with debug flags"
-	picker.select_one({ special_config, "env_simulator_debug", "env_simulator_clang", "env_simulator_release" }, {
+	picker.select_one({
+		special_config,
+		"env_simulator_debug",
+		"env_simulator_clang",
+		"env_simulator_release",
+	}, {
 		prompt = "Select config",
 	}, function(v)
 		coroutine.resume(co, v)
