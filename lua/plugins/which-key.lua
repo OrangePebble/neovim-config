@@ -5,6 +5,8 @@ return {
 	config = function()
 		vim.opt.timeoutlen = 0 -- Works better with this plugin
 
+		-- See "map-modes" help section for available modes.
+
 		-- Find default icons and colors on: https://github.com/folke/which-key.nvim/blob/main/lua/which-key/icons.lua
 		-- Find keymaps set by default on: https://github.com/folke/which-key.nvim/blob/main/lua/which-key/plugins/presets.lua
 		-- Find more icons on: https://www.nerdfonts.com/cheat-sheet
@@ -37,9 +39,9 @@ return {
 				-- Technically <leader>? already does this for buffer specific keymaps, and I could add a
 				--  version for all keymaps,
 				{ "<leader>+", group = "Extras", icon = "" },
-				{ "<leader>y", mode = "nx", icon = { icon = "󰆏", color = "grey" } },
+				{ "<leader>y", mode = { "n", "x" }, icon = { icon = "󰆏", color = "grey" } },
 				{ "<leader>Y", icon = { icon = "󰆏", color = "grey" } },
-				{ "<leader>p", mode = "nx", icon = { icon = "󰆒", color = "grey" } },
+				{ "<leader>p", mode = { "n", "x" }, icon = { icon = "󰆒", color = "grey" } },
 				{ "<leader>P", icon = { icon = "󰆒", color = "grey" } },
 				{ "<leader>u", icon = { icon = "", color = "yellow" } },
 				{ "<leader>e", icon = { icon = "", color = "yellow" } },
@@ -170,7 +172,7 @@ return {
 				{ "<leader>dTv", icon = { icon = "󰫧", color = "yellow" } },
 
 				-- Git
-				{ "<leader>g", mode = "nv", group = "Git" },
+				{ "<leader>g", mode = { "n", "x" }, group = "Git" },
 				{ "<leader>gt", group = "Toggle" },
 				{ "<leader>gb", icon = { icon = "", color = "orange" } },
 				{ "<leader>gp", icon = { icon = "󰈈", color = "yellow" } },
@@ -180,9 +182,9 @@ return {
 				{ "<leader>g}", icon = { icon = "󰞒", color = "grey" } },
 				{ "<leader>g[", icon = { icon = "󰁝", color = "grey" } },
 				{ "<leader>g{", icon = { icon = "󰞕", color = "grey" } },
-				{ "<leader>gr", mode = "nv", icon = { icon = "󰆴", color = "red" } },
+				{ "<leader>gr", mode = { "n", "x" }, icon = { icon = "󰆴", color = "red" } },
 				{ "<leader>gR", icon = { icon = "󰆴", color = "red" } },
-				{ "<leader>gs", mode = "nv", icon = { icon = "", color = "green" } },
+				{ "<leader>gs", mode = { "n", "x" }, icon = { icon = "", color = "green" } },
 				{ "<leader>gS", icon = { icon = "", color = "green" } },
 				{ "<leader>gu", icon = { icon = "", color = "orange" } },
 				{ "<leader>gtb", icon = { icon = "", color = "orange" } },
@@ -196,14 +198,14 @@ return {
 				{ "<leader>go", icon = { icon = "󰖟", color = "grey" } },
 
 				-- Search
-				{ "<leader>s", mode = "nx", group = "Search", icon = { icon = "", color = "blue" } },
+				{ "<leader>s", mode = { "n", "x" }, group = "Search", icon = { icon = "", color = "blue" } },
 				{ "<leader>st", icon = { icon = "󰷐", color = "yellow" } },
 				{ "<leader>sf", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>sF", icon = { icon = "󰈔", color = "green" } },
 				{ "<leader>sc", icon = "" },
 				{ "<leader>sg", icon = { icon = "󰈞", color = "blue" } },
 				{ "<leader>s/", icon = { icon = "󰈞", color = "blue" } },
-				{ "<leader>sw", mode = "nx", icon = { icon = "󰈞", color = "blue" } },
+				{ "<leader>sw", mode = { "n", "x" }, icon = { icon = "󰈞", color = "blue" } },
 				{ "<leader>sh", icon = { icon = "󰞋", color = "grey" } },
 				{ "<leader>sN", icon = { icon = "", color = "grey" } },
 				{ "<leader>sR", icon = "" },
@@ -290,10 +292,10 @@ return {
 				{ "<leader>rS", icon = { icon = "", color = "azure" } },
 
 				-- OpenCode
-				{ "<leader>a", mode = "nx", group = "AI", icon = { icon = "󰚩", color = "green" } },
-				{ "<leader>aa", mode = "nx", icon = { icon = "", color = "green" } },
-				{ "<leader>as", mode = "nx", icon = { icon = "󰷐", color = "blue" } },
-				{ "<leader>ar", mode = "nx", icon = { icon = "󰅪", color = "grey" } },
+				{ "<leader>a", mode = { "n", "x" }, group = "AI", icon = { icon = "󰚩", color = "green" } },
+				{ "<leader>aa", mode = { "n", "x" }, icon = { icon = "", color = "green" } },
+				{ "<leader>as", mode = { "n", "x" }, icon = { icon = "󰷐", color = "blue" } },
+				{ "<leader>ar", mode = { "n", "x" }, icon = { icon = "󰅪", color = "grey" } },
 				{ "<leader>al", icon = { icon = "", color = "grey" } },
 				{ "<leader>ab", icon = { icon = "", color = "grey" } },
 				{ "<leader>ax", icon = { icon = "󱖫", color = "grey" } },
@@ -307,21 +309,27 @@ return {
 				-- g*
 				{ "g'", desc = "Marks", icon = { icon = "󰸕", color = "purple" } },
 				{ "g`", desc = "Marks", icon = { icon = "󰸕", color = "purple" } },
-				{ "gx", mode = "nx", desc = "Open with system app", icon = { icon = "󰏋", color = "green" } },
+				{ "gx", mode = { "n", "x" }, desc = "Open with system app", icon = { icon = "󰏋", color = "green" } },
 				{ "g<", desc = "Display previous command output", icon = { icon = "", color = "green" } },
-				{ "g~", mode = "nx", desc = "Toggle case", icon = { icon = "󰬴", color = "yellow" } },
-				{ "gu", mode = "nx", desc = "Lowercase", icon = { icon = "󰬵", color = "grey" } },
-				{ "gU", mode = "nx", desc = "Uppercase", icon = { icon = "󰬶", color = "grey" } },
+				{ "g~", mode = { "n", "x" }, desc = "Toggle case", icon = { icon = "󰬴", color = "yellow" } },
+				{ "gu", mode = { "n", "x" }, desc = "Lowercase", icon = { icon = "󰬵", color = "grey" } },
+				{ "gU", mode = { "n", "x" }, desc = "Uppercase", icon = { icon = "󰬶", color = "grey" } },
 				{ "gv", desc = "Last visual selection", icon = { icon = "", color = "green" } },
 				{ "gi", desc = "Last insert", icon = { icon = "󰸱", color = "green" } },
 				{
 					"g%",
-					mode = "onx",
+					mode = { "n", "x", "o" },
 					desc = "Cycle backwards through matching group",
 					icon = { icon = "󰅩", color = "grey" },
 				},
-				{ "gc", mode = "nxo", name = "Comment", icon = { icon = "󰐣", color = "grey" } },
-				{ "ge", mode = "nxo", desc = "Previous end of word", icon = { icon = "󰘟", color = "purple" } },
+				{ "gc", mode = { "n", "x" }, name = "Comment", icon = { icon = "󰐣", color = "grey" } },
+				{ "gc", mode = "o", hidden = true },
+				{
+					"ge",
+					mode = { "n", "x", "o" },
+					desc = "Previous end of word",
+					icon = { icon = "󰘟", color = "purple" },
+				},
 				{ "g,", desc = "Go to newer position in change list", icon = { icon = "", color = "purple" } },
 				{ "g;", desc = "Go to older position in change list", icon = { icon = "", color = "purple" } },
 				{ "gt", desc = "Go to next tab page", icon = { icon = "󰓩", color = "green" } },
@@ -330,11 +338,11 @@ return {
 				{ "gN", desc = "Search backwards and select", icon = { icon = "󰈞", color = "blue" } },
 				{ "gf", desc = "Open file", icon = { icon = "󰈔", color = "green" } },
 				-- Remove LSP keymaps
-				{ "gr", mode = "nx", hidden = true },
+				{ "gr", mode = { "n", "x" }, hidden = true },
 				{ "gO", hidden = true },
 
 				-- z*
-				{ "zf", mode = "nx", desc = "Create fold", icon = { icon = "", color = "green" } },
+				{ "zf", mode = { "n", "x" }, desc = "Create fold", icon = { icon = "", color = "green" } },
 				{ "zc", desc = "Close fold under cursor", icon = { icon = "󰕎", color = "orange" } },
 				{ "zC", desc = "Close all folds under cursor", icon = { icon = "󰕎", color = "orange" } },
 				{ "zd", desc = "Delete fold under cursor", icon = { icon = "󰆴", color = "red" } },
