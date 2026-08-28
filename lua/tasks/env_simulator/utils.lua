@@ -41,11 +41,16 @@ end
 
 ---@param co thread
 function M.select_override_repositories(co)
-	local selected_repositories = nil
-	picker.select_many_esc({
+	local available_repositories = {
 		-- "osi_query_library",
-		"stochastics-library",
-	}, {
+		-- "stochastics-library",
+	}
+	if #available_repositories == 0 then
+		return {}
+	end
+
+	local selected_repositories = nil
+	picker.select_many_esc(available_repositories, {
 		prompt = "Select repositories to override",
 	}, function(selected)
 		selected_repositories = selected
