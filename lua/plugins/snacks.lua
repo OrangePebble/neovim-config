@@ -21,7 +21,7 @@ return {
 		},
 		gitbrowse = {
 			url_patterns = {
-        -- "%" are lua escape characters
+				-- "%" are lua escape characters
 				["orangepebble%.net"] = {
 					branch = "/src/branch/{branch}",
 					file = "/src/branch/{branch}/{file}#L{line_start}-L{line_end}",
@@ -85,6 +85,11 @@ return {
 			},
 			layout = {
 				preset = function()
+					local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+					if string.match(cwd_name, ".*ddad.*") or string.match(cwd_name, ".*env_simulator.*") then
+            -- Make picker always hava a vertical layout for repos where files are very deeply nested.
+						return "vertical"
+					end
 					-- 120 is the default
 					return vim.o.columns >= 160 and "default" or "vertical"
 				end,
