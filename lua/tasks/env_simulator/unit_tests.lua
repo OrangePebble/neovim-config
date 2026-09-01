@@ -35,6 +35,12 @@ end
 ---@type Task
 local unit_tests = {
 	name = "Run unit test",
+	dap = {
+		enabled = true,
+		options = {
+			type = "gdb",
+		},
+	},
 	resolve_context = function()
 		local context = {}
 		local co = coroutine.running()
@@ -96,11 +102,12 @@ local unit_tests = {
 		if not test_binary then
 			return nil
 		end
-		context.test_binary = vim.trim(test_binary)
-		if context.test_binary == "" then
+		local relative_test_binary = vim.trim(test_binary)
+		if relative_test_binary == "" then
 			vim.notify("Could not resolve the test binary.", vim.log.levels.ERROR)
 			return nil
 		end
+		context.test_binary = ddad_path .. "/" .. relative_test_binary
 
 		local test_output = run_bazel_query({ context.test_binary, "--gtest_list_tests" }, co)
 		if not test_output then
@@ -138,11 +145,7 @@ local unit_tests = {
 		return context
 	end,
 	cmd = function(context)
-		local cmd = { "bazel", "run", context.selected_target }
-		vim.list_extend(cmd, context.selected_config_args)
-		vim.list_extend(cmd, context.selected_repository_args)
-		vim.list_extend(cmd, { "--", "--gtest_filter=" .. context.selected_test })
-		return cmd
+		return { context.test_binary, "--gtest_filter=" .. context.selected_test }
 	end,
 }
 
