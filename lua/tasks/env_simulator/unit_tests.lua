@@ -34,7 +34,7 @@ end
 
 ---@type Task
 local unit_tests = {
-	name = "Run unit test",
+	name = "Run unit tests",
 	dap = {
 		enabled = true,
 		options = {
@@ -131,21 +131,22 @@ local unit_tests = {
 			return nil
 		end
 
-		picker.select_one(test_names, {
+		picker.select_many(test_names, {
 			prompt = "Select unit test",
-		}, function(item)
-			coroutine.resume(co, item)
+		}, function(selected)
+			coroutine.resume(co, selected)
 		end)
-		context.selected_test = coroutine.yield()
-		if not context.selected_test then
+		context.selected_tests = coroutine.yield()
+		if not context.selected_tests or vim.tbl_isempty(context.selected_tests) then
 			return nil
 		end
+		context.test_filter = table.concat(context.selected_tests, ":")
 
-		context.context_name = "Run " .. context.selected_test .. " unit test"
+		context.context_name = "Run unit tests:" .. table.concat(context.selected_tests, ", ")
 		return context
 	end,
 	cmd = function(context)
-		return { context.test_binary, "--gtest_filter=" .. context.selected_test }
+		return { context.test_binary, "--gtest_filter=" .. context.test_filter }
 	end,
 }
 
