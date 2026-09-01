@@ -121,6 +121,7 @@ local compile_commands = {
 local M = {}
 
 vim.list_extend(M, require("tasks.env_simulator.e2e_tests"))
+vim.list_extend(M, require("tasks.env_simulator.unit_tests"))
 vim.list_extend(M, {
 	bazel_bin,
 	build,
