@@ -14,7 +14,8 @@ local targets = {
 	-- "//third_party/open_simulation_interface:open_simulation_interface",
 	-- "//tools/env_simulator/modules/stochastic_cognitive_model:stochastic_cognitive_model_lib",
 	-- "//tools/env_simulator/modules/stochastic_cognitive_model/tests/Core/Sensor_Tests:sensor_tests",
-	-- "//third_party/googletest:googletest",
+	"//tools/env_simulator/modules/stochastic_cognitive_model/tests/DriverHighway/LaneChangeBehavior_Tests:lane_change_behavior_tests",
+	"//third_party/googletest:googletest",
 }
 
 local bazel_bin = {

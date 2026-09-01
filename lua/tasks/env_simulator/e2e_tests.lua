@@ -291,6 +291,14 @@ local e2e_tests_astas_cli = {
 			return nil
 		end
 
+		Snacks.input({ prompt = "Seed:", default = "0" }, function(value)
+			coroutine.resume(co, value)
+		end)
+		context.seed = coroutine.yield()
+		if not context.seed or not context.seed:match("^%d+$") then
+			return nil
+		end
+
 		context.context_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
 
 		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
@@ -338,7 +346,7 @@ local e2e_tests_astas_cli = {
 			"-t",
 			"100",
 			"-r",
-			"0",
+			context.seed,
 			"-n",
 			context.run_count,
 			"-s",
