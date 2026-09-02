@@ -39,6 +39,7 @@ local unit_tests = {
 		enabled = true,
 		options = {
 			type = "gdb",
+			cwd = ddad_path .. "/bazel-ddad",
 		},
 	},
 	resolve_context = function()
@@ -144,6 +145,14 @@ local unit_tests = {
 
 		context.context_name = "Run unit tests:" .. table.concat(context.selected_tests, ", ")
 		return context
+	end,
+	pre_run_cmd = function(context)
+    -- This is already done in resolve_context because it is required to query available tests,
+    --  but resolve_context is not called on reruns.
+		local cmd = { "bazel", "build", context.selected_target }
+		vim.list_extend(cmd, context.selected_config_args)
+		vim.list_extend(cmd, context.selected_repository_args)
+		return cmd
 	end,
 	cmd = function(context)
 		return { context.test_binary, "--gtest_filter=" .. context.test_filter }

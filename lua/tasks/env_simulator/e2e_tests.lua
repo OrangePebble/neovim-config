@@ -229,6 +229,7 @@ local e2e_tests_astas_cli = {
 		enabled = true,
 		options = {
 			type = "gdb",
+			cwd = ddad_path,
 		},
 	},
 	resolve_context = function()
