@@ -3,35 +3,6 @@ local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
 
----@param cmd string[]
----@param co thread
----@return string|nil
-local function run_bazel_query(cmd, co)
-	local progress = require("fidget.progress").handle.create({
-		title = "Running query",
-		lsp_client = { name = "Bazel" },
-		message = table.concat(cmd, " "),
-		percentage = 0,
-	})
-
-	vim.system(cmd, { text = true, cwd = ddad_path }, function(result)
-		vim.schedule(function()
-			progress.title = result.code == 0 and "Query finished" or "Query failed"
-			progress:finish()
-			coroutine.resume(co, result)
-		end)
-	end)
-
-	local result = coroutine.yield()
-	if result.code ~= 0 then
-		local stderr = vim.trim(result.stderr or "")
-		vim.notify(stderr ~= "" and stderr or "Bazel query failed", vim.log.levels.ERROR)
-		return nil
-	end
-
-	return result.stdout or ""
-end
-
 ---@type Task
 local e2e_tests = {
 	name = "Run E2E test",
@@ -43,7 +14,7 @@ local e2e_tests = {
 
 		-- List all e2e_tests targets
 		local targets =
-			run_bazel_query({ "bazel", "query", "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, co)
+			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, ddad_path, co)
 		if not targets then
 			return nil
 		end
@@ -76,7 +47,7 @@ local e2e_tests = {
 		end
 
 		-- Get build data about the selected_target
-		local build_data = run_bazel_query({ "bazel", "query", "--output=build", context.selected_target }, co)
+		local build_data = utils.run_bazel_query({ "--output=build", context.selected_target }, ddad_path, co)
 		if not build_data then
 			return nil
 		end
@@ -90,7 +61,7 @@ local e2e_tests = {
 		end
 
 		-- Get build data about the JSON file group
-		local json_filegroup_build_data = run_bazel_query({ "bazel", "query", "--output=build", json_filegroup }, co)
+		local json_filegroup_build_data = utils.run_bazel_query({ "--output=build", json_filegroup }, ddad_path, co)
 		if not json_filegroup_build_data then
 			return nil
 		end
@@ -229,7 +200,7 @@ local e2e_tests_astas_cli = {
 		enabled = true,
 		options = {
 			type = "gdb",
-			cwd = ddad_path,
+			cwd = ddad_path .. "/bazel-ddad",
 		},
 	},
 	resolve_context = function()

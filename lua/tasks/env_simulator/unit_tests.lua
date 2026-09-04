@@ -3,35 +3,6 @@ local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
 
----@param cmd string[]
----@param co thread
----@return string|nil
-local function run_bazel_query(cmd, co)
-	local progress = require("fidget.progress").handle.create({
-		title = "Running query",
-		lsp_client = { name = "Bazel" },
-		message = table.concat(cmd, " "),
-		percentage = 0,
-	})
-
-	vim.system(cmd, { text = true, cwd = ddad_path }, function(result)
-		vim.schedule(function()
-			progress.title = result.code == 0 and "Query finished" or "Query failed"
-			progress:finish()
-			coroutine.resume(co, result)
-		end)
-	end)
-
-	local result = coroutine.yield()
-	if result.code ~= 0 then
-		local stderr = vim.trim(result.stderr or "")
-		vim.notify(stderr ~= "" and stderr or "Bazel query failed", vim.log.levels.ERROR)
-		return nil
-	end
-
-	return result.stdout or ""
-end
-
 ---@type Task
 local unit_tests = {
 	name = "Run unit tests",
@@ -46,12 +17,10 @@ local unit_tests = {
 		local context = {}
 		local co = coroutine.running()
 
-		local targets = run_bazel_query({
-			"bazel",
-			"query",
+		local targets = utils.run_bazel_query({
 			"--output=label_kind",
 			"kind(cc_test, //tools/env_simulator/modules/stochastic_cognitive_model/tests/...)",
-		}, co)
+		}, ddad_path, co)
 		if not targets then
 			return nil
 		end
@@ -88,18 +57,18 @@ local unit_tests = {
 		end
 		context.selected_repository_args = utils.select_override_repositories(co)
 
-		local build_cmd = { "bazel", "build", context.selected_target }
+		local build_cmd = { context.selected_target }
 		vim.list_extend(build_cmd, context.selected_config_args)
 		vim.list_extend(build_cmd, context.selected_repository_args)
-		if not run_bazel_query(build_cmd, co) then
+		if not utils.run_bazel_build(build_cmd, ddad_path, co) then
 			return nil
 		end
 
-		local cquery_cmd = { "bazel", "cquery", "--output=files" }
+		local cquery_cmd = { "--output=files" }
 		vim.list_extend(cquery_cmd, context.selected_config_args)
 		vim.list_extend(cquery_cmd, context.selected_repository_args)
 		table.insert(cquery_cmd, context.selected_target)
-		local test_binary = run_bazel_query(cquery_cmd, co)
+		local test_binary = utils.run_bazel_cquery(cquery_cmd, ddad_path, co)
 		if not test_binary then
 			return nil
 		end
@@ -110,7 +79,15 @@ local unit_tests = {
 		end
 		context.test_binary = ddad_path .. "/" .. relative_test_binary
 
-		local test_output = run_bazel_query({ context.test_binary, "--gtest_list_tests" }, co)
+		local test_output = utils.run_command(
+			{ context.test_binary, "--gtest_list_tests" },
+			ddad_path,
+			co,
+			"GTest",
+			"Listing tests",
+			"Listing tests finished",
+			"Listting tests failed"
+		)
 		if not test_output then
 			return nil
 		end
@@ -147,8 +124,8 @@ local unit_tests = {
 		return context
 	end,
 	pre_run_cmd = function(context)
-    -- This is already done in resolve_context because it is required to query available tests,
-    --  but resolve_context is not called on reruns.
+		-- This is already done in resolve_context because it is required to query available tests,
+		--  but resolve_context is not called on reruns.
 		local cmd = { "bazel", "build", context.selected_target }
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
