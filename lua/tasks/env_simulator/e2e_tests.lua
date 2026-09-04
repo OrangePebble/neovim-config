@@ -119,6 +119,17 @@ local e2e_tests = {
 		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
 		return context
 	end,
+	pre_run_cmd = function(context)
+		-- "bazel run" in cmd() below would be enough but by separating it I can clean up the outputs and times
+		local cmd = {
+			"bazel",
+			"build",
+			context.selected_target,
+		}
+		vim.list_extend(cmd, context.selected_config_args)
+		vim.list_extend(cmd, context.selected_repository_args)
+		return cmd
+	end,
 	cmd = function(context)
 		-- output_path is not inside resolve_context so that the date is different when run_last is used
 		context.output_path = context.output_parent_path
