@@ -171,7 +171,8 @@ local e2e_tests = {
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
 
-		vim.fn.writefile(lines, context.output_path .. "/console_output.txt")
+		local console_output_path = vim.fn.tempname()
+		vim.fn.writefile(lines, console_output_path)
 
 		return {
 			"env",
@@ -181,24 +182,27 @@ local e2e_tests = {
 			"OUTPUT_PARENT_PATH=" .. context.output_parent_path,
 			"OUTPUT_PATH=" .. context.output_path,
 			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
+			"CONSOLE_OUTPUT_PATH=" .. console_output_path,
 			"bash",
 			"-c",
 			[[
           set -euo pipefail # Fail this script on first command failure
 
           TEST_GROUP=$(basename "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*)
+          RUNS_AND_TIME=$(basename "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*)
+          ARTIFACTS_PATH="${OUTPUT_PATH}"/artifacts-"${RUNS_AND_TIME}"
 
-          mkdir "${OUTPUT_PATH}"/artifacts
-          mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/* "${OUTPUT_PATH}"/artifacts
+          mkdir -p "${ARTIFACTS_PATH}"
+          mv "${CONSOLE_OUTPUT_PATH}" "${ARTIFACTS_PATH}"/console_output.txt
+          mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${ARTIFACTS_PATH}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
-          mv "${OUTPUT_PATH}"/console_output.txt "${OUTPUT_PATH}"/artifacts/*/
 
           cp "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/"${JSON_NAME}" "${OUTPUT_PATH}"
           cp -r "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/Configurations/"${SELECTED_TEST}" "${OUTPUT_PATH}"/configuration
 
           rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
           mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-          cp -r "${OUTPUT_PATH}"/artifacts/*/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          cp -r "${ARTIFACTS_PATH}"/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
       ]],
 		}
 	end,
