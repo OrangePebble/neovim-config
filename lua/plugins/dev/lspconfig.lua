@@ -172,6 +172,8 @@ return {
 					},
 				},
 			},
+			html = {}, -- html
+			cssls = {}, -- css
 		})
 
 		-- https://github.com/neovim/nvim-lspconfig/wiki/Running-language-servers-in-containers
