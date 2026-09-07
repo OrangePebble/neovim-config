@@ -454,7 +454,12 @@ keymap("n", "<leader><leader>a", function()
 	require("harpoon"):list():add()
 end, { desc = "Add" })
 keymap("n", "<leader><leader><leader>", function()
-	require("harpoon").ui:toggle_quick_menu(require("harpoon"):list())
+	local harpoon = require("harpoon")
+	harpoon.ui:toggle_quick_menu(harpoon:list(), {
+		ui_width_ratio = 0.8,
+		ui_max_width = 160,
+		height_in_lines = 30,
+	})
 end, { desc = "Open list" })
 
 --== Git
