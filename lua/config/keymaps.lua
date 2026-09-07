@@ -452,7 +452,14 @@ keymap("n", "<leader><leader>p", function()
 end, { desc = "Select previous" })
 keymap("n", "<leader><leader>a", function()
 	require("harpoon"):list():add()
-end, { desc = "Add" })
+end, { desc = "Add file" })
+keymap("n", "<leader><leader>A", function()
+	local path = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":.")
+	require("harpoon"):list():add({
+		value = path,
+		context = { row = vim.api.nvim_win_get_cursor(0)[1], col = 0, fixed = true },
+	})
+end, { desc = "Add line" })
 keymap("n", "<leader><leader><leader>", function()
 	local harpoon = require("harpoon")
 	harpoon.ui:toggle_quick_menu(harpoon:list(), {

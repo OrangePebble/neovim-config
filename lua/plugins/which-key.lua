@@ -274,7 +274,8 @@ return {
 		-- harpoon
 		which_key.add({
 			{ "<leader><leader>", group = "Harpoon", icon = { icon = "󱡅", color = "green" } },
-			{ "<leader><leader>a", icon = { icon = "", color = "grey" } },
+			{ "<leader><leader>a", icon = { icon = "󰈔", color = "grey" } },
+			{ "<leader><leader>A", icon = { icon = "", color = "grey" } },
 			{ "<leader><leader>p", icon = { icon = "󰍠", color = "green" } },
 			{ "<leader><leader>n", icon = { icon = "󰍝", color = "green" } },
 			{ "<leader><leader><leader>", icon = { icon = "", color = "blue" } },
