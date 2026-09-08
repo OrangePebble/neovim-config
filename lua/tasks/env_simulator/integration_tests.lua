@@ -8,6 +8,7 @@ local integration_tests = {
 	name = "Run integration tests",
 	overseer = {
 		options = {
+			pre_run_cwd = ddad_path,
 			cwd = ddad_path .. "/bazel-ddad",
 			env = {
 				LD_LIBRARY_PATH = "/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",

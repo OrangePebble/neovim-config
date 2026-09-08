@@ -2,7 +2,9 @@
 ---@module "dap"
 
 ---@class OverseerOptions: overseer.TaskDefinition
+---@field pre_run_cwd? string Working directory to run the cmd before the main cmd. cwd is used if not set
 ---@field cwd? string Working directory to run in
+---@field post_run_cwd? string Working directory to run the cmd after the main cmd. cwd is used if not set
 ---@field env? table<string, string> Additional environment variables
 ---@field strategy? overseer.Serialized Definition for a run Strategy
 ---@field metadata? table Arbitrary metadata for your own use

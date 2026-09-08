@@ -69,6 +69,7 @@ local function run_overseer_task(task, context)
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task_name,
 					cmd = task.post_run_cmd(context),
+					cwd = task.overseer.options.post_run_cwd or task.overseer.options.cwd,
 				}))
 				post_task.parent_id = main_task.id
 				post_task:start()
@@ -81,6 +82,7 @@ local function run_overseer_task(task, context)
 		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 			name = "Pre: " .. task_name,
 			cmd = task.pre_run_cmd(context),
+			cwd = task.overseer.options.pre_run_cwd or task.overseer.options.cwd,
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			context.pre_task_overseer = pre_task
@@ -175,6 +177,7 @@ local function run_dap_task(task, context)
 				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 					name = "Post: " .. task_name,
 					cmd = task.post_run_cmd(context),
+					cwd = task.overseer.options.post_run_cwd or task.overseer.options.cwd,
 				}))
 				post_task.parent_id = repl_task.id
 				post_task:start()
@@ -203,6 +206,7 @@ local function run_dap_task(task, context)
 		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
 			name = "Pre: " .. task_name,
 			cmd = task.pre_run_cmd(context),
+			cwd = task.overseer.options.pre_run_cwd or task.overseer.options.cwd,
 		}))
 		pre_task:subscribe("on_complete", function(_, pre_status)
 			context.pre_task_overseer = pre_task
