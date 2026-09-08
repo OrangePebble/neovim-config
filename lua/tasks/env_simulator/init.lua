@@ -14,7 +14,9 @@ local targets = {
 	-- "//third_party/open_simulation_interface:open_simulation_interface",
 	-- "//tools/env_simulator/modules/stochastic_cognitive_model:stochastic_cognitive_model_lib",
 	-- "//tools/env_simulator/modules/stochastic_cognitive_model/tests/Core/Sensor_Tests:sensor_tests",
-	"//tools/env_simulator/modules/stochastic_cognitive_model/tests/DriverHighway/LaneChangeBehavior_Tests:lane_change_behavior_tests",
+	-- "//tools/env_simulator/modules/stochastic_cognitive_model/tests/DriverHighway/LaneChangeBehavior_Tests:lane_change_behavior_tests",
+	"//tools/env_simulator/astas_core/Tests/Integration/Controller:qaml_agent_integration_controlled_intersection_test",
+	"//tools/env_simulator/astas_core/Tests/Integration/Collision:collision_integration_test",
 	"//third_party/googletest:googletest",
 }
 
@@ -61,7 +63,11 @@ local build = {
 			return nil
 		end
 
-		local cmd = { "bazel", "build" }
+		local cmd = {
+			"bazel",
+			"build",
+			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
+		}
 		local selected_config = utils.select_config(co)
 		vim.list_extend(cmd, selected_config)
 		local selected_repositories = utils.select_override_repositories(co)
@@ -95,7 +101,11 @@ local compile_commands = {
 			return nil
 		end
 
-		local cmd = { "bazel-compile-commands" }
+		local cmd = {
+			"bazel-compile-commands",
+			"-b",
+			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
+		}
 		local selected_config = utils.select_config(co)
 		for _, flag in ipairs(selected_config) do
 			vim.list_extend(cmd, { "-b", flag })
