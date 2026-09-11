@@ -119,3 +119,14 @@ vim.api.nvim_create_autocmd("OptionSet", {
 		vim.opt.foldcolumn = "1"
 	end,
 })
+
+-- Hide columns in the command-line window ("q:") so that there is no space between the ":" prefix and commands.
+vim.api.nvim_create_autocmd("CmdwinEnter", {
+	callback = function()
+		vim.opt_local.number = false
+		vim.opt_local.relativenumber = false
+		vim.opt_local.signcolumn = "no"
+		vim.opt_local.foldcolumn = "0"
+		vim.opt_local.statuscolumn = ""
+	end,
+})
