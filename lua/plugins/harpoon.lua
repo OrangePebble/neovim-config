@@ -58,10 +58,12 @@ return {
 
 					-- When the row is bigger than the number of lines, we open the last line.
 					local lines = vim.api.nvim_buf_line_count(bufnr)
-					local row = math.min(list_item.context.row, lines)
+					-- For manually written list items the context is nil.
+					local context = list_item.context or {}
+					local row = math.min(context.row or 1, lines)
 					-- When the col is bigger than the line length, we open at the end of the line.
 					local row_text = vim.api.nvim_buf_get_lines(0, row - 1, row, false)
-					local col = math.min(list_item.context.col, #row_text[1])
+					local col = math.min(context.col or 0, #row_text[1])
 					vim.api.nvim_win_set_cursor(0, { row, col })
 
 					-- This works with BufLeave because BufLeave is triggered by the "vim.api.nvim_set_current_buf" above.
