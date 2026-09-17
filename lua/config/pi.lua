@@ -470,7 +470,7 @@ local function choose_instance(force_picker, on_ready)
 				if right.socket_path == selected_socket then
 					return false
 				end
-				return format_instance(left) < format_instance(right)
+				return (left.startedAt or 0) > (right.startedAt or 0)
 			end)
 			picker.select_one(instances, {
 				prompt = "Select Pi instance",
