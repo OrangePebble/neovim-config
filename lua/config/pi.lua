@@ -393,10 +393,11 @@ local function choose_instance(force_picker)
 end
 
 ---@param message string
-local function send_prompt(message)
+---@param append_to_editor boolean
+local function send_prompt(message, append_to_editor)
 	request(selected_socket, {
 		id = "neovim-prompt-" .. request_number,
-		type = "prompt",
+		type = append_to_editor and "append_editor_text" or "prompt",
 		message = message,
 		delivery = "steer",
 	}, function(response, error)
@@ -406,7 +407,7 @@ local function send_prompt(message)
 			choose_instance()
 			return
 		end
-		vim.notify("Prompt sent to Pi", vim.log.levels.INFO)
+		vim.notify(append_to_editor and "Prompt appended to Pi editor" or "Prompt sent to Pi", vim.log.levels.INFO)
 	end)
 end
 
@@ -428,7 +429,9 @@ function M.open_input()
 			return
 		end
 		request_number = request_number + 1
-		send_prompt(message)
+		-- A trailing space means place the text in Pi's editor for review rather
+		-- than submitting it to the agent. The extension preserves that space.
+		send_prompt(message, message:sub(-1) == " ")
 	end)
 end
 
