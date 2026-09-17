@@ -8,6 +8,7 @@ local M = {}
 -- Match opencode.nvim's placeholder color, which the configured theme renders
 -- in orange, without depending on the OpenCode plugin's highlight group.
 vim.api.nvim_set_hl(0, "PiContextReference", { link = "@lsp.type.enum", default = true })
+vim.api.nvim_set_hl(0, "PiSelectedInstance", { link = "FloatTitle", default = true })
 
 local picker = require("utils.picker")
 local uv = vim.uv
@@ -395,17 +396,21 @@ local function shorten_home_directory(directory)
 end
 
 ---@param instance table
----@return string
-local function format_instance(instance)
+---@param supports_chunks? boolean
+---@return string|snacks.picker.Highlight[]
+local function format_instance(instance, supports_chunks)
 	local name = without_json_null(instance.sessionName)
 	local started = relative_start_time(instance.startedAt)
 	local cwd = shorten_home_directory(without_json_null(instance.cwd))
 	local time = "󰥔 " .. started
 	local folder = " " .. cwd
-	if type(name) == "string" and name ~= "" then
-		return string.format("%s │ %s │ %s", name, time, folder)
+	local text = type(name) == "string" and name ~= ""
+		and string.format("%s │ %s │ %s", name, time, folder)
+		or string.format("%s │ %s", time, folder)
+	if supports_chunks and instance.socket_path == selected_socket then
+		return { { text, "PiSelectedInstance" } }
 	end
-	return string.format("%s │ %s", time, folder)
+	return text
 end
 
 ---@param instance table
@@ -448,12 +453,23 @@ local function choose_instance(force_picker, on_ready)
 				return
 			end
 
-			if #instances == 1 and not force_picker then
-				activate_instance(instances[1], on_ready)
+			if #instances == 1 then
+				if not force_picker then
+					activate_instance(instances[1], on_ready)
+				end
+				-- Escape from the input opens the picker to switch instances. If
+				-- there is only one live instance, there is nothing to choose, so
+				-- treat it as immediately cancelling that picker as well.
 				return
 			end
 
 			table.sort(instances, function(left, right)
+				if left.socket_path == selected_socket then
+					return true
+				end
+				if right.socket_path == selected_socket then
+					return false
+				end
 				return format_instance(left) < format_instance(right)
 			end)
 			picker.select_one(instances, {
