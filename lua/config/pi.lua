@@ -576,8 +576,17 @@ local function highlight_context_references(text)
 	local highlights = {}
 	for start_column, end_column in text:gmatch("()@[%a_]+()") do
 		local reference = text:sub(start_column, end_column - 1)
-		if vim.tbl_contains(context_references, reference) then
-			table.insert(highlights, { start_column - 1, end_column - 1, "PiContextReference" })
+		for _, candidate in ipairs(context_references) do
+			if vim.startswith(candidate, reference) then
+				-- A partially typed valid reference, such as @diag.
+				table.insert(highlights, { start_column - 1, end_column - 1, "PiContextReference" })
+				break
+			elseif vim.startswith(reference, candidate) then
+				-- Preserve the valid colored prefix in text such as
+				-- @diagnostics_more, while leaving the suffix uncolored.
+				table.insert(highlights, { start_column - 1, start_column - 1 + #candidate, "PiContextReference" })
+				break
+			end
 		end
 	end
 	return highlights
@@ -588,21 +597,16 @@ end
 ---@return string
 local function expand_context_references(message, context)
 	local this = context.path and string.format("%s:L%d-%d", context.path, context.start_line, context.end_line) or "unknown file"
-	message = message:gsub("@this", function()
-		return this
-	end)
-	message = message:gsub("@buffer", function()
-		return context.path or "unknown file"
-	end)
-	message = message:gsub("@diagnostics", function()
-		return format_diagnostics(context)
-	end)
-	return message:gsub("@quickfix", function()
-		return format_quickfix(context)
-	end)
+	-- `%f[^%a_]` makes the reference exact: @this expands, while @this_more
+	-- remains ordinary prompt text. A trailing space is not required.
+	message = message:gsub("@this%f[^%a_]", this)
+	message = message:gsub("@buffer%f[^%a_]", context.path or "unknown file")
+	message = message:gsub("@diagnostics%f[^%a_]", format_diagnostics(context))
+	return message:gsub("@quickfix%f[^%a_]", format_quickfix(context))
 end
 
-function M.open_input()
+---@param default? string
+function M.open_input(default)
 	if not selected_socket then
 		choose_instance()
 		return
@@ -627,6 +631,16 @@ function M.open_input()
 		end
 		local append_to_editor = message:sub(-1) == " "
 		local context = input_context or capture_input_context()
+		if message:find("@diagnostics", 1, true) and #context.diagnostics == 0 then
+			vim.notify("No diagnostics found", vim.log.levels.WARN)
+			M.open_input(message)
+			return
+		end
+		if message:find("@quickfix", 1, true) and #context.quickfix == 0 then
+			vim.notify("The quickfix list is empty", vim.log.levels.WARN)
+			M.open_input(message)
+			return
+		end
 		input_context = nil
 		request_number = request_number + 1
 		-- A trailing space means place the expanded prompt in Pi's editor for
