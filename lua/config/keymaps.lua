@@ -836,7 +836,7 @@ keymap("n", "<leader>rt", function()
 end, { desc = "Toggle task list and outputs" })
 
 --== OpenCode
-keymap({ "n", "x" }, "<leader>aa", require("config.pi").prompt, { desc = "Prompt Pi" })
+keymap({ "n", "x" }, "<leader>a", require("config.pi").prompt, { desc = "Ask AI" })
 
 --== Change
 keymap(

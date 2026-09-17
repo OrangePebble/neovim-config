@@ -317,16 +317,9 @@ return {
 			{ "<leader>rS", icon = { icon = "", color = "azure" } },
 		})
 
-		-- OpenCode
+		-- pi AI agent
 		which_key.add({
-			{ "<leader>a", mode = { "n", "x" }, group = "AI", icon = { icon = "󰚩", color = "green" } },
-			{ "<leader>aa", mode = { "n", "x" }, icon = { icon = "", color = "green" } },
-			{ "<leader>as", mode = { "n", "x" }, icon = { icon = "󰷐", color = "blue" } },
-			{ "<leader>ar", mode = { "n", "x" }, icon = { icon = "󰅪", color = "grey" } },
-			{ "<leader>al", icon = { icon = "", color = "grey" } },
-			{ "<leader>ab", icon = { icon = "", color = "grey" } },
-			{ "<leader>ax", icon = { icon = "󱖫", color = "grey" } },
-			{ "<leader>aq", icon = { icon = "󰺧", color = "grey" } },
+			{ "<leader>a", mode = { "n", "x" }, icon = { icon = "󰚩", color = "green" } },
 		})
 
 		-- Change
