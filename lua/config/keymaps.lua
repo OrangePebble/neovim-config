@@ -836,39 +836,7 @@ keymap("n", "<leader>rt", function()
 end, { desc = "Toggle task list and outputs" })
 
 --== OpenCode
-keymap("n", "<leader>aa", require("config.pi").prompt, { desc = "Prompt Pi" })
--- keymap({ "n", "x" }, "<leader>aa", function()
--- 	require("opencode").ask("", { submit = true })
--- end, { desc = "Ask" })
-keymap({ "n", "x" }, "<leader>as", function()
-	require("opencode").select()
-end, { desc = "Select action" })
-keymap({ "n", "x" }, "<leader>ar", function()
-	return require("opencode").operator("@this ")
-end, { desc = "Add range", expr = true })
-keymap("n", "<leader>al", function()
-	return require("opencode").operator("@this ") .. "_"
-end, { desc = "Add line", expr = true })
-keymap("n", "<leader>ab", function()
-	return require("opencode").operator("@buffer ") .. "_"
-end, { desc = "Add buffer", expr = true })
-keymap("n", "<leader>ax", function()
-	if #vim.diagnostic.get(0) > 0 then
-		return require("opencode").operator("@diagnostics ") .. "_"
-	end
-	vim.defer_fn(function()
-		vim.notify("No diagnostics found.", vim.log.levels.ERROR, { history = false })
-	end, 0)
-end, { desc = "Add diagnostics", expr = true })
-keymap("n", "<leader>aq", function()
-	if #vim.fn.getqflist() > 0 then
-		return require("opencode").operator("@quickfix ") .. "_"
-	else
-		vim.defer_fn(function()
-			vim.notify("The quickfix list is empty.", vim.log.levels.ERROR, { history = false })
-		end, 0)
-	end
-end, { desc = "Add quickfix list", expr = true })
+keymap({ "n", "x" }, "<leader>aa", require("config.pi").prompt, { desc = "Prompt Pi" })
 
 --== Change
 keymap(

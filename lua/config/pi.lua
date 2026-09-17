@@ -12,6 +12,7 @@ local event_socket ---@type userdata|nil
 local progress ---@type ProgressHandle|nil
 local progress_phase ---@type string|nil
 local terminal_stop_reason ---@type string|nil
+local input_context ---@type table|nil
 local request_number = 0
 
 ---@return string
@@ -340,8 +341,21 @@ local function format_instance(instance)
 	return string.format("%s │ %s", time, folder)
 end
 
+---@param instance table
+---@param on_ready? fun()
+local function activate_instance(instance, on_ready)
+	selected_socket = instance.socket_path
+	subscribe(selected_socket)
+	if on_ready then
+		on_ready()
+	else
+		M.open_input()
+	end
+end
+
 ---@param force_picker? boolean
-local function choose_instance(force_picker)
+---@param on_ready? fun()
+local function choose_instance(force_picker, on_ready)
 	local socket_paths = vim.fn.globpath(socket_directory(), "*.sock", false, true)
 	if #socket_paths == 0 then
 		vim.notify("No running Pi TUI sockets found in " .. socket_directory(), vim.log.levels.WARN)
@@ -368,9 +382,7 @@ local function choose_instance(force_picker)
 			end
 
 			if #instances == 1 and not force_picker then
-				selected_socket = instances[1].socket_path
-				subscribe(selected_socket)
-				M.open_input()
+				activate_instance(instances[1], on_ready)
 				return
 			end
 
@@ -384,9 +396,7 @@ local function choose_instance(force_picker)
 				if not instance then
 					return
 				end
-				selected_socket = instance.socket_path
-				subscribe(selected_socket)
-				M.open_input()
+				activate_instance(instance, on_ready)
 			end)
 		end)
 	end
@@ -411,6 +421,91 @@ local function send_prompt(message, append_to_editor)
 	end)
 end
 
+---@param bufnr integer
+---@return string|nil
+local function absolute_buffer_path(bufnr)
+	local path = vim.api.nvim_buf_get_name(bufnr)
+	return path ~= "" and shorten_home_directory(vim.fn.fnamemodify(path, ":p")) or nil
+end
+
+---@return table
+local function capture_input_context()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local cursor = vim.api.nvim_win_get_cursor(0)
+	local start_line, end_line = cursor[1], cursor[1]
+	if vim.fn.mode():match("^[vV\22]") then
+		-- Visual marks are not finalized until visual mode ends. Execute Escape
+		-- before reading them, matching opencode.nvim's context capture.
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "x", true)
+		local start_pos = vim.api.nvim_buf_get_mark(bufnr, "<")
+		local end_pos = vim.api.nvim_buf_get_mark(bufnr, ">")
+		start_line = math.min(start_pos[1], end_pos[1])
+		end_line = math.max(start_pos[1], end_pos[1])
+	end
+	return {
+		path = absolute_buffer_path(bufnr),
+		start_line = start_line,
+		end_line = end_line,
+		diagnostics = vim.diagnostic.get(bufnr),
+		quickfix = vim.fn.getqflist(),
+	}
+end
+
+---@param context table
+---@return string
+local function format_diagnostics(context)
+	if #context.diagnostics == 0 then
+		return "No diagnostics found"
+	end
+	local lines = { "Diagnostics:" }
+	for _, diagnostic in ipairs(context.diagnostics) do
+		local path = absolute_buffer_path(diagnostic.bufnr) or "unknown file"
+		local message = vim.trim(diagnostic.message:gsub("%s+", " "))
+		local source = diagnostic.source and (" (" .. diagnostic.source .. ")") or ""
+		table.insert(lines, string.format("- %s:L%d:C%d%s: %s", path, diagnostic.lnum + 1, diagnostic.col + 1, source, message))
+	end
+	return table.concat(lines, "\n")
+end
+
+---@param context table
+---@return string
+local function format_quickfix(context)
+	if #context.quickfix == 0 then
+		return "No quickfix entries found"
+	end
+	local lines = { "Quickfix entries:" }
+	for _, entry in ipairs(context.quickfix) do
+		local path = entry.filename
+		if (not path or path == "") and entry.bufnr and entry.bufnr ~= 0 then
+			path = vim.api.nvim_buf_get_name(entry.bufnr)
+		end
+		path = path and path ~= "" and shorten_home_directory(vim.fn.fnamemodify(path, ":p")) or "unknown file"
+		local location = entry.lnum and entry.lnum > 0 and (":L" .. entry.lnum) or ""
+		local message = entry.text and (": " .. vim.trim(entry.text:gsub("%s+", " "))) or ""
+		table.insert(lines, "- " .. path .. location .. message)
+	end
+	return table.concat(lines, "\n")
+end
+
+---@param message string
+---@param context table
+---@return string
+local function expand_context_references(message, context)
+	local this = context.path and string.format("%s:L%d-%d", context.path, context.start_line, context.end_line) or "unknown file"
+	message = message:gsub("@this", function()
+		return this
+	end)
+	message = message:gsub("@buffer", function()
+		return context.path or "unknown file"
+	end)
+	message = message:gsub("@diagnostics", function()
+		return format_diagnostics(context)
+	end)
+	return message:gsub("@quickfix", function()
+		return format_quickfix(context)
+	end)
+end
+
 function M.open_input()
 	if not selected_socket then
 		choose_instance()
@@ -428,15 +523,22 @@ function M.open_input()
 			M.open_input()
 			return
 		end
+		local append_to_editor = message:sub(-1) == " "
+		local context = input_context or capture_input_context()
+		input_context = nil
 		request_number = request_number + 1
-		-- A trailing space means place the text in Pi's editor for review rather
-		-- than submitting it to the agent. The extension preserves that space.
-		send_prompt(message, message:sub(-1) == " ")
+		-- A trailing space means place the expanded prompt in Pi's editor for
+		-- review rather than submitting it to the agent.
+		send_prompt(expand_context_references(message, context), append_to_editor)
 	end)
 end
 
 --- Open the picker on first use, otherwise prompt the currently selected Pi.
 function M.prompt()
+	-- Capture selection, diagnostics, and quickfix state before Snacks.input
+	-- changes focus. @this, @buffer, @diagnostics, and @quickfix in the prompt
+	-- are expanded only when the input is submitted.
+	input_context = capture_input_context()
 	if selected_socket then
 		M.open_input()
 	else
