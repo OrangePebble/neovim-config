@@ -5,6 +5,11 @@
 --- instance directly. Escape from the prompt input reopens the instance picker.
 local M = {}
 
+-- Match opencode.nvim's placeholder color, which the configured theme renders
+-- in orange, without depending on the OpenCode plugin's highlight group.
+vim.api.nvim_set_hl(0, "PiContextReference", { link = "@lsp.type.enum", default = true })
+vim.api.nvim_set_hl(0, "PiContextUnknownReference", { link = "Comment", default = true })
+
 local picker = require("utils.picker")
 local uv = vim.uv
 local selected_socket ---@type string|nil
@@ -492,6 +497,24 @@ local function format_quickfix(context)
 	return table.concat(lines, "\n")
 end
 
+---@param text string
+---@return snacks.input.Highlight[]
+local function highlight_context_references(text)
+	local known_references = {
+		["@this"] = true,
+		["@buffer"] = true,
+		["@diagnostics"] = true,
+		["@quickfix"] = true,
+	}
+	local highlights = {}
+	for start_column, end_column in text:gmatch("()@[%a_]+()") do
+		local reference = text:sub(start_column, end_column - 1)
+		local highlight = known_references[reference] and "PiContextReference" or "PiContextUnknownReference"
+		table.insert(highlights, { start_column - 1, end_column - 1, highlight })
+	end
+	return highlights
+end
+
 ---@param message string
 ---@param context table
 ---@return string
@@ -517,7 +540,7 @@ function M.open_input()
 		return
 	end
 
-	Snacks.input({ prompt = "Prompt Pi" }, function(message)
+	Snacks.input({ prompt = "Prompt Pi", highlight = highlight_context_references }, function(message)
 		-- Snacks passes nil only when the user cancels (including Escape). Return
 		-- to the picker so a different live Pi instance can be selected.
 		if message == nil then
