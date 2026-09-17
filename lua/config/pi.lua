@@ -9,6 +9,9 @@ local picker = require("utils.picker")
 local uv = vim.uv
 local selected_socket ---@type string|nil
 local event_socket ---@type userdata|nil
+local progress ---@type ProgressHandle|nil
+local progress_phase ---@type string|nil
+local terminal_stop_reason ---@type string|nil
 local request_number = 0
 
 ---@return string
@@ -111,14 +114,109 @@ local function close_event_subscription()
 	end
 end
 
+local function ensure_progress()
+	if progress then
+		return
+	end
+	progress = require("fidget.progress").handle.create({
+		title = "Pi",
+		message = "Working",
+		lsp_client = { name = "Pi" },
+		percentage = 0,
+	})
+end
+
+---@param phase string
+---@param message string
+local function set_progress(phase, message)
+	ensure_progress()
+	-- message_update arrives for every streamed token. Do not redraw Fidget
+	-- unless Pi has actually entered a different visible phase.
+	if progress_phase == phase then
+		return
+	end
+	progress_phase = phase
+	progress.message = message
+end
+
 ---@param event table
 local function handle_event(event)
-	if event.event == "permissions:ui_prompt" then
+	local event_name = event.event or "unknown event"
+	-- Keep a single stable Fidget progress item alive for the whole Pi agent
+	-- run. agent_settled, unlike agent_end, means retries and queued work have
+	-- also completed.
+	if event_name == "agent_start" then
+		terminal_stop_reason = nil
+		set_progress("starting", "Starting")
+	elseif event_name == "turn_start" then
+		set_progress("thinking", "Thinking")
+	elseif event_name == "message_start" then
+		if event.data and event.data.message and event.data.message.role == "assistant" then
+			set_progress("responding", "Responding")
+		end
+	elseif event_name == "message_update" then
+		set_progress("responding", "Responding")
+	elseif event_name == "agent_end" then
+		local messages = event.data and event.data.messages or {}
+		local last_assistant
+		for index = #messages, 1, -1 do
+			if messages[index].role == "assistant" then
+				last_assistant = messages[index]
+				break
+			end
+		end
+		if not (event.data and event.data.willRetry) and last_assistant then
+			local reason = last_assistant.stopReason
+			if reason == "error" or reason == "aborted" then
+				terminal_stop_reason = reason
+			end
+		end
+		set_progress("finishing", "Finishing")
+	elseif event_name == "tool_execution_start" then
+		local tool_name = event.data and event.data.toolName or "tool"
+		set_progress("tool:" .. tool_name, "Running " .. tool_name)
+	elseif event_name == "tool_execution_update" then
+		local tool_name = event.data and event.data.toolName or "tool"
+		set_progress("tool-update:" .. tool_name, "Running " .. tool_name .. "…")
+	elseif event_name == "tool_execution_end" then
+		local tool_name = event.data and event.data.toolName or "tool"
+		set_progress("tool-finished:" .. tool_name, "Finished " .. tool_name)
+	elseif event_name == "permissions:ui_prompt" then
+		set_progress("permission", "Waiting for permission")
+	elseif event_name == "session_compact" and progress then
+		set_progress("compacted", "Context compacted")
+	elseif event_name == "session_compact_failed" and progress then
+		set_progress("compaction-failed", "Compaction failed")
+	elseif event_name == "agent_settled" then
+		if progress then
+			progress.title = "Pi finished"
+			progress.message = "Prompt completed"
+			progress:finish()
+			progress = nil
+			progress_phase = nil
+		end
+	elseif event_name == "session_shutdown" then
+		if progress then
+			progress.title = "Pi disconnected"
+			progress:finish()
+			progress = nil
+			progress_phase = nil
+		end
+	end
+
+	if event_name == "permissions:ui_prompt" then
 		local request = event.data and event.data.request or {}
 		local tool = event.data.surface or request.surface or "tool"
 		vim.notify("Pi permission request: " .. tool, vim.log.levels.WARN)
-	elseif event.event == "agent_settled" then
-		vim.notify("Pi prompt completed", vim.log.levels.INFO)
+	elseif event_name == "session_compact_failed" and not (event.data and event.data.aborted) then
+		local reason = event.data and event.data.reason or "unknown reason"
+		vim.notify("Pi compaction failed (" .. reason .. "); context may be full", vim.log.levels.WARN)
+	elseif event_name == "agent_settled" then
+		if terminal_stop_reason then
+			vim.notify("Pi stopped: " .. terminal_stop_reason, vim.log.levels.WARN)
+		else
+			vim.notify("Pi prompt completed", vim.log.levels.INFO)
+		end
 	end
 end
 
@@ -156,9 +254,15 @@ local function subscribe(socket_path)
 				local line = buffer:sub(1, newline - 1):gsub("\r$", "")
 				buffer = buffer:sub(newline + 1)
 				local ok, message = pcall(vim.json.decode, line)
-				if ok and type(message) == "table" and message.type == "event" then
+				if ok and type(message) == "table" then
 					vim.schedule(function()
-						handle_event(message)
+						if message.type == "event" then
+							handle_event(message)
+						elseif message.type == "response" and message.success and message.data and not message.data.idle then
+							-- The agent may already be running when Neovim subscribes, in
+							-- which case no future agent_start event is guaranteed.
+							ensure_progress()
+						end
 					end)
 				end
 			end
