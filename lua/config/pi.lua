@@ -608,7 +608,13 @@ function M.open_input()
 		return
 	end
 
-	local input = Snacks.input({ prompt = "Prompt Pi", highlight = highlight_context_references }, function(message)
+	local input = Snacks.input({
+		prompt = "Prompt AI (pi)",
+		default = default,
+		icon = "󰚩",
+		highlight = highlight_context_references,
+		win = { relative = "cursor", row = 1, col = -2 },
+	}, function(message)
 		-- Snacks passes nil only when the user cancels (including Escape). Return
 		-- to the picker so a different live Pi instance can be selected.
 		if message == nil then
