@@ -157,6 +157,13 @@ local function close_event_subscription()
 	end
 end
 
+---@param socket_path string
+local function forget_selected_socket(socket_path)
+	if selected_socket == socket_path then
+		selected_socket = nil
+	end
+end
+
 local function ensure_progress()
 	if progress then
 		return
@@ -241,6 +248,10 @@ local function handle_event(event)
 			progress_phase = nil
 		end
 	elseif event_name == "session_shutdown" then
+		-- The subscription belongs to the terminating extension runtime. Even
+		-- though /reload recreates the same pathname, require an explicit fresh
+		-- selection rather than treating it as a live subscription.
+		selected_socket = nil
 		if progress then
 			progress.title = "Pi disconnected"
 			progress:finish()
@@ -281,6 +292,7 @@ local function subscribe(socket_path)
 		end
 		if connect_error then
 			close_event_subscription()
+			forget_selected_socket(socket_path)
 			vim.notify("Pi event subscription failed: " .. connect_error, vim.log.levels.ERROR)
 			return
 		end
@@ -291,6 +303,10 @@ local function subscribe(socket_path)
 			end
 			if read_error or not chunk then
 				close_event_subscription()
+				forget_selected_socket(socket_path)
+				vim.schedule(function()
+					vim.notify("Pi socket lost", vim.log.levels.WARN)
+				end)
 				return
 			end
 			buffer = buffer .. chunk
@@ -306,10 +322,13 @@ local function subscribe(socket_path)
 					vim.schedule(function()
 						if message.type == "event" then
 							handle_event(message)
-						elseif message.type == "response" and message.success and message.data and not message.data.idle then
-							-- The agent may already be running when Neovim subscribes, in
-							-- which case no future agent_start event is guaranteed.
-							ensure_progress()
+						elseif message.type == "response" and message.success then
+							require("fidget").notify("Subscribed to Pi events")
+							if message.data and not message.data.idle then
+								-- The agent may already be running when Neovim subscribes, in
+								-- which case no future agent_start event is guaranteed.
+								ensure_progress()
+							end
 						end
 					end)
 				end
@@ -319,6 +338,7 @@ local function subscribe(socket_path)
 		socket:write(vim.json.encode({ id = "neovim-subscribe", type = "subscribe" }) .. "\n", function(write_error)
 			if write_error and socket == event_socket then
 				close_event_subscription()
+				forget_selected_socket(socket_path)
 				vim.schedule(function()
 					vim.notify("Pi event subscription failed: " .. write_error, vim.log.levels.ERROR)
 				end)
