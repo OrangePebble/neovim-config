@@ -12,7 +12,7 @@ vim.api.nvim_set_hl(0, "PiSelectedInstance", { link = "FloatTitle", default = tr
 
 local picker = require("utils.picker")
 local uv = vim.uv
-local context_references = { "@this", "@buffer", "@diagnostics", "@quickfix" }
+local context_references = { "@this", "@buffer", "@diagnostics_buffer", "@diagnostics_line", "@diagnostics", "@quickfix" }
 function M.new()
 	return setmetatable({}, { __index = M })
 end
@@ -529,25 +529,59 @@ local function capture_input_context()
 		path = absolute_buffer_path(bufnr),
 		start_line = start_line,
 		end_line = end_line,
+		cursor_line = cursor[1],
+		cursor_column = cursor[2],
 		diagnostics = vim.diagnostic.get(bufnr),
 		quickfix = vim.fn.getqflist(),
 	}
 end
 
----@param context table
+---@param diagnostics vim.Diagnostic[]
 ---@return string
-local function format_diagnostics(context)
-	if #context.diagnostics == 0 then
+local function format_diagnostics(diagnostics)
+	if #diagnostics == 0 then
 		return "No diagnostics found"
 	end
 	local lines = { "Diagnostics:" }
-	for _, diagnostic in ipairs(context.diagnostics) do
+	for _, diagnostic in ipairs(diagnostics) do
 		local path = absolute_buffer_path(diagnostic.bufnr) or "unknown file"
 		local message = vim.trim(diagnostic.message:gsub("%s+", " "))
 		local source = diagnostic.source and (" (" .. diagnostic.source .. ")") or ""
 		table.insert(lines, string.format("- %s:L%d:C%d%s: %s", path, diagnostic.lnum + 1, diagnostic.col + 1, source, message))
 	end
 	return table.concat(lines, "\n")
+end
+
+---@param context table
+---@return vim.Diagnostic[]
+local function cursor_diagnostics(context)
+	local line = context.cursor_line - 1
+	local column = context.cursor_column
+	return vim.tbl_filter(function(diagnostic)
+		local end_line = diagnostic.end_lnum or diagnostic.lnum
+		if line < diagnostic.lnum or line > end_line then
+			return false
+		end
+		if diagnostic.lnum == end_line then
+			return column >= diagnostic.col and column <= (diagnostic.end_col or math.huge)
+		end
+		if line == diagnostic.lnum then
+			return column >= diagnostic.col
+		end
+		if line == end_line then
+			return column <= (diagnostic.end_col or math.huge)
+		end
+		return true
+	end, context.diagnostics)
+end
+
+---@param context table
+---@return vim.Diagnostic[]
+local function line_diagnostics(context)
+	local line = context.cursor_line - 1
+	return vim.tbl_filter(function(diagnostic)
+		return diagnostic.lnum <= line and line <= (diagnostic.end_lnum or diagnostic.lnum)
+	end, context.diagnostics)
 end
 
 ---@param context table
@@ -601,7 +635,9 @@ local function expand_context_references(message, context)
 	-- remains ordinary prompt text. A trailing space is not required.
 	message = message:gsub("@this%f[^%a_]", this)
 	message = message:gsub("@buffer%f[^%a_]", context.path or "unknown file")
-	message = message:gsub("@diagnostics%f[^%a_]", format_diagnostics(context))
+	message = message:gsub("@diagnostics_buffer%f[^%a_]", format_diagnostics(context.diagnostics))
+	message = message:gsub("@diagnostics_line%f[^%a_]", format_diagnostics(line_diagnostics(context)))
+	message = message:gsub("@diagnostics%f[^%a_]", format_diagnostics(cursor_diagnostics(context)))
 	return message:gsub("@quickfix%f[^%a_]", format_quickfix(context))
 end
 
@@ -631,8 +667,21 @@ function M.open_input(default)
 		end
 		local append_to_editor = message:sub(-1) == " "
 		local context = input_context or capture_input_context()
-		if message:find("@diagnostics", 1, true) and #context.diagnostics == 0 then
-			vim.notify("No diagnostics found", vim.log.levels.WARN)
+		local wants_cursor_diagnostics = message:find("@diagnostics", 1, true)
+			and not message:find("@diagnostics_line", 1, true)
+			and not message:find("@diagnostics_buffer", 1, true)
+		if wants_cursor_diagnostics and #cursor_diagnostics(context) == 0 then
+			vim.notify("No diagnostics under the cursor", vim.log.levels.WARN)
+			M.open_input(message)
+			return
+		end
+		if message:find("@diagnostics_line", 1, true) and #line_diagnostics(context) == 0 then
+			vim.notify("No diagnostics on the current line", vim.log.levels.WARN)
+			M.open_input(message)
+			return
+		end
+		if message:find("@diagnostics_buffer", 1, true) and #context.diagnostics == 0 then
+			vim.notify("No diagnostics in the current buffer", vim.log.levels.WARN)
 			M.open_input(message)
 			return
 		end
