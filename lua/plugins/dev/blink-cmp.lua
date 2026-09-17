@@ -56,8 +56,15 @@ return {
 				lua = { inherit_defaults = true, "lazydev" },
 				-- dap includes omni
 				["dap-repl"] = { "dap" },
+				-- Pi's Snacks.input prompt enables only its @context source.
+				["snacks_input"] = { "pi_context" },
 			},
 			providers = {
+				pi_context = {
+					name = "Pi context",
+					module = "config.pi",
+					score_offset = 100,
+				},
 				lazydev = {
 					name = "LazyDev",
 					module = "lazydev.integrations.blink",

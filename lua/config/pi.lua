@@ -8,10 +8,47 @@ local M = {}
 -- Match opencode.nvim's placeholder color, which the configured theme renders
 -- in orange, without depending on the OpenCode plugin's highlight group.
 vim.api.nvim_set_hl(0, "PiContextReference", { link = "@lsp.type.enum", default = true })
-vim.api.nvim_set_hl(0, "PiContextUnknownReference", { link = "Comment", default = true })
 
 local picker = require("utils.picker")
 local uv = vim.uv
+local context_references = { "@this", "@buffer", "@diagnostics", "@quickfix" }
+function M.new()
+	return setmetatable({}, { __index = M })
+end
+
+function M:enabled()
+	return vim.bo.filetype == "snacks_input" and vim.b.pi_context_input == true
+end
+
+function M:get_trigger_characters()
+	return { "@" }
+end
+
+function M:get_completions(context, callback)
+	local before_cursor = context.line:sub(1, context.cursor[2])
+	local _, _, start_column = before_cursor:find("()@[%a_]*$")
+	if not start_column then
+		callback({ items = {} })
+		return
+	end
+
+	local kind = require("blink.cmp.types").CompletionItemKind.Enum
+	local items = vim.tbl_map(function(reference)
+		return {
+			label = reference,
+			kind = kind,
+			textEdit = {
+				newText = reference,
+				range = {
+					start = { line = context.cursor[1] - 1, character = start_column - 1 },
+					["end"] = { line = context.cursor[1] - 1, character = context.cursor[2] },
+				},
+			},
+		}
+	end, context_references)
+	callback({ items = items })
+end
+
 local selected_socket ---@type string|nil
 local event_socket ---@type userdata|nil
 local progress ---@type ProgressHandle|nil
@@ -500,17 +537,12 @@ end
 ---@param text string
 ---@return snacks.input.Highlight[]
 local function highlight_context_references(text)
-	local known_references = {
-		["@this"] = true,
-		["@buffer"] = true,
-		["@diagnostics"] = true,
-		["@quickfix"] = true,
-	}
 	local highlights = {}
 	for start_column, end_column in text:gmatch("()@[%a_]+()") do
 		local reference = text:sub(start_column, end_column - 1)
-		local highlight = known_references[reference] and "PiContextReference" or "PiContextUnknownReference"
-		table.insert(highlights, { start_column - 1, end_column - 1, highlight })
+		if vim.tbl_contains(context_references, reference) then
+			table.insert(highlights, { start_column - 1, end_column - 1, "PiContextReference" })
+		end
 	end
 	return highlights
 end
@@ -540,7 +572,7 @@ function M.open_input()
 		return
 	end
 
-	Snacks.input({ prompt = "Prompt Pi", highlight = highlight_context_references }, function(message)
+	local input = Snacks.input({ prompt = "Prompt Pi", highlight = highlight_context_references }, function(message)
 		-- Snacks passes nil only when the user cancels (including Escape). Return
 		-- to the picker so a different live Pi instance can be selected.
 		if message == nil then
@@ -559,6 +591,10 @@ function M.open_input()
 		-- review rather than submitting it to the agent.
 		send_prompt(expand_context_references(message, context), append_to_editor)
 	end)
+	-- Snacks disables completion in its prompt buffers by default. Opt this Pi
+	-- input into blink.cmp's snacks_input source after the window is created.
+	vim.b[input.buf].completion = true
+	vim.b[input.buf].pi_context_input = true
 end
 
 --- Open the picker on first use, otherwise prompt the currently selected Pi.
