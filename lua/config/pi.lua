@@ -184,6 +184,8 @@ local function handle_event(event)
 		set_progress("tool-finished:" .. tool_name, "Finished " .. tool_name)
 	elseif event_name == "permissions:ui_prompt" then
 		set_progress("permission", "Waiting for permission")
+	elseif event_name == "ui_prompt_start" then
+		set_progress("user-input", "Waiting for user input")
 	elseif event_name == "session_compact" and progress then
 		set_progress("compacted", "Context compacted")
 	elseif event_name == "session_compact_failed" and progress then
@@ -209,6 +211,9 @@ local function handle_event(event)
 		local request = event.data and event.data.request or {}
 		local tool = event.data.surface or request.surface or "tool"
 		vim.notify("Pi permission request: " .. tool, vim.log.levels.WARN)
+	elseif event_name == "ui_prompt_start" then
+		local title = event.data and event.data.title
+		vim.notify("Pi is waiting for user input" .. (title and (": " .. title) or ""), vim.log.levels.WARN)
 	elseif event_name == "session_compact_failed" and not (event.data and event.data.aborted) then
 		local reason = event.data and event.data.reason or "unknown reason"
 		vim.notify("Pi compaction failed (" .. reason .. "); context may be full", vim.log.levels.WARN)
