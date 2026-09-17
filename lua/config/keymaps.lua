@@ -836,9 +836,10 @@ keymap("n", "<leader>rt", function()
 end, { desc = "Toggle task list and outputs" })
 
 --== OpenCode
-keymap({ "n", "x" }, "<leader>aa", function()
-	require("opencode").ask("", { submit = true })
-end, { desc = "Ask" })
+keymap("n", "<leader>aa", require("config.pi").prompt, { desc = "Prompt Pi" })
+-- keymap({ "n", "x" }, "<leader>aa", function()
+-- 	require("opencode").ask("", { submit = true })
+-- end, { desc = "Ask" })
 keymap({ "n", "x" }, "<leader>as", function()
 	require("opencode").select()
 end, { desc = "Select action" })
