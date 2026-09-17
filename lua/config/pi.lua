@@ -5,8 +5,10 @@
 --- instance directly. Escape from the prompt input reopens the instance picker.
 local M = {}
 
+local picker = require("utils.picker")
 local uv = vim.uv
 local selected_socket ---@type string|nil
+local event_socket ---@type userdata|nil
 local request_number = 0
 
 ---@return string
@@ -102,6 +104,77 @@ local function request(socket_path, request, callback)
 	end)
 end
 
+local function close_event_subscription()
+	if event_socket then
+		close_socket(event_socket)
+		event_socket = nil
+	end
+end
+
+---@param event table
+local function handle_event(event)
+	if event.event == "permissions:ui_prompt" then
+		local request = event.data and event.data.request or {}
+		local tool = event.data.surface or request.surface or "tool"
+		vim.notify("Pi permission request: " .. tool, vim.log.levels.WARN)
+	elseif event.event == "agent_settled" then
+		vim.notify("Pi prompt completed", vim.log.levels.INFO)
+	end
+end
+
+---@param socket_path string
+local function subscribe(socket_path)
+	close_event_subscription()
+	local socket = assert(uv.new_pipe(false))
+	local buffer = ""
+	event_socket = socket
+
+	socket:connect(socket_path, function(connect_error)
+		if socket ~= event_socket then
+			return
+		end
+		if connect_error then
+			close_event_subscription()
+			vim.notify("Pi event subscription failed: " .. connect_error, vim.log.levels.ERROR)
+			return
+		end
+
+		socket:read_start(function(read_error, chunk)
+			if socket ~= event_socket then
+				return
+			end
+			if read_error or not chunk then
+				close_event_subscription()
+				return
+			end
+			buffer = buffer .. chunk
+			while true do
+				local newline = buffer:find("\n", 1, true)
+				if not newline then
+					break
+				end
+				local line = buffer:sub(1, newline - 1):gsub("\r$", "")
+				buffer = buffer:sub(newline + 1)
+				local ok, message = pcall(vim.json.decode, line)
+				if ok and type(message) == "table" and message.type == "event" then
+					vim.schedule(function()
+						handle_event(message)
+					end)
+				end
+			end
+		end)
+
+		socket:write(vim.json.encode({ id = "neovim-subscribe", type = "subscribe" }) .. "\n", function(write_error)
+			if write_error and socket == event_socket then
+				close_event_subscription()
+				vim.schedule(function()
+					vim.notify("Pi event subscription failed: " .. write_error, vim.log.levels.ERROR)
+				end)
+			end
+		end)
+	end)
+end
+
 ---@param value unknown
 ---@return unknown
 local function without_json_null(value)
@@ -113,14 +186,54 @@ local function without_json_null(value)
 	return value
 end
 
+---@param started_at unknown
+---@return string
+local function relative_start_time(started_at)
+	if type(started_at) ~= "number" then
+		return "unknown time"
+	end
+	local seconds = math.max(0, os.time() - started_at)
+	if seconds < 60 then
+		return "just now"
+	elseif seconds < 60 * 60 then
+		return string.format("%dm ago", math.floor(seconds / 60))
+	elseif seconds < 24 * 60 * 60 then
+		return string.format("%dh ago", math.floor(seconds / (60 * 60)))
+	end
+	return string.format("%dd ago", math.floor(seconds / (24 * 60 * 60)))
+end
+
+---@param directory unknown
+---@return string
+local function shorten_home_directory(directory)
+	if type(directory) ~= "string" then
+		return "unknown cwd"
+	end
+	local home = vim.env.HOME
+	if not home or home == "" then
+		return directory
+	end
+	if directory == home then
+		return "~"
+	end
+	if vim.startswith(directory, home .. "/") then
+		return "~" .. directory:sub(#home + 1)
+	end
+	return directory
+end
+
 ---@param instance table
 ---@return string
 local function format_instance(instance)
-	local model = without_json_null(instance.model)
-	local model_name = model and (model.provider .. "/" .. model.id) or "no model"
-	local name = without_json_null(instance.sessionName) or "unnamed session"
-	local cwd = without_json_null(instance.cwd) or "unknown cwd"
-	return string.format("%s  │  %s  │  %s", name, model_name, cwd)
+	local name = without_json_null(instance.sessionName)
+	local started = relative_start_time(instance.startedAt)
+	local cwd = shorten_home_directory(without_json_null(instance.cwd))
+	local time = "󰥔 " .. started
+	local folder = " " .. cwd
+	if type(name) == "string" and name ~= "" then
+		return string.format("%s │ %s │ %s", name, time, folder)
+	end
+	return string.format("%s │ %s", time, folder)
 end
 
 ---@param force_picker? boolean
@@ -152,6 +265,7 @@ local function choose_instance(force_picker)
 
 			if #instances == 1 and not force_picker then
 				selected_socket = instances[1].socket_path
+				subscribe(selected_socket)
 				M.open_input()
 				return
 			end
@@ -159,7 +273,7 @@ local function choose_instance(force_picker)
 			table.sort(instances, function(left, right)
 				return format_instance(left) < format_instance(right)
 			end)
-			Snacks.picker.select(instances, {
+			picker.select_one(instances, {
 				prompt = "Select Pi instance",
 				format_item = format_instance,
 			}, function(instance)
@@ -167,6 +281,7 @@ local function choose_instance(force_picker)
 					return
 				end
 				selected_socket = instance.socket_path
+				subscribe(selected_socket)
 				M.open_input()
 			end)
 		end)
@@ -225,6 +340,7 @@ end
 --- Forget the selected instance so the next `prompt()` call opens the picker.
 function M.reset()
 	selected_socket = nil
+	close_event_subscription()
 end
 
 return M
