@@ -47,7 +47,7 @@ return {
 			vue = { "prettierd" },
 
 			json = { "prettierd" },
-			jsonc = { "prettierd" },
+			jsonc = { "prettierd_jsonc" },
 			yaml = { "prettierd" },
 
 			-- Add 'stop_after_first' to stop after using the first valid formatter.
@@ -55,6 +55,11 @@ return {
 		},
 		-- Customize formatters
 		formatters = {
+			prettierd_jsonc = {
+				command = "prettierd",
+				args = { "--trailing-comma=none", "$FILENAME" },
+				stdin = true,
+			},
 			-- shfmt = { append_args = { "-i", "2" }, },
 		},
 
