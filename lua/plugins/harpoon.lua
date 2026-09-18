@@ -177,6 +177,12 @@ return {
 						win = ctx.win_id,
 					}
 				)
+				vim.api.nvim_win_call(ctx.win_id, function()
+					-- Color the :line suffix for fixed entries
+					vim.fn.matchadd("Number", [[:\d\+$]])
+					-- Color comments, and increase priority so possible :line suffixes don't get colored
+					vim.fn.matchadd("Comment", [[^\s*#.*$]], 20)
+				end)
 			end,
 		})
 	end,
