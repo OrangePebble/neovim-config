@@ -342,11 +342,19 @@ end, { desc = "..." })
 keymap("n", "<leader>sR", function()
 	Snacks.picker.resume()
 end, { desc = "Resume search" })
+local excluded_files_and_dirs = {}
+local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+if string.match(cwd_name, ".*ddad.*") then
+	vim.list_extend(excluded_files_and_dirs, { "tools/env_simulator/ASTAS_DATA" })
+elseif string.match(cwd_name, ".*env_simulator.*") then
+	vim.list_extend(excluded_files_and_dirs, { "ASTAS_DATA" })
+end
 keymap("n", "<leader>sf", function()
 	---@type snacks.picker.smart.Config
 	Snacks.picker.smart({
 		follow = true, -- Follow symlinks.
 		hidden = true, -- Search dot-files.
+		exclude = excluded_files_and_dirs,
 	})
 end, { desc = "Files" })
 keymap("n", "<leader>sF", function()
@@ -355,9 +363,9 @@ keymap("n", "<leader>sF", function()
 		follow = true, -- Follow symlinks.
 		hidden = true, -- Search dot-files.
 		-- Remove git submodules from search results.
-		exclude = vim.tbl_map(function(l)
+		exclude = vim.list_extend(vim.deepcopy(excluded_files_and_dirs), vim.tbl_map(function(l)
 			return l:match(" (%S+)$")
-		end, vim.fn.systemlist("git config --file .gitmodules --get-regexp path 2>/dev/null")),
+		end, vim.fn.systemlist("git config --file .gitmodules --get-regexp path 2>/dev/null"))),
 	})
 end, { desc = "Files (excluding submodules)" })
 keymap("n", "<leader>sN", function()
