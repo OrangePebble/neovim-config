@@ -21,6 +21,9 @@ return {
 					if list_item == nil then
 						return
 					end
+					if list_item.context and list_item.context.comment then
+						return
+					end
 					options = options or {}
 					local prev_fixed = prev_sel_item and prev_sel_item.context and prev_sel_item.context.fixed
 
@@ -91,6 +94,14 @@ return {
 				end,
 				create_list_item = function(_, name)
 					name = name and vim.trim(name)
+
+					-- Keep lines beginning with # as non-navigable comments.
+					if name and name:match("^#") then
+						return {
+							value = name,
+							context = { comment = true },
+						}
+					end
 
 					local path
 					local row = 1
