@@ -156,8 +156,18 @@ return {
 					path = "[No Name]"
 				end
 
-				local width = vim.fn.strchars(vim.fn.fnamemodify(path, ":t"))
-				local text = scrolling_text(width, path):gsub("%%", "%%%%")
+				local text = nil
+
+        -- If the path length shorter the window width minus 50 the just print the whole path.
+        -- 50 should be enough space for the other lualine section and spacing.
+				local available_width = vim.api.nvim_win_get_width(0) - 50
+				if vim.fn.strchars(path) <= available_width then
+					text = path
+				else
+					local width = vim.fn.strchars(vim.fn.fnamemodify(path, ":t"))
+					text = scrolling_text(width, path):gsub("%%", "%%%%")
+				end
+
 				local symbols = {}
 				if vim.bo.modified then
 					table.insert(symbols, "[+]")
@@ -210,7 +220,6 @@ return {
 							return true
 						end,
 					}),
-					"b:obsidian_status",
 				},
 				lualine_x = { "filetype" },
 				lualine_y = {},

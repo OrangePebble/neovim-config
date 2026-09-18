@@ -6,8 +6,12 @@ return {
 			---@type obsidian.config
 			require("obsidian").setup({
 				legacy_commands = false,
+				ui = { enable = false },
 				frontmatter = { enabled = false },
-        footer = { enabled = false }, -- this is shown in lualine instead
+				footer = {
+					enabled = true,
+					separator = "________________________________________________________________________________",
+				},
 				workspaces = {
 					{
 						name = "vault",
