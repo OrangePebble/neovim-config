@@ -42,6 +42,10 @@ keymap("x", "<leader>p", '"_dP', { desc = "Paste without yanking" })
 -- Print absoulute file path and yank it to clipboard
 keymap("n", "<leader>%", function()
 	local path = vim.fn.expand("%:p")
+	local home = vim.env.HOME
+	if vim.startswith(path, home .. "/") then
+		path = "~" .. path:sub(#home + 1)
+	end
 	vim.fn.setreg("+", path)
 	vim.notify("Printed and yanked file path to clipboard.", vim.log.levels.INFO)
 	vim.print(path)

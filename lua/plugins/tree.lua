@@ -56,6 +56,7 @@ return {
 				end
 				-- Use default mappings.
 				api.map.on_attach.default(bufnr)
+				vim.keymap.set("n", "<F2>", api.fs.rename, opts("Rename"))
 				-- Make '?' open help.
 				vim.keymap.set("n", "?", api.tree.toggle_help, opts("Help"))
 			end,
