@@ -185,9 +185,11 @@ local e2e_tests = {
 			[[
           set -euo pipefail # Fail this script on first command failure
 
+          echo -e "\033[34m[info]\033[0m Moving artifacts to ${OUTPUT_PATH} and deleting old location"
           mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${OUTPUT_PATH}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
 
+          echo -e "\033[34m[info]\033[0m Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/* "${OUTPUT_CONTAINER_PATH}"/_latest
@@ -303,12 +305,16 @@ local e2e_tests_astas_cli = {
 
           bazel build $SELECTED_CONFIG_ARGS $SELECTED_REPOSITORY_ARGS -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
 
+          echo -e "\033[34m[info]\033[0m Creating ${OUTPUT_PATH}/artifacts"
           mkdir -p "${OUTPUT_PATH}"/artifacts
+
+          echo -e "\033[34m[info]\033[0m Creating ${OUTPUT_PATH}/configuration and moving files into it"
           cp -r "${SELECTED_SCENARIO_PATH}" "${OUTPUT_PATH}"/configuration
           # Using rsync because cp without overwriting is a mess
   				rsync -a --ignore-existing "${COMMON_RESOURCES_PATH}/" "${OUTPUT_PATH}"/configuration/
           cp "${DDAD_PATH}"/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu "${OUTPUT_PATH}"/configuration
 
+          echo -e "\033[34m[info]\033[0m Using sed to replace /path/to/update in configuration files"
           sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, ${DDAD_PATH}/bazel-bin/external/gecco_default/src/controller}|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
           sed -i "s|\"/path/to/update\"|\"${OUTPUT_PATH}/configuration\"|" "${OUTPUT_PATH}"/configuration/Scenarios/XOSC/Scenario.xosc
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH/artifacts|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
@@ -357,6 +363,8 @@ local e2e_tests_astas_cli = {
 			[=[
           set -euo pipefail # Fail this script on first command failure
 
+
+          echo -e "\033[34m[info]\033[0m Starting python .venv"
           VENV="${OUTPUT_CONTAINER_PATH}"/.venv
           if [ ! -f "${VENV}"/bin/activate ]; then
               # Uses system packages
@@ -366,21 +374,28 @@ local e2e_tests_astas_cli = {
 
           # Install the pytest plugin into the venv if it is not importable yet.
           if ! python3.12 -c 'import pytest_optestrunner' >/dev/null 2>&1; then
-               bazel fetch @op_test_runner//:op_test_runner
-               OPTR_FOLDER="$(bazel info output_base)/external/op_test_runner"
-               python3.12 -m pip install -e "$OPTR_FOLDER/plugin/optestrunner"
-           fi
+            echo -e "\033[34m[info]\033[0m Installing the python pytest plugin into .venv"
+            bazel fetch @op_test_runner//:op_test_runner
+            OPTR_FOLDER="$(bazel info output_base)/external/op_test_runner"
+            python3.12 -m pip install -e "$OPTR_FOLDER/plugin/optestrunner"
+          fi
 
+          echo -e "\033[34m[info]\033[0m Moving .xodr files into ${OUTPUT_PATH}/artifacts for opVisualizer"
           cp "${OUTPUT_PATH}"/configuration/*.xodr "${OUTPUT_PATH}"/artifacts
+
+          echo -e "\033[34m[info]\033[0m Running pytest's optestrunner merge scripts"
           python3.12 -m pytest_optestrunner.merge_csv2csv -r "${OUTPUT_PATH}"/artifacts
           python3.12 -m pytest_optestrunner.merge -r "${OUTPUT_PATH}"/artifacts
 
+          echo -e "\033[34m[info]\033[0m Fixing simulationOutput.xml's schemaVersion"
           sed -i "s|schemaVersion=\"0.0.3\"|schemaVersion=\"0.3.1\"|" "${OUTPUT_PATH}"/artifacts/simulationOutput.xml
 
+          echo -e "\033[34m[info]\033[0m Removing configuration files, moving artifacts to ${OUTPUT_PATH}, and deleting old the artifacts' location"
           rm -rf "${OUTPUT_PATH}"/configuration
           mv "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PATH}"
           rm -rf "${OUTPUT_PATH}"/artifacts
 
+          echo -e "\033[34m[info]\033[0m Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/* "${OUTPUT_CONTAINER_PATH}"/_latest
