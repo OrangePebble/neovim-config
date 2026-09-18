@@ -116,7 +116,7 @@ local e2e_tests = {
 
 		context.context_name = "Run " .. context.selected_test .. " E2E test"
 		context.json_name = vim.fs.basename(json_path)
-		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
+		context.output_container_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
 		return context
 	end,
 	pre_run_cmd = function(context)
@@ -132,7 +132,7 @@ local e2e_tests = {
 	end,
 	cmd = function(context)
 		-- output_path is not inside resolve_context so that the date is different when run_last is used
-		context.output_path = context.output_parent_path
+		context.output_path = context.output_container_path
 			.. "/"
 			.. context.selected_test
 				:gsub("(%a)([%w']*)", function(first, rest)
@@ -161,48 +161,36 @@ local e2e_tests = {
 		return cmd
 	end,
 	post_run_cmd = function(context)
+		-- Get the overseer console text and put it in a file
 		local exit_code = context.task_overseer.exit_code
 		local lines = {
 			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
 			"",
 		}
-
 		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
-
-		local console_output_path = vim.fn.tempname()
-		vim.fn.writefile(lines, console_output_path)
+		vim.fn.writefile(lines, context.output_path .. "/console_output.txt")
 
 		return {
 			"env",
 			"DDAD_PATH=" .. context.ddad_path,
 			"JSON_NAME=" .. context.json_name,
 			"SELECTED_TEST=" .. context.selected_test,
-			"OUTPUT_PARENT_PATH=" .. context.output_parent_path,
+			"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
 			"OUTPUT_PATH=" .. context.output_path,
 			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
-			"CONSOLE_OUTPUT_PATH=" .. console_output_path,
 			"bash",
 			"-c",
 			[[
           set -euo pipefail # Fail this script on first command failure
 
-          TEST_GROUP=$(basename "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*)
-          RUNS_AND_TIME=$(basename "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*)
-          ARTIFACTS_PATH="${OUTPUT_PATH}"/artifacts-"${RUNS_AND_TIME}"
-
-          mkdir -p "${ARTIFACTS_PATH}"
-          mv "${CONSOLE_OUTPUT_PATH}" "${ARTIFACTS_PATH}"/console_output.txt
-          mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${ARTIFACTS_PATH}"
+          mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${OUTPUT_PATH}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
 
-          cp "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/"${JSON_NAME}" "${OUTPUT_PATH}"
-          cp -r "${DDAD_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/"${TEST_GROUP}"/Resources/Configurations/"${SELECTED_TEST}" "${OUTPUT_PATH}"/configuration
-
-          rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-          mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-          cp -r "${ARTIFACTS_PATH}"/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
+          mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
+          cp -r "${OUTPUT_PATH}"/* "${OUTPUT_CONTAINER_PATH}"/_latest
       ]],
 		}
 	end,
@@ -288,13 +276,13 @@ local e2e_tests_astas_cli = {
 
 		context.context_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
 
-		context.output_parent_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
+		context.output_container_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
 
 		return context
 	end,
 	pre_run_cmd = function(context)
 		-- output_path is not inside resolve_context so that the date is different when run_last is used
-		context.output_path = context.output_parent_path
+		context.output_path = context.output_container_path
 			.. "/"
 			.. context.selected_scenario
 			.. "/"
@@ -349,28 +337,27 @@ local e2e_tests_astas_cli = {
 		}
 	end,
 	post_run_cmd = function(context)
+		-- Get the overseer console text and put it in a file
 		local exit_code = context.task_overseer.exit_code
 		local lines = {
 			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
 			"",
 		}
-
 		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
-
 		vim.fn.writefile(lines, context.output_path .. "/artifacts/console_output.txt")
 
 		return {
 			"env",
 			"OUTPUT_PATH=" .. context.output_path,
-			"OUTPUT_PARENT_PATH=" .. context.output_parent_path,
+			"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
 			"bash",
 			"-c",
 			[=[
           set -euo pipefail # Fail this script on first command failure
 
-          VENV="${OUTPUT_PARENT_PATH}"/.venv
+          VENV="${OUTPUT_CONTAINER_PATH}"/.venv
           if [ ! -f "${VENV}"/bin/activate ]; then
               # Uses system packages
               python3.12 -m venv --system-site-packages "${VENV}"
@@ -390,13 +377,15 @@ local e2e_tests_astas_cli = {
 
           sed -i "s|schemaVersion=\"0.0.3\"|schemaVersion=\"0.3.1\"|" "${OUTPUT_PATH}"/artifacts/simulationOutput.xml
 
-          rm "${OUTPUT_PATH}"/configuration/AlgorithmScm.fmu
+          rm -rf "${OUTPUT_PATH}"/configuration
+          mv "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PATH}"
+          rm -rf "${OUTPUT_PATH}"/artifacts
 
-          rm -rf "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-          mkdir "${OUTPUT_PARENT_PATH}"/_latest_artifacts
-          cp -r "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+          rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
+          mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
+          cp -r "${OUTPUT_PATH}"/* "${OUTPUT_CONTAINER_PATH}"/_latest
           if [[ -e default.profraw ]]; then
-            mv default.profraw "${OUTPUT_PARENT_PATH}"/_latest_artifacts
+            mv default.profraw "${OUTPUT_CONTAINER_PATH}"/_latest
           fi
       ]=],
 		}
