@@ -43,6 +43,8 @@ return {
 		},
 
 		completion = {
+			-- Fixes the DAP REPL completions appending the whole suggestion instead of only the new text.
+			keyword = { range = "full" },
 			-- Automatically show the documentation of the selected menu.
 			documentation = { auto_show = true },
 		},
@@ -60,6 +62,21 @@ return {
 				["snacks_input"] = { "pi_context" },
 			},
 			providers = {
+				cmdline = {
+					-- Fixes :ShellTask's path completion appending the whole path instead of only the new text.
+					transform_items = function(_, items)
+						if
+							vim.fn.getcmdcompltype() == "shellcmd" and vim.fn.getcmdline():match("^%s*ShellTask!?%s")
+						then
+							for _, item in ipairs(items) do
+								if item.textEdit and item.filterText then
+									item.textEdit.newText = item.filterText
+								end
+							end
+						end
+						return items
+					end,
+				},
 				pi_context = {
 					name = "Pi context",
 					module = "config.pi",
