@@ -51,6 +51,7 @@ function M:get_completions(context, callback)
 end
 
 local selected_socket ---@type string|nil
+local selected_cwd ---@type string|nil
 local event_socket ---@type userdata|nil
 local progress ---@type ProgressHandle|nil
 local progress_phase ---@type string|nil
@@ -162,6 +163,7 @@ end
 local function forget_selected_socket(socket_path)
 	if selected_socket == socket_path then
 		selected_socket = nil
+		selected_cwd = nil
 	end
 end
 
@@ -294,6 +296,7 @@ local function handle_event(event)
 		-- though /reload recreates the same pathname, require an explicit fresh
 		-- selection rather than treating it as a live subscription.
 		selected_socket = nil
+		selected_cwd = nil
 		if progress then
 			progress.title = "Pi disconnected"
 			progress:finish()
@@ -458,6 +461,7 @@ end
 ---@param on_ready? fun()
 local function activate_instance(instance, on_ready)
 	selected_socket = instance.socket_path
+	selected_cwd = without_json_null(instance.cwd)
 	subscribe(selected_socket)
 	if on_ready then
 		on_ready()
@@ -537,6 +541,7 @@ local function send_prompt(message, append_to_editor)
 	}, function(response, error)
 		if error or not response or not response.success then
 			selected_socket = nil
+			selected_cwd = nil
 			vim.notify("Pi prompt failed: " .. (error or response.error or "unknown error"), vim.log.levels.ERROR)
 			choose_instance()
 			return
@@ -545,11 +550,20 @@ local function send_prompt(message, append_to_editor)
 	end)
 end
 
+---@param absolute_path string
+---@return string
+local function format_path_for_pi(absolute_path)
+	if selected_cwd and (absolute_path == selected_cwd or vim.startswith(absolute_path, selected_cwd .. "/")) then
+		return absolute_path == selected_cwd and "." or absolute_path:sub(#selected_cwd + 2)
+	end
+	return shorten_home_directory(absolute_path)
+end
+
 ---@param bufnr integer
 ---@return string|nil
-local function absolute_buffer_path(bufnr)
+local function buffer_absolute_path(bufnr)
 	local path = vim.api.nvim_buf_get_name(bufnr)
-	return path ~= "" and shorten_home_directory(vim.fn.fnamemodify(path, ":p")) or nil
+	return path ~= "" and vim.fn.fnamemodify(path, ":p") or nil
 end
 
 ---@return table
@@ -567,7 +581,7 @@ local function capture_input_context()
 		end_line = math.max(start_pos[1], end_pos[1])
 	end
 	return {
-		path = absolute_buffer_path(bufnr),
+		path = buffer_absolute_path(bufnr),
 		start_line = start_line,
 		end_line = end_line,
 		cursor_line = cursor[1],
@@ -585,7 +599,8 @@ local function format_diagnostics(diagnostics)
 	end
 	local lines = { "Diagnostics:" }
 	for _, diagnostic in ipairs(diagnostics) do
-		local path = absolute_buffer_path(diagnostic.bufnr) or "unknown file"
+		local absolute_path = buffer_absolute_path(diagnostic.bufnr)
+		local path = absolute_path and format_path_for_pi(absolute_path) or "unknown file"
 		local message = vim.trim(diagnostic.message:gsub("%s+", " "))
 		local source = diagnostic.source and (" (" .. diagnostic.source .. ")") or ""
 		table.insert(lines, string.format("- %s:L%d:C%d%s: %s", path, diagnostic.lnum + 1, diagnostic.col + 1, source, message))
@@ -637,7 +652,7 @@ local function format_quickfix(context)
 		if (not path or path == "") and entry.bufnr and entry.bufnr ~= 0 then
 			path = vim.api.nvim_buf_get_name(entry.bufnr)
 		end
-		path = path and path ~= "" and shorten_home_directory(vim.fn.fnamemodify(path, ":p")) or "unknown file"
+		path = path and path ~= "" and format_path_for_pi(vim.fn.fnamemodify(path, ":p")) or "unknown file"
 		local location = entry.lnum and entry.lnum > 0 and (":L" .. entry.lnum) or ""
 		local message = entry.text and (": " .. vim.trim(entry.text:gsub("%s+", " "))) or ""
 		table.insert(lines, "- " .. path .. location .. message)
@@ -671,11 +686,12 @@ end
 ---@param context table
 ---@return string
 local function expand_context_references(message, context)
-	local this = context.path and string.format("%s:L%d-%d", context.path, context.start_line, context.end_line) or "unknown file"
+	local formatted_path = context.path and format_path_for_pi(context.path)
+	local this = formatted_path and string.format("%s:L%d-%d", formatted_path, context.start_line, context.end_line) or "unknown file"
 	-- `%f[^%a_]` makes the reference exact: @this expands, while @this_more
 	-- remains ordinary prompt text. A trailing space is not required.
 	message = message:gsub("@this%f[^%a_]", this)
-	message = message:gsub("@buffer%f[^%a_]", context.path or "unknown file")
+	message = message:gsub("@buffer%f[^%a_]", formatted_path or "unknown file")
 	message = message:gsub("@diagnostics_buffer%f[^%a_]", format_diagnostics(context.diagnostics))
 	message = message:gsub("@diagnostics_line%f[^%a_]", format_diagnostics(line_diagnostics(context)))
 	message = message:gsub("@diagnostics%f[^%a_]", format_diagnostics(cursor_diagnostics(context)))
@@ -759,6 +775,7 @@ end
 --- Forget the selected instance so the next `prompt()` call opens the picker.
 function M.reset()
 	selected_socket = nil
+	selected_cwd = nil
 	close_event_subscription()
 end
 
