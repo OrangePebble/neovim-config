@@ -194,9 +194,42 @@ local function has_active_tool_or_prompt()
 	return progress_phase and (vim.startswith(progress_phase, "tool") or progress_phase == "permission" or progress_phase == "user-input")
 end
 
+---@param location table
+local function open_file_for_user(location)
+	if type(location.path) ~= "string" or location.path == "" then
+		vim.notify("Pi requested opening a file without a path", vim.log.levels.WARN)
+		return
+	end
+
+	vim.cmd.tabnew(vim.fn.fnameescape(location.path))
+	if type(location.line) == "number" then
+		local line_count = vim.api.nvim_buf_line_count(0)
+		local line = math.min(math.max(1, location.line), line_count)
+		local column = type(location.column) == "number" and math.max(0, location.column - 1) or 0
+		vim.api.nvim_win_set_cursor(0, { line, column })
+	end
+end
+
 ---@param event table
 local function handle_event(event)
 	local event_name = event.event or "unknown event"
+	if event_name == "open_file" then
+		local locations = event.data and event.data.locations
+		if type(locations) ~= "table" or #locations == 0 then
+			vim.notify("Pi requested opening no files", vim.log.levels.WARN)
+			return
+		end
+		-- Open each requested location in its own tab, then restore the user's
+		-- original tab so the request does not interrupt their current workflow.
+		local original_tab = vim.api.nvim_get_current_tabpage()
+		for _, location in ipairs(locations) do
+			open_file_for_user(location)
+		end
+		if vim.api.nvim_tabpage_is_valid(original_tab) then
+			vim.api.nvim_set_current_tabpage(original_tab)
+		end
+		return
+	end
 	-- Keep a single stable Fidget progress item alive for the whole Pi agent
 	-- run. agent_settled, unlike agent_end, means retries and queued work have
 	-- also completed.
