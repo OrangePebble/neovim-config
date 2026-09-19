@@ -1,26 +1,11 @@
--- Custom overseer resession extension. Overwrites the old one.
--- Saves the task metadata and output but doesn't reopen the window if it was open.
+-- Plugin to save Neovim sessions.
+
+-- Saves the overseer task metadata and output.
 -- WARN: These changes use internal/private/new fields that aren't supposed to be used so there are
---  some warnings. I could add ignores to each line but I think it looks worse than the underlines.
-
-local M = {}
-
----@class overseer.CustomResessionConfig
----@field autostart_on_load? boolean
----@field filter? overseer.ListTaskOpts
-local conf = {}
-
----@param data? overseer.CustomResessionConfig
-M.config = function(data)
-	conf = vim.tbl_extend("keep", data or {}, {
-		autostart_on_load = false,
-		filter = {},
-	})
-end
-
-M.on_save = function()
+-- some warnings. I could add ignores to each line but I think it looks worse than the underlines.
+local function save_overseer_tasks()
 	local task_list = require("overseer.task_list")
-	local tasks = task_list.list_tasks(conf.filter)
+	local tasks = task_list.list_tasks({})
 
 	if #tasks == 0 then
 		return nil
@@ -43,11 +28,10 @@ M.on_save = function()
 
 	return saved
 end
-
-M.on_load = function(data)
+local function restore_overseer_tasks(tasks)
 	local overseer = require("overseer")
 
-	for _, entry in ipairs(data) do
+	for _, entry in ipairs(tasks) do
 		local saved_status = entry._saved_status
 		local saved_exit_code = entry._saved_exit_code
 		local saved_time_start = entry._saved_time_start
@@ -70,9 +54,7 @@ M.on_load = function(data)
 		end
 
 		local bufnr = vim.api.nvim_create_buf(false, true)
-		local term_id
-
-		term_id = vim.api.nvim_open_term(bufnr, {})
+		local term_id = vim.api.nvim_open_term(bufnr, {})
 		vim.bo[bufnr].scrollback = 99999
 		pcall(vim.api.nvim_chan_send, term_id, saved_raw_output)
 
@@ -81,11 +63,37 @@ M.on_load = function(data)
 
 		task.strategy.bufnr = bufnr
 		task.strategy.term_id = term_id
-
-		if conf.autostart_on_load then
-			task:start()
-		end
 	end
 end
 
-return M
+return {
+	"rmagatti/auto-session",
+	lazy = false,
+	config = function()
+		local auto_session = require("auto-session")
+		auto_session.setup({
+			suppressed_dirs = { "~/", "~/home", "~/home/projects", "/" },
+			save_and_restore_shada = true,
+			save_extra_data = function()
+				local tasks = save_overseer_tasks()
+				return tasks and vim.json.encode(tasks) or nil
+			end,
+			restore_extra_data = function(_, extra_data)
+				local ok, tasks = pcall(vim.json.decode, extra_data)
+				if ok then
+					restore_overseer_tasks(tasks)
+				end
+			end,
+		})
+
+		-- auto-session saves on exit but I want to save more often in case of crashes.
+		local function autosave()
+			vim.defer_fn(function()
+				auto_session.save_session(nil, { show_message = false })
+				require("fidget").notify(string.format('Saved session "%s"', vim.fn.getcwd()))
+				autosave()
+			end, 300000)
+		end
+		autosave()
+	end,
+}

@@ -315,24 +315,23 @@ end, { desc = "Previous todo" })
 vim.keymap.del("n", "]T")
 vim.keymap.del("n", "[T")
 
---== Resession
+--== auto-session
 keymap("n", "<leader>\\s", function()
-	require("resession").save(vim.fn.getcwd(), { notify = false })
+	vim.cmd("AutoSession save")
 	vim.notify(
 		string.format('Saved session "%s"', vim.fn.getcwd()),
 		vim.log.levels.INFO,
 		{ history = false, timeout = 1000 }
 	)
 end, { desc = "Save" })
-keymap("n", "<leader>\\l", function()
-	require("resession").load(vim.fn.getcwd())
-end, { desc = "Load" })
+keymap("n", "<leader>\\l", "<cmd>AutoSession restore<cr>", { desc = "Load" })
 keymap("n", "<leader>\\d", function()
-	require("resession").delete(vim.fn.getcwd())
-	vim.g.resession_deleted = true
+	-- Prevent VimLeavePre from recreating the session we just removed.
+	vim.cmd("AutoSession disable")
+	vim.cmd("AutoSession delete")
 end, { desc = "Delete" })
 keymap("n", "<leader>\\i", function()
-	vim.print(require("resession").get_current_session_info())
+	vim.print(require("auto-session.lib").current_session_name())
 end, { desc = "Get info" })
 
 --== Search

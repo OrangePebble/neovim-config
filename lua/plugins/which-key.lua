@@ -281,7 +281,7 @@ return {
 			{ "<leader><leader><leader>", icon = { icon = "", color = "blue" } },
 		})
 
-		-- Resession
+		-- auto-session
 		which_key.add({
 			{ "<leader>\\", group = "Session", icon = "" },
 			{ "<leader>\\i", icon = { icon = "", color = "blue" } },
