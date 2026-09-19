@@ -79,12 +79,27 @@ return {
 			suppressed_dirs = { "~/", "~/home", "~/home/projects", "/" },
 			save_and_restore_shada = true,
 			save_extra_data = function()
-				local tasks = save_overseer_tasks()
-				return tasks and vim.json.encode(tasks) or nil
+				local data = {
+					overseer_tasks = save_overseer_tasks(),
+					last_overseer_task = vim.g.last_overseer_task,
+					last_dap_task = vim.g.last_dap_task,
+				}
+				if not data.overseer_tasks and not data.last_overseer_task and not data.last_dap_task then
+					return nil
+				end
+				return vim.json.encode(data)
 			end,
 			restore_extra_data = function(_, extra_data)
-				local ok, tasks = pcall(vim.json.decode, extra_data)
-				if ok then
+				local ok, data = pcall(vim.json.decode, extra_data)
+				if not ok then
+					return
+				end
+
+				-- Sessions saved before task-selection persistence stored the task list directly.
+				local tasks = data.overseer_tasks or data
+				vim.g.last_overseer_task = data.last_overseer_task
+				vim.g.last_dap_task = data.last_dap_task
+				if tasks then
 					restore_overseer_tasks(tasks)
 				end
 			end,

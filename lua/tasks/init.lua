@@ -47,6 +47,19 @@ local last_overseer_task = nil
 ---@type { task: Task, context: TaskContext }|{ regular_dap: true }
 local last_dap_task = nil
 
+---@param name string
+---@param task_type "overseer"|"dap"
+---@return Task|nil
+local function find_task(name, task_type)
+	for _, task_set in ipairs({ tasks, get_runtime_tasks() }) do
+		for _, task in ipairs(task_set) do
+			if task.name == name and task[task_type] and task[task_type].enabled then
+				return vim.tbl_deep_extend("keep", task, task_defaults)
+			end
+		end
+	end
+end
+
 ---@param task Task
 ---@param context TaskContext
 local function run_overseer_task(task, context)
@@ -247,6 +260,7 @@ local function generic_to_overseer_tasks(generic_tasks)
 						return
 					end
 					last_overseer_task = { task = task, context = context }
+					vim.g.last_overseer_task = { task_name = task.name, context = context }
 					run_overseer_task(task, context)
 				end,
 			})
@@ -281,6 +295,7 @@ local function generic_to_dap_tasks(generic_tasks)
 						return
 					end
 					last_dap_task = { task = task, context = context }
+					vim.g.last_dap_task = { task_name = task.name, context = context }
 					run_dap_task(task, context)
 				end,
 			})
@@ -383,6 +398,10 @@ M.choose_and_run_dap_task = function()
 						dap.listeners.after.event_initialized[listener_key] = function()
 							clear_regular_dap_listeners()
 							last_dap_task = { regular_dap = true }
+							vim.g.last_dap_task = {
+								regular_dap = true,
+								name = configuration.name,
+							}
 						end
 						dap.listeners.after.event_terminated[listener_key] = clear_regular_dap_listeners
 						dap.run(configuration)
@@ -423,6 +442,14 @@ end
 M.run_last_overseer_task = function()
 	if last_overseer_task then
 		run_overseer_task(last_overseer_task.task, last_overseer_task.context)
+	elseif vim.g.last_overseer_task then
+		local saved = vim.g.last_overseer_task
+		local task = find_task(saved.task_name, "overseer")
+		if task then
+			run_overseer_task(task, saved.context)
+		else
+			vim.notify("Saved Overseer task is no longer available.", vim.log.levels.WARN)
+		end
 	else
 		local task = overseer.list_tasks({
 			sort = require("overseer.task_list").sort_finished_recently,
@@ -441,6 +468,14 @@ M.run_last_dap_task = function()
 			dap.run_last()
 		else
 			run_dap_task(last_dap_task.task, last_dap_task.context)
+		end
+	elseif vim.g.last_dap_task then
+		local saved = vim.g.last_dap_task
+		local task = find_task(saved.task_name, "dap")
+		if task then
+			run_dap_task(task, saved.context)
+		else
+			vim.notify("Saved debugging task is no longer available.", vim.log.levels.WARN)
 		end
 	else
 		vim.notify("No debugging tasks found.", vim.log.levels.WARN)
