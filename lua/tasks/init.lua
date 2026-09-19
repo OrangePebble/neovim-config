@@ -455,7 +455,9 @@ M.init_shell_task_command = function()
 				return args.args
 			end,
 			overseer = {
-				options = { ephemeral = false },
+				options = {
+					metadata = { ignore_on_session_save = false },
+				},
 			},
 		}, task_defaults)
 		local context = {}

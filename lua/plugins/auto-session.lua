@@ -5,7 +5,11 @@
 -- some warnings. I could add ignores to each line but I think it looks worse than the underlines.
 local function save_overseer_tasks()
 	local task_list = require("overseer.task_list")
-	local tasks = task_list.list_tasks({})
+	local tasks = task_list.list_tasks({
+		filter = function(task)
+			return not (task.metadata and task.metadata.ignore_on_session_save)
+		end,
+	})
 
 	if #tasks == 0 then
 		return nil
