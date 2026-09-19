@@ -687,7 +687,14 @@ end
 ---@return string
 local function expand_context_references(message, context)
 	local formatted_path = context.path and format_path_for_pi(context.path)
-	local this = formatted_path and string.format("%s:L%d-%d", formatted_path, context.start_line, context.end_line) or "unknown file"
+	local this
+	if formatted_path then
+		this = context.start_line == context.end_line
+			and string.format("%s:L%d", formatted_path, context.start_line)
+			or string.format("%s:L%d-L%d", formatted_path, context.start_line, context.end_line)
+	else
+		this = "unknown file"
+	end
 	-- `%f[^%a_]` makes the reference exact: @this expands, while @this_more
 	-- remains ordinary prompt text. A trailing space is not required.
 	message = message:gsub("@this%f[^%a_]", this)
