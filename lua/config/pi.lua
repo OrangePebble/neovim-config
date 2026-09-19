@@ -190,6 +190,10 @@ local function set_progress(phase, message)
 	progress.message = message
 end
 
+local function has_active_tool_or_prompt()
+	return progress_phase and (vim.startswith(progress_phase, "tool") or progress_phase == "permission" or progress_phase == "user-input")
+end
+
 ---@param event table
 local function handle_event(event)
 	local event_name = event.event or "unknown event"
@@ -202,11 +206,15 @@ local function handle_event(event)
 	elseif event_name == "turn_start" then
 		set_progress("thinking", "Thinking")
 	elseif event_name == "message_start" then
-		if event.data and event.data.message and event.data.message.role == "assistant" then
+		if event.data and event.data.message and event.data.message.role == "assistant" and not has_active_tool_or_prompt() then
 			set_progress("responding", "Responding")
 		end
 	elseif event_name == "message_update" then
-		set_progress("responding", "Responding")
+		-- Pi can emit a final assistant stream update after a tool starts. Keep
+		-- the more useful active tool/permission state until the next turn.
+		if not has_active_tool_or_prompt() then
+			set_progress("responding", "Responding")
+		end
 	elseif event_name == "agent_end" then
 		local messages = event.data and event.data.messages or {}
 		local last_assistant
