@@ -10,8 +10,8 @@ vim.opt.wrap = true -- Wrap lines
 vim.opt.breakindent = true -- Wrapped lines will keep the indentation
 vim.opt.cmdheight = 1 -- Command line height
 vim.opt.spelllang = { "en", "pt" } -- Set language for spellchecking
--- Recommended by :checkhealth
-vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"
+-- Recommended by :checkhealth (minus terminal as I don't use it and it doesn't work well with OverseerOutput)
+vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
 
 -- Tabbing / Indentation
 vim.opt.tabstop = 2 -- Tab width

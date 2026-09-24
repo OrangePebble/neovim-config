@@ -77,6 +77,9 @@ return {
 		local auto_session = require("auto-session")
 		auto_session.setup({
 			suppressed_dirs = { "~/", "~/home", "~/home/projects", "/" },
+			-- NvimTree and OverseerList don't work with this plugin.
+			-- OverseerOutput is not saved as defined in vim.o.sessionoptions.
+			close_unsupported_windows = true,
 			save_and_restore_shada = true,
 			save_extra_data = function()
 				local data = {
@@ -108,7 +111,7 @@ return {
 		-- auto-session saves on exit but I want to save more often in case of crashes.
 		local function autosave()
 			vim.defer_fn(function()
-				auto_session.save_session(nil, { show_message = false })
+				auto_session.auto_save_session()
 				require("fidget").notify(string.format('Saved session "%s"', vim.fn.getcwd()))
 				autosave()
 			end, 300000)
