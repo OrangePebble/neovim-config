@@ -107,15 +107,5 @@ return {
 				end
 			end,
 		})
-
-		-- auto-session saves on exit but I want to save more often in case of crashes.
-		local function autosave()
-			vim.defer_fn(function()
-				auto_session.auto_save_session()
-				require("fidget").notify(string.format('Saved session "%s"', vim.fn.getcwd()))
-				autosave()
-			end, 300000)
-		end
-		autosave()
 	end,
 }
