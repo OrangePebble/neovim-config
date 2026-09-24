@@ -190,7 +190,7 @@ local e2e_tests = {
           mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${OUTPUT_PATH}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
 
-          echo -e "\033[34m[info]\033[0m Moving any .mcap file in /tmp to ${OUTPUT_PATH}"
+          printf '[\033[94minfo\033[0m] %s\n' "Moving any .mcap file in /tmp to ${OUTPUT_PATH}"
           shopt -s nullglob
           mcap_files=(/tmp/*.mcap)
           if ((${#mcap_files[@]})); then
