@@ -189,6 +189,13 @@ local e2e_tests = {
           mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${OUTPUT_PATH}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
 
+          echo -e "\033[34m[info]\033[0m Moving any .mcap file in /tmp to ${OUTPUT_PATH}"
+          shopt -s nullglob
+          mcap_files=(/tmp/*.mcap)
+          if ((${#mcap_files[@]})); then
+            mv -- "${mcap_files[@]}" "${OUTPUT_PATH}"
+          fi
+
           echo -e "\033[34m[info]\033[0m Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
