@@ -80,6 +80,9 @@ local e2e_tests = {
 			return nil
 		end
 
+		-- pytest uses this path as the prefix to all tests.
+		context.pytest_json_path = "tools/env_simulator/ExampleData/" .. relative_json_path
+
 		-- Read the JSON file and get available tests
 		local decode_ok, decoded_json = pcall(vim.json.decode, table.concat(json_text, "\n"))
 		if not decode_ok then
@@ -97,6 +100,7 @@ local e2e_tests = {
 			vim.notify("No enabled tests found in the JSON file: " .. json_path, vim.log.levels.WARN)
 			return nil
 		end
+		context.test_names = test_names
 
 		picker.select_one(test_names, {
 			prompt = "Select test",
@@ -154,9 +158,20 @@ local e2e_tests = {
 			"--",
 			"--store-artifacts",
 			"-vvv",
-			"-k=" .. vim.split(context.selected_test, " +", { trimempty = true })[1],
 			"--artifacts-path=" .. context.raw_artifacts_path,
 		})
+
+		-- I'm not using `-k` because it selects tests with matching prefixes, and if
+		--  a test is a prefix of another, that can't be used to only run it without the other.
+		-- I'm instead using `--deselect` to explicitly disable all tests besides the
+		--  ones I want by using exact complete names.
+    -- While pytest `-k` supports more complex queries, optestrunner butchers the
+    --  flag before sending it to pytest.
+		for _, test_name in ipairs(context.test_names) do
+			if test_name ~= context.selected_test then
+				table.insert(cmd, "--deselect=" .. context.pytest_json_path .. "::" .. test_name)
+			end
+		end
 
 		return cmd
 	end,
