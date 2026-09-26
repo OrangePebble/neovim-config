@@ -5,33 +5,30 @@ return {
 	lazy = false,
 	config = function()
 		require("nvim-treesitter").install({
-			"lua",
-			"luadoc",
-			"vim",
-			"vimdoc",
-			"nix",
+			-- Install parsers not built-in into neovim.
+			-- To get installed parsers run :lua vim.print(require("nvim-treesitter").get_installed())
+			-- For possible parsers check https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers
 			"bash",
-			"c",
 			"cpp",
 			"css",
+			"diff",
 			"dockerfile",
 			"go",
 			"html",
 			"javascript",
-			"markdown",
-			"markdown_inline",
-			"python",
-			"rust",
-			"svelte",
-			"typescript",
-			"vue",
-			"yaml",
+			"jsdoc",
 			"json",
-			"toml",
-			"diff",
+			"luadoc",
+			"nix",
+			"python",
 			"regex",
+			"rust",
+			"toml",
+			"typescript",
+			"yaml",
 		})
 		vim.treesitter.language.register("cpp", { "tpp" })
+
 		-- So treesitter has had a massive revamp and removed a bunch of features so that they
 		--  become just the foundation for the features and is therefore easier to maintain.
 		-- Use https://github.com/MeanderingProgrammer/treesitter-modules.nvim#implementing-yourself
@@ -42,21 +39,17 @@ return {
 				local buf = args.buf
 				local filetype = args.match
 
-				-- you need some mechanism to avoid running on buffers that do not
-				-- correspond to a language (like oil.nvim buffers), this implementation
-				-- checks if a parser exists for the current language
+				-- Check if a parser exists for the current buffer.
 				local language = vim.treesitter.language.get_lang(filetype) or filetype
 				if not vim.treesitter.language.add(language) then
 					return
 				end
 
-				-- replicate `highlight = { enable = true }`
+				-- Enable the parser.
 				vim.treesitter.start(buf, language)
 
-				-- replicate `indent = { enable = true }`
+				-- Uses treesitter to know how much to indent each line.
 				vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-
-				-- `incremental_selection = { enable = true }` cannot be easily replicated
 			end,
 		})
 	end,
