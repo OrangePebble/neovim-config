@@ -53,8 +53,9 @@ local last_dap_task = nil
 local function find_task(name, task_type)
 	for _, task_set in ipairs({ tasks, get_runtime_tasks() }) do
 		for _, task in ipairs(task_set) do
+      task = vim.tbl_deep_extend("keep", task, task_defaults)
 			if task.name == name and task[task_type] and task[task_type].enabled then
-				return vim.tbl_deep_extend("keep", task, task_defaults)
+				return task
 			end
 		end
 	end
