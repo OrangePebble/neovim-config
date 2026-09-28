@@ -165,14 +165,32 @@ local e2e_tests = {
 			"--artifacts-path=" .. context.raw_artifacts_path,
 		})
 
-		-- I'm not using `-k` because it selects tests with matching prefixes, and if
-		--  a test is a prefix of another, that can't be used to only run it without the other.
-		-- I'm instead using `--deselect` to explicitly disable all tests besides the
-		--  ones I want by using exact complete names.
-		-- While pytest `-k` supports more complex queries, optestrunner butchers the
-		--  flag before sending it to pytest.
+		-- Get the smallest selected test name and see if it prefixes all others.
+		local smallest_selected_test = context.selected_tests[1]
+		for _, selected_test in ipairs(context.selected_tests) do
+			if #selected_test < #smallest_selected_test then
+				smallest_selected_test = selected_test
+			end
+		end
+		local use_prefix_filter = true
+		for _, selected_test in ipairs(context.selected_tests) do
+			if not vim.startswith(selected_test, smallest_selected_test) then
+				use_prefix_filter = false
+				break
+			end
+		end
+
+		-- If the smallest selected test prefixes all others, use "-k" and a smaller
+		--  number of "--deselect" to only deselect the tests that were not selected
+		--  but still have the smallest one as a prefix.
+		-- If only 1 test was selected, "-k" is used and "--deselect" is used to
+		--  deselect all other tests that have the smallest one as a prefix.
+		if use_prefix_filter then
+			vim.list_extend(cmd, { "-k", smallest_selected_test })
+		end
 		for _, test_name in ipairs(context.test_names) do
-			if not context.selected_test_outputs[test_name] then
+			local is_unselected = not context.selected_test_outputs[test_name]
+			if is_unselected and (not use_prefix_filter or vim.startswith(test_name, smallest_selected_test)) then
 				table.insert(cmd, "--deselect=" .. context.pytest_json_path .. "::" .. test_name)
 			end
 		end
@@ -211,6 +229,10 @@ local e2e_tests = {
 			[[
           set -euo pipefail
 
+          if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
+            printf '[\033[94minfo\033[0m] %s\n' "Multiple tests were selected, not moving .mcap files"
+          fi
+
           while IFS=$'\t' read -r selected_test output_path; do
             printf '[\033[94minfo\033[0m] %s\n' "Moving artifacts to ${output_path} and deleting old location"
             mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/"${selected_test}"/*/*/* "${output_path}"
@@ -222,8 +244,6 @@ local e2e_tests = {
               else
                 printf '[\033[94minfo\033[0m] %s\n' "No .mcap files found, not moving them"
               fi
-            else
-              printf '[\033[94minfo\033[0m] %s\n' "Multiple tests were selected, not moving .mcap files"
             fi
           done <<< "${TEST_OUTPUTS}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
