@@ -11,6 +11,7 @@ return {
 			"bash",
 			"cpp",
 			"css",
+			"devicetree", -- For my zmk config
 			"diff",
 			"dockerfile",
 			"go",
