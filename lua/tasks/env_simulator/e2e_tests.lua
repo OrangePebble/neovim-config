@@ -5,7 +5,7 @@ local ddad_path = utils.ddad_path
 
 ---@type Task
 local e2e_tests = {
-	name = "Run E2E test",
+	name = "Run E2E tests",
 	resolve_context = function()
 		local context = {}
 		context.ddad_path = ddad_path
@@ -102,13 +102,13 @@ local e2e_tests = {
 		end
 		context.test_names = test_names
 
-		picker.select_one(test_names, {
-			prompt = "Select test",
-		}, function(item)
-			coroutine.resume(co, item)
+		picker.select_many(test_names, {
+			prompt = "Select tests",
+		}, function(items)
+			coroutine.resume(co, items)
 		end)
-		context.selected_test = coroutine.yield()
-		if not context.selected_test then
+		context.selected_tests = coroutine.yield()
+		if not context.selected_tests or vim.tbl_isempty(context.selected_tests) then
 			return nil
 		end
 
@@ -118,7 +118,7 @@ local e2e_tests = {
 		end
 		context.selected_repository_args = utils.select_override_repositories(co)
 
-		context.context_name = "Run " .. context.selected_test .. " E2E test"
+		context.context_name = "Run E2E tests: " .. table.concat(context.selected_tests, ", ")
 		context.json_name = vim.fs.basename(json_path)
 		context.output_container_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
 		return context
@@ -135,23 +135,27 @@ local e2e_tests = {
 		return cmd
 	end,
 	cmd = function(context)
-		-- output_path is not inside resolve_context so that the date is different when run_last is used
-		context.output_path = context.output_container_path
-			.. "/"
-			.. context.selected_test
-				:gsub("(%a)([%w']*)", function(first, rest)
-					return first:upper() .. rest
-				end)
-				:gsub("%s+", "")
-			.. "/"
-			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
+		local timestamp = os.date("%y-%m-%d_%Hh%Mm%Ss")
+		context.selected_test_outputs = {}
+		for _, selected_test in ipairs(context.selected_tests) do
+			local output_path = context.output_container_path
+				.. "/"
+				.. selected_test
+					:gsub("(%a)([%w']*)", function(first, rest)
+						return first:upper() .. rest
+					end)
+					:gsub("%s+", "")
+				.. "/"
+				.. timestamp
+			context.selected_test_outputs[selected_test] = output_path
+		end
+
+		-- The shared raw artifacts path will be in the first selected test directory.
+		-- The first selected test will also be used as the _latest output.
+		context.output_path = context.selected_test_outputs[context.selected_tests[1]]
 		context.raw_artifacts_path = context.output_path .. "/E2E-Artifacts"
 
-		local cmd = {
-			"bazel",
-			"run",
-			context.selected_target,
-		}
+		local cmd = { "bazel", "run", context.selected_target }
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
 		vim.list_extend(cmd, {
@@ -165,10 +169,10 @@ local e2e_tests = {
 		--  a test is a prefix of another, that can't be used to only run it without the other.
 		-- I'm instead using `--deselect` to explicitly disable all tests besides the
 		--  ones I want by using exact complete names.
-    -- While pytest `-k` supports more complex queries, optestrunner butchers the
-    --  flag before sending it to pytest.
+		-- While pytest `-k` supports more complex queries, optestrunner butchers the
+		--  flag before sending it to pytest.
 		for _, test_name in ipairs(context.test_names) do
-			if test_name ~= context.selected_test then
+			if not context.selected_test_outputs[test_name] then
 				table.insert(cmd, "--deselect=" .. context.pytest_json_path .. "::" .. test_name)
 			end
 		end
@@ -176,7 +180,7 @@ local e2e_tests = {
 		return cmd
 	end,
 	post_run_cmd = function(context)
-		-- Get the overseer console text and put it in a file
+		-- Get the overseer console text
 		local exit_code = context.task_overseer.exit_code
 		local lines = {
 			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
@@ -185,37 +189,47 @@ local e2e_tests = {
 		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
-		vim.fn.writefile(lines, context.output_path .. "/console_output.txt")
+
+		local bash_readable_selected_test_outputs = {}
+		for selected_test, output_path in pairs(context.selected_test_outputs) do
+			-- Put the overseer console text into a file
+			vim.fn.mkdir(output_path, "p")
+			vim.fn.writefile(lines, output_path .. "/console_output.txt")
+			-- Turn the selected_test_outputs table into a readable list in bash
+			table.insert(bash_readable_selected_test_outputs, selected_test .. "\t" .. output_path)
+		end
 
 		return {
 			"env",
-			"DDAD_PATH=" .. context.ddad_path,
-			"JSON_NAME=" .. context.json_name,
-			"SELECTED_TEST=" .. context.selected_test,
+			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
+			"TEST_OUTPUTS=" .. table.concat(bash_readable_selected_test_outputs, "\n"),
 			"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
 			"OUTPUT_PATH=" .. context.output_path,
-			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
 			"bash",
 			"-c",
 			--bash
 			[[
-          set -euo pipefail # Fail this script on first command failure
-
-          printf '[\033[94minfo\033[0m] %s\n' "Moving artifacts to ${OUTPUT_PATH} and deleting old location"
-          mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/*/*/*/* "${OUTPUT_PATH}"
-          rm -rf "${RAW_ARTIFACTS_PATH}"
-
-          printf '[\033[94minfo\033[0m] %s\n' "Moving any .mcap file in /tmp to ${OUTPUT_PATH}"
+          set -euo pipefail
           shopt -s nullglob
           mcap_files=(/tmp/*.mcap)
-          if ((${#mcap_files[@]})); then
-            mv -- "${mcap_files[@]}" "${OUTPUT_PATH}"
-          fi
+
+          while IFS=$'\t' read -r selected_test output_path; do
+            printf '[\033[94minfo\033[0m] %s\n' "Moving artifacts to ${output_path} and deleting old location"
+            mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/"${selected_test}"/*/*/* "${output_path}"
+
+            printf '[\033[94minfo\033[0m] %s\n' "Copying common files to ${output_path}"
+            # If the number of elements in mcap_files is not 0
+            if ((${#mcap_files[@]})); then
+              cp -- "${mcap_files[@]}" "${output_path}"
+            fi
+          done <<< "${TEST_OUTPUTS}"
+          rm -rf "${RAW_ARTIFACTS_PATH}"
+          rm -f -- "${mcap_files[@]}"
 
           printf '[\033[94minfo\033[0m] %s\n' "Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
-          cp -r "${OUTPUT_PATH}"/* "${OUTPUT_CONTAINER_PATH}"/_latest
+          cp -r "${OUTPUT_PATH}"/. "${OUTPUT_CONTAINER_PATH}"/_latest
       ]],
 		}
 	end,
