@@ -210,21 +210,23 @@ local e2e_tests = {
 			--bash
 			[[
           set -euo pipefail
-          shopt -s nullglob
-          mcap_files=(/tmp/*.mcap)
 
           while IFS=$'\t' read -r selected_test output_path; do
             printf '[\033[94minfo\033[0m] %s\n' "Moving artifacts to ${output_path} and deleting old location"
             mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/"${selected_test}"/*/*/* "${output_path}"
 
-            printf '[\033[94minfo\033[0m] %s\n' "Copying common files to ${output_path}"
-            # If the number of elements in mcap_files is not 0
-            if ((${#mcap_files[@]})); then
-              cp -- "${mcap_files[@]}" "${output_path}"
+            if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
+              if compgen -G '/tmp/*.mcap' > /dev/null; then
+                printf '[\033[94minfo\033[0m] %s\n' "Moving .mcap files to ${output_path}"
+                mv -- /tmp/*.mcap "${output_path}"
+              else
+                printf '[\033[94minfo\033[0m] %s\n' "No .mcap files found, not moving them"
+              fi
+            else
+              printf '[\033[94minfo\033[0m] %s\n' "Multiple tests were selected, not moving .mcap files"
             fi
           done <<< "${TEST_OUTPUTS}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
-          rm -f -- "${mcap_files[@]}"
 
           printf '[\033[94minfo\033[0m] %s\n' "Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
