@@ -150,40 +150,40 @@ local theme = lush(function(injected_functions)
 
     Comment        { fg = comment }, -- Any comment
 
-    Constant       { fg = orange_bright }, -- (*) Any constant
+    Constant       { fg = orange }, -- (*) Any constant
     String         { fg = green }, --   A string constant: "this is a string"
     Character      { String }, --   A character constant: 'c', '\n'
-    Number         { fg = orange }, --   A number constant: 234, 0xff
-    Float          { Number }, --   A floating point constant: 2.3e10
-    Boolean        { Number }, --   A boolean constant: TRUE, false
+    Number         { Constant }, --   A number constant: 234, 0xff
+    Float          { Constant }, --   A floating point constant: 2.3e10
+    Boolean        { Constant }, --   A boolean constant: TRUE, false
 
-    Identifier     { fg = cyan }, -- (*) Any variable name
-    Function       { fg = blue_bright }, --   Function name (also: methods for classes)
+    Identifier     { Normal }, -- (*) Any variable name
+    Function       { fg = blue }, --   Function name (also: methods for classes)
 
     Statement      { fg = magenta }, -- (*) Any statement
-    Conditional    { fg = magenta_bright }, --   if, then, else, endif, switch, etc.
+    Conditional    { Statement }, --   if, then, else, endif, switch, etc.
     Repeat         { Conditional }, --   for, do, while, etc.
     Label          { Conditional }, --   case, default, etc.
 
     Operator       { fg = fg1 }, --   "sizeof", "+", "*", etc.
     Keyword        { fg = magenta }, --   any other keyword
-    Exception      { Keyword }, --   try, catch, throw
+    Exception      { fg = red }, --   try, catch, throw
 
     PreProc        { fg = pink_bright }, -- (*) Generic Preprocessor
     Include        { PreProc }, --   Preprocessor #include
     Define         { PreProc }, --   Preprocessor #define
-    Macro          { PreProc }, --   Same as Define
-    PreCondit      { PreProc }, --   Preprocessor #if, #else, #endif, etc.
+    Macro          { fg = pink }, --   Same as Define
+    PreCondit      { Conditional }, --   Preprocessor #if, #else, #endif, etc.
 
     Type           { fg = yellow }, -- (*) int, long, char, etc.
     StorageClass   { Type }, --   static, register, volatile, etc.
     Structure      { Type }, --   struct, union, enum, etc.
     Typedef        { Type }, --   A typedef
 
-    Special        { fg = blue_bright }, -- (*) Any special symbol
+    Special        { fg = cyan_bright }, -- (*) Any special symbol
     SpecialChar    { Special }, --   Special character in a constant
     Tag            { Special }, --   You can use CTRL-] on this
-    Delimiter      { Special }, --   Character that needs attention
+    Delimiter      { fg = fg1}, --   Character that needs attention
     SpecialComment { Special }, --   Special things inside a comment (e.g. '\n')
     Debug          { Special }, --   Debugging statements
 
@@ -248,12 +248,12 @@ local theme = lush(function(injected_functions)
     -- Identifiers ------------------------------------------------------------
     sym"@variable"           { fg = white }, -- various variable names
     sym"@variable.builtin"   { fg = red }, -- built-in variable names (e.g. `this`)
-    sym"@variable.parameter" { fg = cyan_bright }, -- parameters of a function
+    sym"@variable.parameter" { fg = cyan }, -- parameters of a function
     sym"@variable.member"    { fg = blue }, -- object and struct fields
     sym"@constant"           { Constant }, -- constant identifiers
     sym"@constant.builtin"   { Constant }, -- built-in constant values
     sym"@constant.macro"     { Macro }, -- constants defined by the preprocessor
-    sym"@module"             { fg = cyan_dim }, -- modules or namespaces
+    sym"@module"             { PreProc }, -- modules or namespaces
     -- sym"@module.builtin"     { }, -- built-in modules or namespaces
     sym"@label"              { Label }, -- GOTO and other labels (e.g. `label:` in C), including heredoc labels
 
@@ -261,7 +261,7 @@ local theme = lush(function(injected_functions)
     sym"@string"                { String }, -- string literals
     -- sym"@string.documentation"  { }, -- string documenting code (e.g. Python docstrings)
     sym"@string.regexp"         { fg = yellow_bright }, -- regular expressions
-    sym"@string.escape"         { fg = yellow_bright, gui = "bold" }, -- escape sequences
+    sym"@string.escape"         { fg = green_bright, gui = "bold" }, -- escape sequences
     sym"@string.special"        { Special }, -- other special strings (e.g. dates)
     -- sym"@string.special.symbol" { }, -- symbols or atoms
     sym"@string.special.url"    { fg = orange_bright, gui = "italic,underline" }, -- URIs (e.g. hyperlinks)
@@ -274,20 +274,20 @@ local theme = lush(function(injected_functions)
 
     -- Types ------------------------------------------------------------------
     sym"@type"            { Type }, -- type or class definitions and annotations
-    sym"@type.builtin"    { fg = cyan_dim }, -- built-in types
+    sym"@type.builtin"    { sym"@type" }, -- built-in types
     sym"@type.definition" { sym"@type" }, -- identifiers in type definitions (e.g. `typedef <type> <identifier>` in C)
     sym"@type.qualifier"  { sym"@type" }, -- type qualifiers (e.g. `const`)
     sym"@attribute"       { Constant }, -- attribute annotations (e.g. Python decorators)
-    sym"@property"        { fg = blue }, -- the key in key/value pairs
+    sym"@property"        { fg = blue_bright }, -- the key in key/value pairs
 
     -- Functions --------------------------------------------------------------
     sym"@function"             { Function }, -- function definitions
-    sym"@function.builtin"     { fg = red }, -- built-in functions
+    -- sym"@function.builtin"     { fg = red }, -- built-in functions
     sym"@function.call"        { sym"@function" }, -- function calls
     sym"@function.macro"       { Macro }, -- preprocessor macros
     sym"@function.method"      { sym"@function" }, -- method definitions
     sym"@function.method.call" { sym"@function" }, -- method calls
-    sym"@constructor"          { fg = cyan }, -- constructor calls and definitions
+    sym"@constructor"          { sym"@function" }, -- constructor calls and definitions
     sym"@operator"             { Operator }, -- symbolic operators (e.g. `+` / `*`)
 
     -- Keywords ---------------------------------------------------------------
@@ -303,14 +303,14 @@ local theme = lush(function(injected_functions)
     sym"@keyword.exception"           { Exception }, -- keywords related to exceptions (e.g. `throw` / `catch`)
     sym"@keyword.conditional"         { Conditional }, -- keywords related to conditionals (e.g. `if` / `else`)
     sym"@keyword.conditional.ternary" { Conditional }, -- ternary operator (e.g. `?` / `:`)
-    -- sym"@keyword.directive"           { }, -- various preprocessor directives & shebangs
-    -- sym"@keyword.directive.define"    { }, -- preprocessor definition directives
+    sym"@keyword.directive"           { PreCondit }, -- various preprocessor directives & shebangs
+    sym"@keyword.directive.define"    { Define }, -- preprocessor definition directives
 
     -- Punctuation ------------------------------------------------------------
     -- sym"@punctuation"           { Delimiter }, -- Delimiter
-    sym"@punctuation.delimiter" { fg = fg1 }, -- delimiters (e.g. `;` / `.` / `,`)
-    sym"@punctuation.bracket"   { fg = fg1 }, -- brackets (e.g. `()` / `{}` / `[]`)
-    sym"@punctuation.special"   { fg = cyan_bright }, -- special symbols (e.g. `{}` in string interpolation)
+    -- sym"@punctuation.delimiter" { Delimiter }, -- delimiters (e.g. `;` / `.` / `,`)
+    -- sym"@punctuation.bracket"   { Delimiter }, -- brackets (e.g. `()` / `{}` / `[]`)
+    sym"@punctuation.special"   { Special }, -- special symbols (e.g. `{}` in string interpolation)
 
     -- Comments ---------------------------------------------------------------
     sym"@comment"               { Comment }, -- line and block comments
@@ -415,7 +415,7 @@ local theme = lush(function(injected_functions)
     sym"@lsp.type.builtinType"                  { sym"@type.builtin" },
     sym"@lsp.type.comment"                      { sym"@comment" },
     sym"@lsp.type.enum"                         { sym"@type" },
-    sym"@lsp.type.enumMember"                   { sym"@constant" },
+    sym"@lsp.type.enumMember"                   { sym"@property" },
     sym"@lsp.type.escapeSequence"               { sym"@string.escape" },
     sym"@lsp.type.formatSpecifier"              { sym"@punctuation.special" },
     sym"@lsp.type.interface"                    { fg = red_bright },
@@ -432,15 +432,16 @@ local theme = lush(function(injected_functions)
     sym"@lsp.typemod.class.defaultLibrary"      { sym"@type.builtin" },
     sym"@lsp.typemod.enum.defaultLibrary"       { sym"@type.builtin" },
     sym"@lsp.typemod.enumMember.defaultLibrary" { sym"@constant.builtin" },
-    sym"@lsp.typemod.function.defaultLibrary"   { sym"@function.builtin" },
+    -- sym"@lsp.typemod.function.defaultLibrary"   { sym"@function.builtin" },
     sym"@lsp.typemod.keyword.async"             { sym"@keyword.coroutine" },
-    sym"@lsp.typemod.macro.defaultLibrary"      { sym"@function.builtin" },
-    sym"@lsp.typemod.method.defaultLibrary"     { sym"@function.builtin" },
+    -- sym"@lsp.typemod.macro.defaultLibrary"      { sym"@function.builtin" },
+    -- sym"@lsp.typemod.method.defaultLibrary"     { sym"@function.builtin" },
     sym"@lsp.typemod.operator.injected"         { sym"@operator" },
     sym"@lsp.typemod.string.injected"           { sym"@string" },
     sym"@lsp.typemod.type.defaultLibrary"       { sym"@type.builtin" },
     sym"@lsp.typemod.variable.defaultLibrary"   { sym"@variable.builtin" },
     sym"@lsp.typemod.variable.injected"         { sym"@variable" },
+    sym"@lsp.typemod.variable.global"           { sym"@variable.builtin" },
 
     -- lazy.nvim
     LazyButtonActive { TabLineSel },
@@ -448,9 +449,9 @@ local theme = lush(function(injected_functions)
     LazyProp         { LineNr },
 
     -- which-key
-    WhichKey          { Function },
-    WhichKeyGroup     { Identifier },
-    WhichKeyDesc      { Keyword },
+    WhichKey          { fg = blue_bright },
+    WhichKeyGroup     { WhichKey },
+    WhichKeyDesc      { fg = magenta },
     WhichKeySeperator { Comment },
     WhichKeySeparator { Comment },
     WhichKeyFloat     { NormalFloat },
