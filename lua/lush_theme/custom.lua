@@ -591,6 +591,8 @@ local theme = lush(function(injected_functions)
     -- Custom groups for my breakpoint input
     SnacksInputTitleBreakpoint  { FloatTitle, fg = red },
     SnacksInputBorderBreakpoint { FloatBorder, fg = orange_dim },
+
+    -- Change the colors and tinting of injected code blocks at ../utils/injected_code_tint.lua
   }
 end)
 
