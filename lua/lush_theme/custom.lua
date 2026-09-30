@@ -264,7 +264,7 @@ local theme = lush(function(injected_functions)
     sym"@string.escape"         { fg = green_bright, gui = "bold" }, -- escape sequences
     sym"@string.special"        { Special }, -- other special strings (e.g. dates)
     -- sym"@string.special.symbol" { }, -- symbols or atoms
-    sym"@string.special.url"    { fg = orange_bright, gui = "italic,underline" }, -- URIs (e.g. hyperlinks)
+    sym"@string.special.url"    { fg = blue_dim, gui = "italic,underline" }, -- URIs (e.g. hyperlinks)
     -- sym"@string.special.path"   { }, -- filenames
     sym"@character"             { Character }, -- character literals
     sym"@character.special"     { SpecialChar }, -- special characters (e.g. wildcards)
@@ -282,7 +282,7 @@ local theme = lush(function(injected_functions)
 
     -- Functions --------------------------------------------------------------
     sym"@function"             { Function }, -- function definitions
-    -- sym"@function.builtin"     { fg = red }, -- built-in functions
+    sym"@function.builtin"     { fg = red }, -- built-in functions
     sym"@function.call"        { sym"@function" }, -- function calls
     sym"@function.macro"       { Macro }, -- preprocessor macros
     sym"@function.method"      { sym"@function" }, -- method definitions
@@ -330,22 +330,22 @@ local theme = lush(function(injected_functions)
     sym"@markup.quote"          { fg = fg1 }, -- block quotes
     sym"@markup.math"           { Function }, -- math environments (e.g. `$ ... $` in LaTeX)
     -- sym"@markup.environment"    { }, -- environments (e.g. in LaTeX)
-    sym"@markup.link"           { fg = magenta, gui = "bold" }, -- text references, footnotes, citations, etc.
-    sym"@markup.link.label"     { Special }, -- link, reference descriptions
-    sym"@markup.link.url"       { fg = orange_bright, gui = "italic,underline" }, -- URL-style links
+    sym"@markup.link"           { Delimiter }, -- text references, footnotes, citations, etc.
+    sym"@markup.link.url"       { fg = blue_dim, gui = "italic,underline" }, -- URL-style links
+    sym"@markup.link.label"     { fg = blue }, -- link, reference descriptions
     sym"@markup.raw"            { fg = cyan, gui = "italic" }, -- literal or verbatim text (e.g. inline code)
     sym"@markup.raw.block"      { fg = pink }, -- literal or verbatim text as a stand-alone block (use priority 90 for blocks with injections)
     sym"@markup.list"           { fg = cyan_bright }, -- list markers
     sym"@markup.list.checked"   { fg = green }, -- checked todo-style list markers
     sym"@markup.list.unchecked" { fg = yellow }, -- unchecked todo-style list markers
+
+    -- Misc -------------------------------------------------------------------
     sym"@diff.plus"             { fg = green }, -- added text (for diff files)
     sym"@diff.minus"            { fg = red }, -- deleted text (for diff files)
     sym"@diff.delta"            { fg = blue_bright }, -- changed text (for diff files)
-    sym"@tag"                   { fg = magenta }, -- XML-style tag names (and similar)
-    sym"@tag.attribute"         { fg = blue_bright, gui = "italic" }, -- XML-style tag attributes
-    sym"@tag.delimiter"         { fg = cyan_bright }, -- XML-style tag delimiters
-
-    -- Misc -------------------------------------------------------------------
+    sym"@tag"                   { sym"@property" }, -- XML-style tag names (and similar)
+    sym"@tag.attribute"         { Type }, -- XML-style tag attributes
+    sym"@tag.delimiter"         { Delimiter }, -- XML-style tag delimiters
     -- sym"@none" { }, -- completely disable the highlight
     -- sym"@conceal" { }, -- captures that are only meant to be concealed
     -- sym"@spell" { }, -- for defining regions to be spellchecked
@@ -353,13 +353,22 @@ local theme = lush(function(injected_functions)
 
     -- Language specific ------------------------------------------------------
     -- json
-    sym"@label.json" { fg = blue_bright }, -- For labels: label: in C and :label: in Lua.
+    sym"@label.json"           { sym"@property" }, -- For labels: label: in C and :label: in Lua.
     -- lua
-    sym"@constructor.lua" { fg = fg1 }, -- Lua's constructor is { }
+    sym"@constructor.lua"      { fg = fg1 }, -- Lua's constructor is { }
     -- rust
-    sym"@field.rust" { fg = fg1 },
+    sym"@field.rust"           { fg = fg1 },
     -- yaml
-    sym"@variable.member.yaml" { fg = blue_bright }, -- For fields.
+    sym"@variable.member.yaml" { sym"@property" }, -- For fields.
+    --- xml
+    xmlTag                     { sym"@tag.delimiter" },
+    xmlTagName                 { sym"@tag" },
+    xmlAttrib                  { sym"@tag.attribute" },
+    xmlEqual                   { Operator },
+    -- dosini
+    dosiniSection              { Delimiter },
+    dosiniHeader               { Type },
+    dosiniLabel                { sym"@property" },
 
     -- Legacy -----------------------------------------------------------------
     sym"@parameter"             { sym"@variable.parameter" },
@@ -428,20 +437,22 @@ local theme = lush(function(injected_functions)
     sym"@lsp.type.selfKeyword"                  { sym"@variable.builtin" },
     sym"@lsp.type.typeAlias"                    { sym"@type.definition" },
     sym"@lsp.type.unresolvedReference"          { sym"@error" },
+    sym"@lsp.type.table"                        { sym"@type" },
     sym"@lsp.type.variable"                     {}, -- use treesitter styles for regular variables
     sym"@lsp.typemod.class.defaultLibrary"      { sym"@type.builtin" },
     sym"@lsp.typemod.enum.defaultLibrary"       { sym"@type.builtin" },
     sym"@lsp.typemod.enumMember.defaultLibrary" { sym"@constant.builtin" },
-    -- sym"@lsp.typemod.function.defaultLibrary"   { sym"@function.builtin" },
+    sym"@lsp.typemod.function.defaultLibrary"   { sym"@function.builtin" },
     sym"@lsp.typemod.keyword.async"             { sym"@keyword.coroutine" },
-    -- sym"@lsp.typemod.macro.defaultLibrary"      { sym"@function.builtin" },
-    -- sym"@lsp.typemod.method.defaultLibrary"     { sym"@function.builtin" },
+    sym"@lsp.typemod.macro.defaultLibrary"      { sym"@function.builtin" },
+    sym"@lsp.typemod.method.defaultLibrary"     { sym"@function.builtin" },
     sym"@lsp.typemod.operator.injected"         { sym"@operator" },
     sym"@lsp.typemod.string.injected"           { sym"@string" },
     sym"@lsp.typemod.type.defaultLibrary"       { sym"@type.builtin" },
     sym"@lsp.typemod.variable.defaultLibrary"   { sym"@variable.builtin" },
     sym"@lsp.typemod.variable.injected"         { sym"@variable" },
     sym"@lsp.typemod.variable.global"           { sym"@variable.builtin" },
+    sym"@lsp.typemod.macro.globalScope.cpp"     { sym"@function.builtin" },
 
     -- lazy.nvim
     LazyButtonActive { TabLineSel },
@@ -589,6 +600,7 @@ local theme = lush(function(injected_functions)
     SnacksInputBorder { FloatBorder },
     SnacksInputIcon   { SnacksInputTitle },
     SnacksInputNormal { NormalFloat },
+    SnacksPickerMatch { Search },
     -- Custom groups for my breakpoint input
     SnacksInputTitleBreakpoint  { FloatTitle, fg = red },
     SnacksInputBorderBreakpoint { FloatBorder, fg = orange_dim },
