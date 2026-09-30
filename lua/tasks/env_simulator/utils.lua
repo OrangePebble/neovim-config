@@ -42,8 +42,9 @@ end
 ---@param co thread
 function M.select_override_repositories(co)
 	local available_repositories = {
-		-- "osi_query_library",
-		-- "stochastics-library",
+		{ "osi_query_library", "--override_repository=osi_query_library=/home/pedro/projects/osi-query-library" },
+		{ "stochastics_library", "--override_repository=stochastics_library=/home/pedro/projects/stochastics-library" },
+		{ "road_logic_suite", "--override_repository=road_logic_suite=/home/pedro/projects/road-logic-suite" },
 	}
 	if #available_repositories == 0 then
 		return {}
@@ -52,6 +53,9 @@ function M.select_override_repositories(co)
 	local selected_repositories = nil
 	picker.select_many_esc(available_repositories, {
 		prompt = "Select repositories to override",
+		format_item = function(repository)
+			return repository[1]
+		end,
 	}, function(selected)
 		selected_repositories = selected
 		coroutine.resume(co)
@@ -60,11 +64,7 @@ function M.select_override_repositories(co)
 
 	local cmd_args = {}
 	for _, repository in ipairs(selected_repositories or {}) do
-		if repository == "osi_query_library" then
-			table.insert(cmd_args, "--override_repository=osi_query_library=/home/pedro/projects/osi-query-library")
-		elseif repository == "stochastics-library" then
-			table.insert(cmd_args, "--override_repository=stochastics_library=/home/pedro/projects/stochastics-library")
-		end
+		table.insert(cmd_args, repository[2])
 	end
 
 	return cmd_args
