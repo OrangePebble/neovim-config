@@ -42,9 +42,10 @@ end
 ---@param co thread
 function M.select_override_repositories(co)
 	local available_repositories = {
-		{ "osi_query_library", "--override_repository=osi_query_library=/home/pedro/projects/osi-query-library" },
-		{ "stochastics_library", "--override_repository=stochastics_library=/home/pedro/projects/stochastics-library" },
-		{ "road_logic_suite", "--override_repository=road_logic_suite=/home/pedro/projects/road-logic-suite" },
+		-- { "osi_query_library", "/home/pedro/projects/osi-query-library" },
+		-- { "stochastics_library", "/home/pedro/projects/stochastics-library" },
+		-- { "road_logic_suite", "/home/pedro/projects/road-logic-suite" },
+		-- { "gt_gen_core_default", "/home/pedro/projects/gt-gen-core" },
 	}
 	if #available_repositories == 0 then
 		return {}
@@ -64,7 +65,7 @@ function M.select_override_repositories(co)
 
 	local cmd_args = {}
 	for _, repository in ipairs(selected_repositories or {}) do
-		table.insert(cmd_args, repository[2])
+		table.insert(cmd_args, "--override_repository=" .. repository[1] .. "=" .. repository[2])
 	end
 
 	return cmd_args
