@@ -15,6 +15,9 @@ local function get_initial_tasks()
 	if string.match(cwd_name, ".*ddad.*") or string.match(cwd_name, ".*env_simulator.*") then
 		vim.list_extend(t, require("tasks.env_simulator"))
 	end
+	if string.match(cwd_name, ".*gt%-gen%-core.*") then
+		vim.list_extend(t, require("tasks.gt-gen-core"))
+	end
 	return t
 end
 vim.list_extend(tasks, get_initial_tasks())
@@ -53,7 +56,7 @@ local last_dap_task = nil
 local function find_task(name, task_type)
 	for _, task_set in ipairs({ tasks, get_runtime_tasks() }) do
 		for _, task in ipairs(task_set) do
-      task = vim.tbl_deep_extend("keep", task, task_defaults)
+			task = vim.tbl_deep_extend("keep", task, task_defaults)
 			if task.name == name and task[task_type] and task[task_type].enabled then
 				return task
 			end
@@ -492,6 +495,7 @@ M.init_shell_task_command = function()
 			end,
 			overseer = {
 				options = {
+					ephemeral = false,
 					metadata = { ignore_on_session_save = false },
 				},
 			},

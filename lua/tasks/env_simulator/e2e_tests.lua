@@ -1,4 +1,5 @@
-local utils = require("tasks.env_simulator.utils")
+local env_simulator_utils = require("tasks.env_simulator.utils")
+local utils = require("tasks.utils")
 local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
@@ -112,11 +113,11 @@ local e2e_tests = {
 			return nil
 		end
 
-		context.selected_config_args = utils.select_config(co)
+		context.selected_config_args = env_simulator_utils.select_config(co)
 		if not context.selected_config_args then
 			return nil
 		end
-		context.selected_repository_args = utils.select_override_repositories(co)
+		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
 
 		context.context_name = "Run E2E tests: " .. table.concat(context.selected_tests, ", ")
 		context.json_name = vim.fs.basename(json_path)
@@ -311,12 +312,12 @@ local e2e_tests_astas_cli = {
 		end
 		context.selected_scenario_path = scenarios_path .. context.selected_scenario
 
-		local selected_config_args = utils.select_config(co)
+		local selected_config_args = env_simulator_utils.select_config(co)
 		if not selected_config_args then
 			return nil
 		end
 		context.selected_config_args = table.concat(selected_config_args, " ")
-		local selected_repository_args = utils.select_override_repositories(co)
+		local selected_repository_args = env_simulator_utils.select_override_repositories(co)
 		context.selected_repository_args = table.concat(selected_repository_args, " ")
 
 		Snacks.input({ prompt = "Number of runs:", default = "1" }, function(value)

@@ -47,7 +47,7 @@ local M = {
 		enabled = true,
 		options = {
 			ephemeral = true,
-			metadata = { ignore_on_session_save = true },
+			metadata = { ignore_on_session_save = false },
 		},
 	},
 	dap = {

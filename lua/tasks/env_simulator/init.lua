@@ -1,4 +1,5 @@
-local utils = require("tasks.env_simulator.utils")
+local env_simulator_utils = require("tasks.env_simulator.utils")
+local utils = require("tasks.utils")
 local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
@@ -68,9 +69,9 @@ local build = {
 			"build",
 			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
 		}
-		local selected_config = utils.select_config(co)
+		local selected_config = env_simulator_utils.select_config(co)
 		vim.list_extend(cmd, selected_config)
-		local selected_repositories = utils.select_override_repositories(co)
+		local selected_repositories = env_simulator_utils.select_override_repositories(co)
 		vim.list_extend(cmd, selected_repositories)
 		local extra_args = utils.input_args(co)
 		vim.list_extend(cmd, extra_args)
@@ -106,11 +107,11 @@ local compile_commands = {
 			"-b",
 			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
 		}
-		local selected_config = utils.select_config(co)
+		local selected_config = env_simulator_utils.select_config(co)
 		for _, flag in ipairs(selected_config) do
 			vim.list_extend(cmd, { "-b", flag })
 		end
-		local selected_repositories = utils.select_override_repositories(co)
+		local selected_repositories = env_simulator_utils.select_override_repositories(co)
 		for _, flag in ipairs(selected_repositories) do
 			vim.list_extend(cmd, { "-b", flag })
 		end

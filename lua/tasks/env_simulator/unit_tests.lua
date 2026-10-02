@@ -1,4 +1,5 @@
-local utils = require("tasks.env_simulator.utils")
+local env_simulator_utils = require("tasks.env_simulator.utils")
+local utils = require("tasks.utils")
 local picker = require("utils.picker")
 
 local ddad_path = utils.ddad_path
@@ -51,11 +52,11 @@ local unit_tests = {
 			return nil
 		end
 
-		context.selected_config_args = utils.select_config(co)
+		context.selected_config_args = env_simulator_utils.select_config(co)
 		if not context.selected_config_args then
 			return nil
 		end
-		context.selected_repository_args = utils.select_override_repositories(co)
+		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
 
 		local build_cmd = { context.selected_target }
 		vim.list_extend(build_cmd, context.selected_config_args)

@@ -14,6 +14,7 @@ return {
 			"devicetree", -- For my zmk config
 			"diff",
 			"dockerfile",
+			"doxygen", -- C++ documentation comments
 			"go",
 			"html",
 			"javascript",
