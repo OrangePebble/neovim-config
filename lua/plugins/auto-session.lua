@@ -7,7 +7,9 @@ local function save_overseer_tasks()
 	local task_list = require("overseer.task_list")
 	local tasks = task_list.list_tasks({
 		filter = function(task)
-			return not (task.metadata and task.metadata.ignore_on_session_save)
+      -- I don't think this filter is necessary, as ephemeral tasks seem to be deleted on
+      --  new sessions, but this way we don't save them at all.
+			return not task.ephemeral
 		end,
 	})
 
