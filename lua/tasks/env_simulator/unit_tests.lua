@@ -2,7 +2,7 @@ local env_simulator_utils = require("tasks.env_simulator.utils")
 local utils = require("tasks.utils")
 local picker = require("utils.picker")
 
-local ddad_path = utils.ddad_path
+local ddad_path = env_simulator_utils.ddad_path
 
 ---@type Task
 local unit_tests = {

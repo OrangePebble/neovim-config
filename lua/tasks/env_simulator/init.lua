@@ -2,7 +2,7 @@ local env_simulator_utils = require("tasks.env_simulator.utils")
 local utils = require("tasks.utils")
 local picker = require("utils.picker")
 
-local ddad_path = utils.ddad_path
+local ddad_path = env_simulator_utils.ddad_path
 
 -- Instead of manually defining a list of targets, I could automatically get a list of targets using something like:
 --  `bazel query --keep_going --noshow_progress --output label '//tools/env_simulator/astas_cli/... except kind(cc_test, //tools/env_simulator/astas_cli/...) except kind(filegroup, //tools/env_simulator/astas_cli/...)' 2>/dev/null`
