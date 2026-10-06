@@ -16,7 +16,10 @@ local function get_initial_tasks()
 		vim.list_extend(t, require("tasks.env_simulator"))
 	end
 	if string.match(cwd_name, ".*gt%-gen%-core.*") then
-		vim.list_extend(t, require("tasks.gt-gen-core"))
+		vim.list_extend(t, require("tasks.gt_gen_core"))
+	end
+	if string.match(cwd_name, ".*openscenario1_engine.*") then
+		vim.list_extend(t, require("tasks.open_scenario_engine"))
 	end
 	return t
 end

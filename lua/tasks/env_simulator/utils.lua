@@ -46,6 +46,7 @@ function M.select_override_repositories(co)
 		-- { "stochastics_library", "/home/pedro/projects/stochastics-library" },
 		-- { "road_logic_suite", "/home/pedro/projects/road-logic-suite" },
 		-- { "gt_gen_core_default", "/home/pedro/projects/gt-gen-core" },
+		-- { "open_scenario_engine", "/home/pedro/projects/openscenario1_engine/engine" },
 	}
 	if #available_repositories == 0 then
 		return {}

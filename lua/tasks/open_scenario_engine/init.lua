@@ -1,12 +1,24 @@
 local picker = require("utils.picker")
 local utils = require("tasks.utils")
 
+-- The repository root contains the Bazel workspace in its engine/ subdirectory.
+-- Also support opening Neovim directly from that workspace.
+local bazel_workspace = vim.fn.getcwd()
+if vim.fn.filereadable(bazel_workspace .. "/MODULE.bazel") == 0 then
+	bazel_workspace = bazel_workspace .. "/engine"
+end
+
 local targets = {
-	"//Core/Environment/Map/...",
+	"//:open_scenario_engine",
 }
 
 local build = {
 	name = "Build bazel targets",
+	overseer = {
+		options = {
+			cwd = bazel_workspace,
+		},
+	},
 	resolve_context = function()
 		local co = coroutine.running()
 		local selected_targets = nil
@@ -24,12 +36,9 @@ local build = {
 		local cmd = {
 			"bazel",
 			"build",
-			"--config=core",
-			"--config=clang",
-			"--repo_env=CC=" .. vim.fn.exepath("clang"),
-			"--repo_env=CXX=" .. vim.fn.exepath("clang++"),
-			"--cxxopt=-includealgorithm",
-			"--features=-treat_warnings_as_errors",
+			"--config=ose",
+			"--config=ose_clang",
+			-- open_scenario_parser omits this required standard header.
 			"--cxxopt=-includecstdint",
 		}
 		local extra_args = utils.input_args(co)
@@ -47,6 +56,11 @@ local build = {
 
 local compile_commands = {
 	name = "Generate compile_commands.json",
+	overseer = {
+		options = {
+			cwd = bazel_workspace,
+		},
+	},
 	resolve_context = function()
 		local co = coroutine.running()
 		local selected_targets = nil
@@ -64,17 +78,10 @@ local compile_commands = {
 		local cmd = {
 			"bazel-compile-commands",
 			"-b",
-			"--config=core",
+			"--config=ose",
 			"-b",
-			"--config=clang",
-			"-b",
-			"--repo_env=CC=" .. vim.fn.exepath("clang"),
-			"-b",
-			"--repo_env=CXX=" .. vim.fn.exepath("clang++"),
-			"-b",
-			"--cxxopt=-includealgorithm",
-			"-b",
-			"--features=-treat_warnings_as_errors",
+			"--config=ose_clang",
+			-- open_scenario_parser omits this required standard header.
 			"-b",
 			"--cxxopt=-includecstdint",
 		}
