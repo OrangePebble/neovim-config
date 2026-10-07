@@ -424,7 +424,7 @@ local theme = lush(function(injected_functions)
     sym"@lsp.type.builtinType"                  { sym"@type.builtin" },
     sym"@lsp.type.comment"                      { sym"@comment" },
     sym"@lsp.type.enum"                         { sym"@type" },
-    sym"@lsp.type.enumMember"                   { sym"@property" },
+    sym"@lsp.type.enumMember"                   { sym"@constant" },
     sym"@lsp.type.escapeSequence"               { sym"@string.escape" },
     sym"@lsp.type.formatSpecifier"              { sym"@punctuation.special" },
     sym"@lsp.type.interface"                    { fg = red_bright },
@@ -452,7 +452,7 @@ local theme = lush(function(injected_functions)
     sym"@lsp.typemod.variable.defaultLibrary"   { sym"@variable.builtin" },
     sym"@lsp.typemod.variable.injected"         { sym"@variable" },
     sym"@lsp.typemod.variable.global"           { sym"@variable.builtin" },
-    sym"@lsp.typemod.macro.globalScope.cpp"     { sym"@function.builtin" },
+    sym"@lsp.typemod.macro.globalScope.cpp"     { sym"@function.builtin" }, -- `assert` in C++ is this color
 
     -- lazy.nvim
     LazyButtonActive { TabLineSel },
