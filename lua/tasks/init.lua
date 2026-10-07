@@ -21,6 +21,9 @@ local function get_initial_tasks()
 	if string.match(cwd_name, ".*openscenario1_engine.*") then
 		vim.list_extend(t, require("tasks.open_scenario_engine"))
 	end
+	if string.match(cwd_name, ".*mantle%-api.*") then
+		vim.list_extend(t, require("tasks.mantle_api"))
+	end
 	return t
 end
 vim.list_extend(tasks, get_initial_tasks())
