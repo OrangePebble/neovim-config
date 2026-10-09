@@ -10,6 +10,7 @@ end
 
 local targets = {
 	"//:open_scenario_engine",
+	"//:spawning_tests",
 }
 
 local build = {

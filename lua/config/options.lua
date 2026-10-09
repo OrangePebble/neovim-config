@@ -14,7 +14,7 @@ vim.opt.spelllang = { "en", "pt" } -- Set language for spellchecking
 vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,localoptions"
 
 -- Tabbing / Indentation
-vim.opt.tabstop = 4 -- Tab width
+vim.opt.tabstop = 2 -- Tab width
 vim.opt.shiftwidth = 0 -- How many spaces pressing tab inserts. 0 means same as tabstop.
 vim.opt.softtabstop = -1 -- <Tab> and <BS> move the cursor the number of columns instead of inserting a literal tab. 0 disables it, -1 makes it the same as shiftwidth
 vim.opt.expandtab = true -- Use spaces instead of tabs

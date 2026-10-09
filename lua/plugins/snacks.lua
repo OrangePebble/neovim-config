@@ -34,6 +34,12 @@ return {
 					permalink = "/blob/{commit}/{file}#L{line_start}-L{line_end}",
 					commit = "/commit/{commit}",
 				},
+				["gitlab%.eclipse%.org"] = {
+					branch = "/-/tree/{branch}",
+					file = "/-/blob/{branch}/{file}#L{line_start}-{line_end}",
+					permalink = "/-/blob/{commit}/{file}#L{line_start}-{line_end}",
+					commit = "/-/commit/{commit}",
+				},
 			},
 		},
 		indent = {
@@ -87,7 +93,7 @@ return {
 				preset = function()
 					local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
 					if string.match(cwd_name, ".*ddad.*") or string.match(cwd_name, ".*env_simulator.*") then
-            -- Make picker always hava a vertical layout for repos where files are very deeply nested.
+						-- Make picker always hava a vertical layout for repos where files are very deeply nested.
 						return "vertical"
 					end
 					-- 120 is the default
