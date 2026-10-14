@@ -20,7 +20,7 @@ local build = {
 			cwd = bazel_workspace,
 		},
 	},
-	resolve_context = function()
+	first_run_pre = function(context)
 		local co = coroutine.running()
 		local selected_targets = nil
 		picker.select_many(targets, {
@@ -31,7 +31,8 @@ local build = {
 		end)
 		coroutine.yield()
 		if not selected_targets then
-			return nil
+			context.failed = true
+			return
 		end
 
 		local cmd = {
@@ -48,9 +49,9 @@ local build = {
 		table.insert(cmd, "--")
 		vim.list_extend(cmd, selected_targets)
 
-		return { cmd = cmd }
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }
@@ -62,7 +63,7 @@ local compile_commands = {
 			cwd = bazel_workspace,
 		},
 	},
-	resolve_context = function()
+	first_run_pre = function(context)
 		local co = coroutine.running()
 		local selected_targets = nil
 		picker.select_many(targets, {
@@ -73,7 +74,8 @@ local compile_commands = {
 		end)
 		coroutine.yield()
 		if not selected_targets then
-			return nil
+			context.failed = true
+			return
 		end
 
 		local cmd = {
@@ -93,9 +95,9 @@ local compile_commands = {
 
 		vim.list_extend(cmd, selected_targets)
 
-		return { cmd = cmd }
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }

@@ -8,20 +8,22 @@ local M = {
 				type = "gdb",
 			},
 		},
-		resolve_context = function()
+		first_run_pre = function(context)
 			local file_path = require("utils.picker").pick_file(vim.fn.getcwd(), nil)
 			if not file_path then
-				return nil
+				context.failed = true
+				return
 			end
+
 			local cmd = { file_path }
 			local co = coroutine.running()
 			Snacks.input({ prompt = "Args:" }, function(value)
 				coroutine.resume(co, value)
 			end)
 			vim.list_extend(cmd, vim.split(coroutine.yield() or "", " +", { trimempty = true }))
-			return { cmd = cmd }
+			context.cmd = cmd
 		end,
-		cmd = function(context)
+		run_main = function(context)
 			return context.cmd
 		end,
 	},
@@ -45,15 +47,15 @@ local M = {
 				end,
 			},
 		},
-		resolve_context = function()
+		first_run_pre = function(context)
 			local file_path = require("utils.picker").pick_file(vim.fn.getcwd(), nil)
 			if not file_path then
-				return nil
+				context.failed = true
+				return
 			end
-			local cmd = { file_path }
-			return { cmd = cmd }
+			context.cmd = { file_path }
 		end,
-		cmd = function(context)
+		run_main = function(context)
 			return context.cmd
 		end,
 	},
@@ -70,15 +72,15 @@ local M = {
 				target = "localhost:1234",
 			},
 		},
-		resolve_context = function()
+		first_run_pre = function(context)
 			local file_path = require("utils.picker").pick_file(vim.fn.getcwd(), nil)
 			if not file_path then
-				return nil
+				context.failed = true
+				return
 			end
-			local cmd = { file_path }
-			return { cmd = cmd }
+			context.cmd = { file_path }
 		end,
-		cmd = function(context)
+		run_main = function(context)
 			return context.cmd
 		end,
 	},

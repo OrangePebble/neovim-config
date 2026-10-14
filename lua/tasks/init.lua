@@ -72,77 +72,74 @@ end
 
 ---@param task Task
 ---@param context TaskContext
-local function run_overseer_task(task, context)
-	context.is_overseer_task = true
-	local task_name = task.name
-	if context.context_name then
-		task_name = context.context_name
-	end
-	local function start_main_and_post_tasks()
-		local main_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-			name = task_name,
-			cmd = task.cmd(context),
-		}))
-		if context.pre_task_overseer then
-			context.pre_task_overseer.parent_id = main_task.id
+---@param first_run? boolean
+local function run_task(task, context, first_run)
+	local first_run_pre_overseer_tasks
+	local run_pre_overseer_tasks
+	local run_post_overseer_tasks
+	if first_run then
+		if task.first_run_pre then
+			first_run_pre_overseer_tasks = task.first_run_pre(context)
 		end
-		if task.post_run_cmd then
-			main_task:subscribe("on_complete", function()
-				context.task_overseer = main_task
-				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-					name = "Post: " .. task_name,
-					cmd = task.post_run_cmd(context),
-					cwd = task.overseer.options.post_run_cwd or task.overseer.options.cwd,
-				}))
-				post_task.parent_id = main_task.id
-				post_task:start()
-			end)
+		if context.failed then
+			vim.notify(
+				"The task '" .. task.name .. "' was cancelled or failed while resolving context",
+				vim.log.levels.ERROR
+			)
+			return
 		end
-		main_task:start()
+		if context.is_overseer then
+			last_overseer_task = { task = task, context = context }
+			vim.g.last_overseer_task = { task_name = task.name, context = context }
+		elseif context.is_dap then
+			last_dap_task = { task = task, context = context }
+			vim.g.last_dap_task = { task_name = task.name, context = context }
+		else
+			vim.notify(
+				"The task '" .. task.name .. "' did not set if it was an Overseer or DAP task",
+				vim.log.levels.ERROR
+			)
+			return
+		end
 	end
-
-	if task.pre_run_cmd then
-		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-			name = "Pre: " .. task_name,
-			cmd = task.pre_run_cmd(context),
-			cwd = task.overseer.options.pre_run_cwd or task.overseer.options.cwd,
-		}))
-		pre_task:subscribe("on_complete", function(_, pre_status)
-			context.pre_task_overseer = pre_task
-			if pre_status ~= "SUCCESS" then
-				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
-				return
-			end
-			start_main_and_post_tasks()
+	local main_name = task.name
+	if context.main_name then
+		main_name = context.main_name
+	end
+	if task.run_pre then
+		run_pre_overseer_tasks = task.run_pre(context)
+	end
+	if context.failed then
+		vim.notify("The `pre` step of the task " .. main_name .. "' failed", vim.log.levels.ERROR)
+		return
+	end
+	local main_cmd = task.run_main(context)
+	if context.failed then
+		vim.notify("The cmd building step of the task " .. main_name .. "' failed", vim.log.levels.ERROR)
+		return
+	end
+	if context.is_overseer then
+		context.main_run_overseer =
+			overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, { name = main_name, cmd = main_cmd }))
+		local co = coroutine.running()
+		context.main_run_overseer:subscribe("on_complete", function()
+			coroutine.resume(co)
 		end)
-		pre_task:start()
+		context.main_run_overseer:start()
+		coroutine.yield()
 	else
-		start_main_and_post_tasks()
-	end
-end
-
----@param task Task
----@param context TaskContext
-local function run_dap_task(task, context)
-	context.is_dap_task = true
-	local task_name = task.name
-	if context.context_name then
-		task_name = context.context_name
-	end
-	local function start_main_and_post_tasks()
-		local cmd = task.cmd(context)
 		local config = vim.tbl_deep_extend("force", task.dap.options, {
-			name = task_name,
-			program = cmd[1],
-			args = vim.list_slice(cmd, 2),
+			name = main_name,
+			program = main_cmd[1],
+			args = vim.list_slice(main_cmd, 2),
 		})
-
 		local time_start = os.time()
-		local listener_key = "tasks.dap_complete." .. task_name .. "." .. tostring(time_start)
+		local listener_key = "tasks.dap_complete." .. main_name .. "." .. tostring(time_start)
 		local repl_output = {}
 		local exit_code = nil
 		local was_canceled = false
-		local function on_dap_complete()
+		local co = coroutine.running()
+		dap.listeners.after.event_terminated[listener_key] = function()
 			dap.listeners.before.terminate[listener_key] = nil
 			dap.listeners.before.disconnect[listener_key] = nil
 			dap.listeners.after.event_terminated[listener_key] = nil
@@ -172,17 +169,15 @@ local function run_dap_task(task, context)
 			local output = repl_buffer_found and table.concat(lines, "\n") or table.concat(repl_output)
 
 			local repl_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-				name = "DAP Output: " .. task_name,
-				cmd = cmd,
+				name = "DAP Output: " .. main_name,
+				cmd = main_cmd,
 			}))
-			if context.pre_task_overseer then
-				context.pre_task_overseer.parent_id = repl_task.id
-			end
 			repl_task.status = status
 			repl_task.exit_code = exit_code
 			repl_task.time_start = time_start
 			repl_task.time_end = os.time()
 			repl_task.metadata.raw_output = output
+			context.main_run_overseer = repl_task
 
 			local bufnr = vim.api.nvim_create_buf(false, true)
 			local term_id = vim.api.nvim_open_term(bufnr, {})
@@ -195,16 +190,7 @@ local function run_dap_task(task, context)
 			---@diagnostic disable-next-line: invisible, inject-field
 			repl_task.strategy.term_id = term_id
 
-			if task.post_run_cmd then
-				context.task_overseer = repl_task
-				local post_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-					name = "Post: " .. task_name,
-					cmd = task.post_run_cmd(context),
-					cwd = task.overseer.options.post_run_cwd or task.overseer.options.cwd,
-				}))
-				post_task.parent_id = repl_task.id
-				post_task:start()
-			end
+			coroutine.resume(co)
 		end
 		dap.listeners.before.terminate[listener_key] = function()
 			was_canceled = true
@@ -212,7 +198,6 @@ local function run_dap_task(task, context)
 		dap.listeners.before.disconnect[listener_key] = function()
 			was_canceled = true
 		end
-		dap.listeners.after.event_terminated[listener_key] = on_dap_complete
 		dap.listeners.after.event_exited[listener_key] = function(_, body)
 			exit_code = body and body.exitCode or nil
 		end
@@ -221,27 +206,24 @@ local function run_dap_task(task, context)
 				table.insert(repl_output, body.output)
 			end
 		end
-
 		dap.run(config)
+		coroutine.yield()
 	end
-
-	if task.pre_run_cmd then
-		local pre_task = overseer.new_task(vim.tbl_deep_extend("force", task.overseer.options, {
-			name = "Pre: " .. task_name,
-			cmd = task.pre_run_cmd(context),
-			cwd = task.overseer.options.pre_run_cwd or task.overseer.options.cwd,
-		}))
-		pre_task:subscribe("on_complete", function(_, pre_status)
-			context.pre_task_overseer = pre_task
-			if pre_status ~= "SUCCESS" then
-				vim.notify("The task 'Pre: " .. task_name .. "' failed", vim.log.levels.ERROR)
-				return
-			end
-			start_main_and_post_tasks()
-		end)
-		pre_task:start()
-	else
-		start_main_and_post_tasks()
+	for _, overseer_task in ipairs(first_run_pre_overseer_tasks or {}) do
+		overseer_task.parent_id = context.main_run_overseer.id
+	end
+	for _, overseer_task in ipairs(run_pre_overseer_tasks or {}) do
+		overseer_task.parent_id = context.main_run_overseer.id
+	end
+	if task.run_post then
+		run_post_overseer_tasks = task.run_post(context)
+	end
+	for _, overseer_task in ipairs(run_post_overseer_tasks or {}) do
+		overseer_task.parent_id = context.main_run_overseer.id
+	end
+	if context.failed then
+		vim.notify("The `post` step of the task " .. main_name .. "' failed", vim.log.levels.ERROR)
+		return
 	end
 end
 
@@ -257,21 +239,7 @@ local function generic_to_overseer_tasks(generic_tasks)
 			table.insert(local_overseer_tasks, {
 				name = task.name,
 				run = function()
-					---@type TaskContext|nil
-					local context = {}
-					if task.resolve_context then
-						context = task.resolve_context()
-					end
-					if not context then
-						vim.notify(
-							"The task '" .. task.name .. "' was cancelled or failed while resolving context",
-							vim.log.levels.ERROR
-						)
-						return
-					end
-					last_overseer_task = { task = task, context = context }
-					vim.g.last_overseer_task = { task_name = task.name, context = context }
-					run_overseer_task(task, context)
+					run_task(task, { is_overseer = true }, true)
 				end,
 			})
 		end
@@ -292,21 +260,7 @@ local function generic_to_dap_tasks(generic_tasks)
 			table.insert(local_dap_tasks, {
 				name = task.name,
 				run = function()
-					---@type TaskContext|nil
-					local context = {}
-					if task.resolve_context then
-						context = task.resolve_context()
-					end
-					if not context then
-						vim.notify(
-							"The task '" .. task.name .. "' was cancelled or failed while resolving context",
-							vim.log.levels.ERROR
-						)
-						return
-					end
-					last_dap_task = { task = task, context = context }
-					vim.g.last_dap_task = { task_name = task.name, context = context }
-					run_dap_task(task, context)
+					run_task(task, { is_dap = true }, true)
 				end,
 			})
 		end
@@ -451,12 +405,24 @@ end
 
 M.run_last_overseer_task = function()
 	if last_overseer_task then
-		run_overseer_task(last_overseer_task.task, last_overseer_task.context)
+		local co = coroutine.create(function()
+			run_task(last_overseer_task.task, last_overseer_task.context)
+		end)
+		local ok, err = coroutine.resume(co)
+		if not ok then
+			vim.notify(err, vim.log.levels.ERROR)
+		end
 	elseif vim.g.last_overseer_task then
 		local saved = vim.g.last_overseer_task
 		local task = find_task(saved.task_name, "overseer")
 		if task then
-			run_overseer_task(task, saved.context)
+			local co = coroutine.create(function()
+				run_task(task, saved.context)
+			end)
+			local ok, err = coroutine.resume(co)
+			if not ok then
+				vim.notify(err, vim.log.levels.ERROR)
+			end
 		else
 			vim.notify("Saved Overseer task is no longer available.", vim.log.levels.WARN)
 		end
@@ -477,13 +443,25 @@ M.run_last_dap_task = function()
 		if last_dap_task.regular_dap then
 			dap.run_last()
 		else
-			run_dap_task(last_dap_task.task, last_dap_task.context)
+			local co = coroutine.create(function()
+				run_task(last_dap_task.task, last_dap_task.context)
+			end)
+			local ok, err = coroutine.resume(co)
+			if not ok then
+				vim.notify(err, vim.log.levels.ERROR)
+			end
 		end
 	elseif vim.g.last_dap_task then
 		local saved = vim.g.last_dap_task
 		local task = find_task(saved.task_name, "dap")
 		if task then
-			run_dap_task(task, saved.context)
+			local co = coroutine.create(function()
+				run_task(task, saved.context)
+			end)
+			local ok, err = coroutine.resume(co)
+			if not ok then
+				vim.notify(err, vim.log.levels.ERROR)
+			end
 		else
 			vim.notify("Saved debugging task is no longer available.", vim.log.levels.WARN)
 		end
@@ -496,7 +474,7 @@ M.init_shell_task_command = function()
 	vim.api.nvim_create_user_command("ShellTask", function(args)
 		local task = vim.tbl_deep_extend("keep", {
 			name = args.args,
-			cmd = function()
+			run_main = function()
 				return args.args
 			end,
 			overseer = {
@@ -505,11 +483,14 @@ M.init_shell_task_command = function()
 				},
 			},
 		}, task_defaults)
-		local context = {}
-
-		last_overseer_task = { task = task, context = context }
 		if not args.bang then
-			run_overseer_task(task, context)
+			local co = coroutine.create(function()
+				run_task(task, { is_overseer = true }, true)
+			end)
+			local ok, err = coroutine.resume(co)
+			if not ok then
+				vim.notify(err, vim.log.levels.ERROR)
+			end
 		end
 	end, {
 		bang = true,

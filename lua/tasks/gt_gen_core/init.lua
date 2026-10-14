@@ -7,7 +7,7 @@ local targets = {
 
 local apply_patches = {
 	name = "Apply env_simulator patches",
-	cmd = function(_)
+	run_main = function(_)
 		return {
 			"git",
 			"apply",
@@ -21,7 +21,7 @@ local apply_patches = {
 
 local build = {
 	name = "Build bazel targets",
-	resolve_context = function()
+	first_run_pre = function(context)
 		local co = coroutine.running()
 		local selected_targets = nil
 		picker.select_many(targets, {
@@ -52,16 +52,16 @@ local build = {
 		table.insert(cmd, "--")
 		vim.list_extend(cmd, selected_targets)
 
-		return { cmd = cmd }
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }
 
 local compile_commands = {
 	name = "Generate compile_commands.json",
-	resolve_context = function()
+	first_run_pre = function(context)
 		local co = coroutine.running()
 		local selected_targets = nil
 		picker.select_many(targets, {
@@ -99,9 +99,9 @@ local compile_commands = {
 
 		vim.list_extend(cmd, selected_targets)
 
-		return { cmd = cmd }
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }

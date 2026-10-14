@@ -23,36 +23,38 @@ end
 ---@param prog_msg string
 ---@param succ_msg string
 ---@param fail_msg string
----@return string|nil
+---@return { task: overseer.Task, output: string|nil }
 function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
-	local progress = require("fidget.progress").handle.create({
-		title = prog_msg,
-		lsp_client = { name = category },
-		message = table.concat(cmd, " "),
-		percentage = 0,
+	local overseer = require("overseer")
+	local task = overseer.new_task({
+		name = category .. ": " .. prog_msg,
+		cmd = cmd,
+		cwd = cwd,
+		components = { "default" },
 	})
 
-	vim.system(cmd, { text = true, cwd = cwd }, function(result)
-		vim.schedule(function()
-			progress.title = result.code == 0 and succ_msg or fail_msg
-			progress:finish()
-			coroutine.resume(co, result)
-		end)
+	task:subscribe("on_complete", function()
+		coroutine.resume(co)
 	end)
+	task:start()
+	coroutine.yield()
 
-	local result = coroutine.yield()
-	if result.code ~= 0 then
-		local stderr = vim.trim(result.stderr or "")
-		vim.notify(stderr ~= "" and stderr or category .. ": " .. fail_msg, vim.log.levels.ERROR)
-		return nil
+	local succeeded = task.status == "SUCCESS"
+	task.name = category .. ": " .. (succeeded and succ_msg or fail_msg)
+	local output = task.metadata.raw_output
+	if not succeeded then
+		local trimmed_output = vim.trim(output or "")
+		vim.notify(trimmed_output ~= "" and trimmed_output or category .. ": " .. fail_msg, vim.log.levels.ERROR)
+		output = nil
 	end
 
-	return result.stdout or ""
+	return { task = task, output = output }
 end
+
 ---@param args string[]
 ---@param cwd string
 ---@param co thread
----@return string|nil
+---@return { task: overseer.Task, output: string|nil }
 function M.run_bazel_query(args, cwd, co)
 	return M.run_command(
 		vim.list_extend({ "bazel", "query" }, args),
@@ -67,7 +69,7 @@ end
 ---@param args string[]
 ---@param cwd string
 ---@param co thread
----@return string|nil
+---@return { task: overseer.Task, output: string|nil }
 function M.run_bazel_cquery(args, cwd, co)
 	return M.run_command(
 		vim.list_extend({ "bazel", "cquery" }, args),
@@ -82,7 +84,7 @@ end
 ---@param args string[]
 ---@param cwd string
 ---@param co thread
----@return string|nil
+---@return { task: overseer.Task, output: string|nil }
 function M.run_bazel_build(args, cwd, co)
 	return M.run_command(
 		vim.list_extend({ "bazel", "build" }, args),
