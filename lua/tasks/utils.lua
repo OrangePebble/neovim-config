@@ -26,12 +26,36 @@ end
 ---@return { task: overseer.Task, output: string|nil }
 function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	local overseer = require("overseer")
-	local task = overseer.new_task({
-		name = category .. ": " .. prog_msg,
+	local task_defaults = require("tasks.task_defaults")
+	local output_chunks = {}
+	local progress = require("fidget.progress").handle.create({
+		title = prog_msg,
+		lsp_client = { name = category },
+		message = table.concat(cmd, " "),
+		percentage = 0,
+	})
+	local task = overseer.new_task(vim.tbl_deep_extend("force", task_defaults.overseer.options, {
 		cmd = cmd,
 		cwd = cwd,
-		components = { "default" },
-	})
+		components = { "capture_raw_output", "on_exit_set_status" },
+		-- `metadata.raw_output` contains ANSI and other terminal characters, so we use this for clean output.
+		strategy = {
+			"system",
+			wrap_opts = {
+				text = true,
+				stdout = function(_, data)
+					if data then
+						table.insert(output_chunks, data)
+					end
+				end,
+				stderr = function(_, data)
+					if data then
+						table.insert(output_chunks, data)
+					end
+				end,
+			},
+		},
+	}))
 
 	task:subscribe("on_complete", function()
 		coroutine.resume(co)
@@ -40,12 +64,12 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	coroutine.yield()
 
 	local succeeded = task.status == "SUCCESS"
-	task.name = category .. ": " .. (succeeded and succ_msg or fail_msg)
-	local output = task.metadata.raw_output
+	progress.title = succeeded and succ_msg or fail_msg
+	progress:finish()
+	local output = table.concat(output_chunks)
 	if not succeeded then
 		local trimmed_output = vim.trim(output or "")
 		vim.notify(trimmed_output ~= "" and trimmed_output or category .. ": " .. fail_msg, vim.log.levels.ERROR)
-		output = nil
 	end
 
 	return { task = task, output = output }

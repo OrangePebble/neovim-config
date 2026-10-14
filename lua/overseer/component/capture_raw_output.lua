@@ -2,7 +2,7 @@
 ---@type overseer.ComponentFileDefinition
 return {
 	-- Uses "task.metadata" so that the value is serialized.
-	desc = "Captures raw terminal output (which included colors) into task.metadata.raw_output",
+	desc = "Captures raw terminal output (which includes colors) into task.metadata.raw_output",
 	serializable = false,
 	constructor = function()
 		return {
