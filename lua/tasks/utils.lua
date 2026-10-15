@@ -37,7 +37,6 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	local task = overseer.new_task(vim.tbl_deep_extend("force", task_defaults.overseer.options, {
 		cmd = cmd,
 		cwd = cwd,
-		components = { "capture_raw_output", "on_exit_set_status" },
 		-- `metadata.raw_output` contains ANSI and other terminal characters, so we use this for clean output.
 		strategy = {
 			"system",
@@ -67,10 +66,6 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	progress.title = succeeded and succ_msg or fail_msg
 	progress:finish()
 	local output = table.concat(output_chunks)
-	if not succeeded then
-		local trimmed_output = vim.trim(output or "")
-		vim.notify(trimmed_output ~= "" and trimmed_output or category .. ": " .. fail_msg, vim.log.levels.ERROR)
-	end
 
 	return { task = task, output = output }
 end

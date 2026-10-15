@@ -30,19 +30,18 @@ local bazel_bin = {
 			cwd = ddad_path,
 		},
 	},
-	resolve_context = function()
-		local file_path =
-			require("utils.picker").pick_file(vim.fn.getcwd() .. "/bazel-bin", "Pick a file (./bazel-bin)")
+	first_run_pre = function(context)
+		local file_path = require("utils.picker").pick_file(vim.fn.getcwd() .. "/bazel-bin", "Pick a file (./bazel-bin)")
 		if not file_path then
-			return nil
+			context.failed = true
+			return
 		end
 		local cmd = { file_path }
 		local co = coroutine.running()
-		local args = utils.input_args(co)
-		vim.list_extend(cmd, args)
-		return { cmd = cmd }
+		vim.list_extend(cmd, utils.input_args(co))
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }
@@ -50,7 +49,7 @@ local bazel_bin = {
 local build = {
 	-- Inspired by https://github.com/alexander-born/cmp-bazel
 	name = "Build bazel targets",
-	resolve_context = function()
+	first_run_pre = function(context)
 		local co = coroutine.running()
 		local selected_targets = nil
 		picker.select_many(targets, {
@@ -61,7 +60,8 @@ local build = {
 		end)
 		coroutine.yield()
 		if not selected_targets then
-			return nil
+			context.failed = true
+			return
 		end
 
 		local cmd = {
@@ -70,6 +70,10 @@ local build = {
 			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
 		}
 		local selected_config = env_simulator_utils.select_config(co)
+		if not selected_config then
+			context.failed = true
+			return
+		end
 		vim.list_extend(cmd, selected_config)
 		local selected_repositories = env_simulator_utils.select_override_repositories(co)
 		vim.list_extend(cmd, selected_repositories)
@@ -79,16 +83,16 @@ local build = {
 		table.insert(cmd, "--")
 		vim.list_extend(cmd, selected_targets)
 
-		return { cmd = cmd }
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }
 
 local compile_commands = {
 	name = "Generate compile_commands.json",
-	resolve_context = function()
+	first_run_pre = function(context)
 		local co = coroutine.running()
 		local selected_targets = nil
 		picker.select_many(targets, {
@@ -99,7 +103,8 @@ local compile_commands = {
 		end)
 		coroutine.yield()
 		if not selected_targets then
-			return nil
+			context.failed = true
+			return
 		end
 
 		local cmd = {
@@ -108,6 +113,10 @@ local compile_commands = {
 			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
 		}
 		local selected_config = env_simulator_utils.select_config(co)
+		if not selected_config then
+			context.failed = true
+			return
+		end
 		for _, flag in ipairs(selected_config) do
 			vim.list_extend(cmd, { "-b", flag })
 		end
@@ -122,9 +131,9 @@ local compile_commands = {
 
 		vim.list_extend(cmd, selected_targets)
 
-		return { cmd = cmd }
+		context.cmd = cmd
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return context.cmd
 	end,
 }

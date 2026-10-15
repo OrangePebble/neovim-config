@@ -7,17 +7,20 @@ local ddad_path = env_simulator_utils.ddad_path
 ---@type Task
 local e2e_tests = {
 	name = "Run E2E tests",
-	resolve_context = function()
-		local context = {}
+	first_run_pre = function(context)
 		context.ddad_path = ddad_path
 
 		local co = coroutine.running()
+		local pre_tasks = {}
 
 		-- List all e2e_tests targets
-		local targets =
+		local target_query =
 			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, ddad_path, co)
+		table.insert(pre_tasks, target_query.task)
+		local targets = target_query.output
 		if not targets then
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		-- Filter the targets to the py_test ones
@@ -31,7 +34,8 @@ local e2e_tests = {
 		table.sort(test_targets)
 		if vim.tbl_isempty(test_targets) then
 			vim.notify("No py_test targets found.", vim.log.levels.WARN)
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		picker.select_one(test_targets, {
@@ -44,13 +48,17 @@ local e2e_tests = {
 		end)
 		context.selected_target = coroutine.yield()
 		if not context.selected_target then
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		-- Get build data about the selected_target
-		local build_data = utils.run_bazel_query({ "--output=build", context.selected_target }, ddad_path, co)
+		local build_data_query = utils.run_bazel_query({ "--output=build", context.selected_target }, ddad_path, co)
+		table.insert(pre_tasks, build_data_query.task)
+		local build_data = build_data_query.output
 		if not build_data then
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		-- Get the file group for the JSON file
@@ -58,13 +66,17 @@ local e2e_tests = {
 			build_data:match("%$%(location%s+(//tools/env_simulator/ExampleData:[^%s%)]+_json_file)%)")
 		if not json_filegroup then
 			vim.notify("Could not resolve the JSON filegroup.", vim.log.levels.ERROR)
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		-- Get build data about the JSON file group
-		local json_filegroup_build_data = utils.run_bazel_query({ "--output=build", json_filegroup }, ddad_path, co)
+		local filegroup_query = utils.run_bazel_query({ "--output=build", json_filegroup }, ddad_path, co)
+		table.insert(pre_tasks, filegroup_query.task)
+		local json_filegroup_build_data = filegroup_query.output
 		if not json_filegroup_build_data then
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		-- Get the JSON file's path
@@ -72,13 +84,15 @@ local e2e_tests = {
 			json_filegroup_build_data:match('srcs = %["//tools/env_simulator/ExampleData:([^%"]+%.json)"%]')
 		if not relative_json_path then
 			vim.notify("Could not resolve the JSON path.", vim.log.levels.ERROR)
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 		local json_path = ddad_path .. "/tools/env_simulator/ExampleData/" .. relative_json_path
 		local ok, json_text = pcall(vim.fn.readfile, json_path)
 		if not ok then
 			vim.notify("Could not read the JSON file: " .. json_path, vim.log.levels.ERROR)
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		-- pytest uses this path as the prefix to all tests.
@@ -88,7 +102,8 @@ local e2e_tests = {
 		local decode_ok, decoded_json = pcall(vim.json.decode, table.concat(json_text, "\n"))
 		if not decode_ok then
 			vim.notify("Could not decode the JSON file: " .. json_path, vim.log.levels.ERROR)
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 		local test_names = {}
 		for test_name in pairs(decoded_json.tests or {}) do
@@ -99,7 +114,8 @@ local e2e_tests = {
 		table.sort(test_names)
 		if vim.tbl_isempty(test_names) then
 			vim.notify("No enabled tests found in the JSON file: " .. json_path, vim.log.levels.WARN)
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 		context.test_names = test_names
 
@@ -110,32 +126,35 @@ local e2e_tests = {
 		end)
 		context.selected_tests = coroutine.yield()
 		if not context.selected_tests or vim.tbl_isempty(context.selected_tests) then
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 
 		context.selected_config_args = env_simulator_utils.select_config(co)
 		if not context.selected_config_args then
-			return nil
+			context.failed = true
+			return pre_tasks
 		end
 		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
 
-		context.context_name = "Run E2E tests: " .. table.concat(context.selected_tests, ", ")
+		context.main_name = "Run E2E tests: " .. table.concat(context.selected_tests, ", ")
 		context.json_name = vim.fs.basename(json_path)
 		context.output_container_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests"
-		return context
+		return pre_tasks
 	end,
-	pre_run_cmd = function(context)
-		-- "bazel run" in cmd() below would be enough but by separating it I can clean up the outputs and times
-		local cmd = {
-			"bazel",
-			"build",
-			context.selected_target,
-		}
+	run_pre = function(context)
+		-- "bazel run" in run_main() below would be enough but separating the build
+		-- lets the post step clean up outputs and times even when execution fails.
+		local cmd = { context.selected_target }
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
-		return cmd
+		local result = utils.run_bazel_build(cmd, ddad_path, coroutine.running())
+		if not result.output then
+			context.failed = true
+		end
+		return { result.task }
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		local timestamp = os.date("%y-%m-%d_%Hh%Mm%Ss")
 		context.selected_test_outputs = {}
 		for _, selected_test in ipairs(context.selected_tests) do
@@ -198,14 +217,14 @@ local e2e_tests = {
 
 		return cmd
 	end,
-	post_run_cmd = function(context)
+	run_post = function(context)
 		-- Get the overseer console text
-		local exit_code = context.task_overseer.exit_code
+		local exit_code = context.main_run_overseer.exit_code
 		local lines = {
-			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
+			context.main_run_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
 			"",
 		}
-		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
+		local raw_output = context.main_run_overseer and context.main_run_overseer.metadata.raw_output or ""
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
 
@@ -218,7 +237,7 @@ local e2e_tests = {
 			table.insert(bash_readable_selected_test_outputs, selected_test .. "\t" .. output_path)
 		end
 
-		return {
+		local result = utils.run_command({
 			"env",
 			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
 			"TEST_OUTPUTS=" .. table.concat(bash_readable_selected_test_outputs, "\n"),
@@ -254,7 +273,18 @@ local e2e_tests = {
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/. "${OUTPUT_CONTAINER_PATH}"/_latest
       ]],
-		}
+		},
+		ddad_path,
+		coroutine.running(),
+		"E2E",
+		"Processing test outputs",
+		"Test outputs processed",
+		"Failed to process test outputs"
+		)
+		if result.task.status ~= "SUCCESS" then
+			context.failed = true
+		end
+		return { result.task }
 	end,
 }
 
@@ -268,8 +298,7 @@ local e2e_tests_astas_cli = {
 			cwd = ddad_path .. "/bazel-ddad",
 		},
 	},
-	resolve_context = function()
-		local context = {}
+	first_run_pre = function(context)
 		context.ddad_path = ddad_path
 		local co = coroutine.running()
 
@@ -288,7 +317,8 @@ local e2e_tests_astas_cli = {
 		end)
 		local selected_test_group = coroutine.yield()
 		if not selected_test_group then
-			return nil
+			context.failed = true
+			return
 		end
 
 		local scenarios_path = test_groups_path .. "/" .. selected_test_group .. "/Resources/Configurations/"
@@ -308,13 +338,15 @@ local e2e_tests_astas_cli = {
 		end)
 		context.selected_scenario = coroutine.yield()
 		if not context.selected_scenario then
-			return nil
+			context.failed = true
+			return
 		end
 		context.selected_scenario_path = scenarios_path .. context.selected_scenario
 
 		local selected_config_args = env_simulator_utils.select_config(co)
 		if not selected_config_args then
-			return nil
+			context.failed = true
+			return
 		end
 		context.selected_config_args = table.concat(selected_config_args, " ")
 		local selected_repository_args = env_simulator_utils.select_override_repositories(co)
@@ -325,7 +357,8 @@ local e2e_tests_astas_cli = {
 		end)
 		context.run_count = coroutine.yield()
 		if not context.run_count or not context.run_count:match("^%d+$") then
-			return nil
+			context.failed = true
+			return
 		end
 
 		Snacks.input({ prompt = "Seed:", default = "0" }, function(value)
@@ -333,24 +366,24 @@ local e2e_tests_astas_cli = {
 		end)
 		context.seed = coroutine.yield()
 		if not context.seed or not context.seed:match("^%d+$") then
-			return nil
+			context.failed = true
+			return
 		end
 
-		context.context_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
+		context.main_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
 
 		context.output_container_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
 
-		return context
 	end,
-	pre_run_cmd = function(context)
-		-- output_path is not inside resolve_context so that the date is different when run_last is used
+	run_pre = function(context)
+		-- output_path is generated here so its timestamp changes on each rerun.
 		context.output_path = context.output_container_path
 			.. "/"
 			.. context.selected_scenario
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
-		return {
+		local result = utils.run_command({
 			"env",
 			"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
 			"SELECTED_SCENARIO_PATH=" .. context.selected_scenario_path,
@@ -380,9 +413,20 @@ local e2e_tests_astas_cli = {
           sed -i "s|\"/path/to/update\"|\"${OUTPUT_PATH}/configuration\"|" "${OUTPUT_PATH}"/configuration/Scenarios/XOSC/Scenario.xosc
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH/artifacts|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
       ]],
-		}
+		},
+		ddad_path,
+		coroutine.running(),
+		"E2E",
+		"Preparing astas_cli scenario",
+		"Scenario prepared",
+		"Failed to prepare scenario"
+		)
+		if result.task.status ~= "SUCCESS" then
+			context.failed = true
+		end
+		return { result.task }
 	end,
-	cmd = function(context)
+	run_main = function(context)
 		return {
 			context.ddad_path .. "/bazel-bin/tools/env_simulator/astas_cli/astas_cli",
 			"-t",
@@ -403,19 +447,19 @@ local e2e_tests_astas_cli = {
 			context.output_path .. "/artifacts/output.mcap",
 		}
 	end,
-	post_run_cmd = function(context)
+	run_post = function(context)
 		-- Get the overseer console text and put it in a file
-		local exit_code = context.task_overseer.exit_code
+		local exit_code = context.main_run_overseer.exit_code
 		local lines = {
-			context.task_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
+			context.main_run_overseer.status .. " " .. tostring(exit_code == nil and "unknown" or exit_code),
 			"",
 		}
-		local raw_output = context.task_overseer and context.task_overseer.metadata.raw_output or ""
+		local raw_output = context.main_run_overseer and context.main_run_overseer.metadata.raw_output or ""
 		local plain_output = raw_output:gsub("\27%[[0-?]*[ -/]*[@-~]", "")
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
 		vim.fn.writefile(lines, context.output_path .. "/artifacts/console_output.txt")
 
-		return {
+		local result = utils.run_command({
 			"env",
 			"OUTPUT_PATH=" .. context.output_path,
 			"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
@@ -465,7 +509,18 @@ local e2e_tests_astas_cli = {
             mv default.profraw "${OUTPUT_CONTAINER_PATH}"/_latest
           fi
       ]=],
-		}
+		},
+		ddad_path,
+		coroutine.running(),
+		"E2E",
+		"Processing astas_cli artifacts",
+		"Artifacts processed",
+		"Failed to process artifacts"
+		)
+		if result.task.status ~= "SUCCESS" then
+			context.failed = true
+		end
+		return { result.task }
 	end,
 }
 
