@@ -1,8 +1,7 @@
 local picker = require("utils.picker")
 local utils = require("tasks.utils")
 
--- The repository root contains the Bazel workspace in its engine/ subdirectory.
--- Also support opening Neovim directly from that workspace.
+-- The repository root contains the Bazel workspace in the ./engine subdirectory.
 local bazel_workspace = vim.fn.getcwd()
 if vim.fn.filereadable(bazel_workspace .. "/MODULE.bazel") == 0 then
 	bazel_workspace = bazel_workspace .. "/engine"
@@ -40,7 +39,6 @@ local build = {
 			"build",
 			"--config=ose",
 			"--config=ose_clang",
-			-- open_scenario_parser omits this required standard header.
 			"--cxxopt=-includecstdint",
 		}
 		local extra_args = utils.input_args(co)
@@ -84,7 +82,6 @@ local compile_commands = {
 			"--config=ose",
 			"-b",
 			"--config=ose_clang",
-			-- open_scenario_parser omits this required standard header.
 			"-b",
 			"--cxxopt=-includecstdint",
 		}
