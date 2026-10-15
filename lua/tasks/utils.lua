@@ -27,7 +27,6 @@ end
 function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	local overseer = require("overseer")
 	local task_defaults = require("tasks.task_defaults")
-	local output_chunks = {}
 	local progress = require("fidget.progress").handle.create({
 		title = prog_msg,
 		lsp_client = { name = category },
@@ -37,23 +36,7 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	local task = overseer.new_task(vim.tbl_deep_extend("force", task_defaults.overseer.options, {
 		cmd = cmd,
 		cwd = cwd,
-		-- `metadata.raw_output` contains ANSI and other terminal characters, so we use this for clean output.
-		strategy = {
-			"system",
-			wrap_opts = {
-				text = true,
-				stdout = function(_, data)
-					if data then
-						table.insert(output_chunks, data)
-					end
-				end,
-				stderr = function(_, data)
-					if data then
-						table.insert(output_chunks, data)
-					end
-				end,
-			},
-		},
+		components = { "capture_raw_output", "on_exit_set_status" },
 	}))
 
 	task:subscribe("on_complete", function()
@@ -65,7 +48,32 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	local succeeded = task.status == "SUCCESS"
 	progress.title = succeeded and succ_msg or fail_msg
 	progress:finish()
-	local output = table.concat(output_chunks)
+	if not succeeded then
+		vim.notify("FAILURE " .. task.name, vim.log.levels.ERROR)
+	end
+
+	-- We get plain text output without special terminal characters by reading the buffer.
+	-- We could get this directly from Overseer but that would require the OverseerResult buffer
+	--  not have terminal features like redrawing and colors.
+	local output = ""
+	local output_bufnr = task:get_bufnr()
+	if output_bufnr and vim.api.nvim_buf_is_valid(output_bufnr) and task.exit_code ~= nil then
+		local exit_marker = "[Process exited " .. task.exit_code .. "]"
+		local lines
+		-- We check if the line added by Overseer at the end exists a couple of times because buffer
+		--  drawing is async and the contents might not be up to date yet.
+		vim.wait(1000, function()
+			lines = vim.api.nvim_buf_get_lines(output_bufnr, 0, -1, false)
+			return vim.tbl_contains(lines, exit_marker)
+		end, 10)
+		for i = #lines, 1, -1 do
+			if lines[i] == exit_marker then
+				table.remove(lines, i)
+				break
+			end
+		end
+		output = table.concat(lines, "\n")
+	end
 
 	return { task = task, output = output }
 end

@@ -13,8 +13,10 @@ function M.select_config(co)
 	picker.select_one({
 		special_config,
 		"env_simulator_debug",
+		"env_simulator_debug_gcc12",
 		"env_simulator_clang",
 		"env_simulator_release",
+		"env_simulator_release_gcc12",
 	}, {
 		prompt = "Select config",
 	}, function(v)
