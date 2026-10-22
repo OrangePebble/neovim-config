@@ -362,9 +362,12 @@ keymap("n", "<leader>sF", function()
 		follow = true, -- Follow symlinks.
 		hidden = true, -- Search dot-files.
 		-- Remove git submodules from search results.
-		exclude = vim.list_extend(vim.deepcopy(excluded_files_and_dirs), vim.tbl_map(function(l)
-			return l:match(" (%S+)$")
-		end, vim.fn.systemlist("git config --file .gitmodules --get-regexp path 2>/dev/null"))),
+		exclude = vim.list_extend(
+			vim.deepcopy(excluded_files_and_dirs),
+			vim.tbl_map(function(l)
+				return l:match(" (%S+)$")
+			end, vim.fn.systemlist("git config --file .gitmodules --get-regexp path 2>/dev/null"))
+		),
 	})
 end, { desc = "Files (excluding submodules)" })
 keymap("n", "<leader>sN", function()
@@ -385,6 +388,7 @@ keymap("n", "<leader>sg", function()
 		follow = true, -- Follow symlinks.
 		hidden = true, -- Search dot-files.
 		limit_live = 999999,
+		exclude = excluded_files_and_dirs,
 	})
 	vim.notify(
 		string.format("Append '-- -g **/*' to glob filter directories.", vim.fn.getcwd()),
@@ -399,6 +403,8 @@ keymap({ "n", "x" }, "<leader>sw", function()
 	Snacks.picker.grep_word({
 		follow = true, -- Follow symlinks.
 		hidden = true, -- Search dot-files.
+		limit_live = 999999,
+		exclude = excluded_files_and_dirs,
 	})
 end, { desc = "Grep word on cursor" })
 keymap("n", "<leader>sb", function()
