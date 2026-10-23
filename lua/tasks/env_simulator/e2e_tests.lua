@@ -15,7 +15,7 @@ local e2e_tests = {
 
 		-- List all e2e_tests targets
 		local target_query =
-			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:*" }, ddad_path, co)
+			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path, co)
 		table.insert(pre_tasks, target_query.task)
 		local targets = target_query.output
 		if not targets then
@@ -237,16 +237,17 @@ local e2e_tests = {
 			table.insert(bash_readable_selected_test_outputs, selected_test .. "\t" .. output_path)
 		end
 
-		local result = utils.run_command({
-			"env",
-			"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
-			"TEST_OUTPUTS=" .. table.concat(bash_readable_selected_test_outputs, "\n"),
-			"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
-			"OUTPUT_PATH=" .. context.output_path,
-			"bash",
-			"-c",
-			--bash
-			[[
+		local result = utils.run_command(
+			{
+				"env",
+				"RAW_ARTIFACTS_PATH=" .. context.raw_artifacts_path,
+				"TEST_OUTPUTS=" .. table.concat(bash_readable_selected_test_outputs, "\n"),
+				"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
+				"OUTPUT_PATH=" .. context.output_path,
+				"bash",
+				"-c",
+				--bash
+				[[
           set -euo pipefail
 
           if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
@@ -273,13 +274,13 @@ local e2e_tests = {
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/. "${OUTPUT_CONTAINER_PATH}"/_latest
       ]],
-		},
-		ddad_path,
-		coroutine.running(),
-		"E2E",
-		"Processing test outputs",
-		"Test outputs processed",
-		"Failed to process test outputs"
+			},
+			ddad_path,
+			coroutine.running(),
+			"E2E",
+			"Processing test outputs",
+			"Test outputs processed",
+			"Failed to process test outputs"
 		)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -373,7 +374,6 @@ local e2e_tests_astas_cli = {
 		context.main_name = "Run " .. context.selected_scenario .. " E2E test in astas_cli"
 
 		context.output_container_path = vim.fn.expand("~") .. "/simulation_outputs/e2e-tests-astas_cli"
-
 	end,
 	run_pre = function(context)
 		-- output_path is generated here so its timestamp changes on each rerun.
@@ -383,18 +383,19 @@ local e2e_tests_astas_cli = {
 			.. "/"
 			.. os.date("%y-%m-%d_%Hh%Mm%Ss")
 
-		local result = utils.run_command({
-			"env",
-			"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
-			"SELECTED_SCENARIO_PATH=" .. context.selected_scenario_path,
-			"DDAD_PATH=" .. context.ddad_path,
-			"OUTPUT_PATH=" .. context.output_path,
-			"SELECTED_CONFIG_ARGS=" .. context.selected_config_args,
-			"SELECTED_REPOSITORY_ARGS=" .. context.selected_repository_args,
-			"bash",
-			"-c",
-			--bash
-			[[
+		local result = utils.run_command(
+			{
+				"env",
+				"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
+				"SELECTED_SCENARIO_PATH=" .. context.selected_scenario_path,
+				"DDAD_PATH=" .. context.ddad_path,
+				"OUTPUT_PATH=" .. context.output_path,
+				"SELECTED_CONFIG_ARGS=" .. context.selected_config_args,
+				"SELECTED_REPOSITORY_ARGS=" .. context.selected_repository_args,
+				"bash",
+				"-c",
+				--bash
+				[[
           set -euo pipefail # Fail this script on first command failure
 
           bazel build $SELECTED_CONFIG_ARGS $SELECTED_REPOSITORY_ARGS -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
@@ -413,13 +414,13 @@ local e2e_tests_astas_cli = {
           sed -i "s|\"/path/to/update\"|\"${OUTPUT_PATH}/configuration\"|" "${OUTPUT_PATH}"/configuration/Scenarios/XOSC/Scenario.xosc
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH/artifacts|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
       ]],
-		},
-		ddad_path,
-		coroutine.running(),
-		"E2E",
-		"Preparing astas_cli scenario",
-		"Scenario prepared",
-		"Failed to prepare scenario"
+			},
+			ddad_path,
+			coroutine.running(),
+			"E2E",
+			"Preparing astas_cli scenario",
+			"Scenario prepared",
+			"Failed to prepare scenario"
 		)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -459,14 +460,15 @@ local e2e_tests_astas_cli = {
 		vim.list_extend(lines, vim.split(plain_output, "\n", { plain = true }))
 		vim.fn.writefile(lines, context.output_path .. "/artifacts/console_output.txt")
 
-		local result = utils.run_command({
-			"env",
-			"OUTPUT_PATH=" .. context.output_path,
-			"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
-			"bash",
-			"-c",
-			--bash
-			[=[
+		local result = utils.run_command(
+			{
+				"env",
+				"OUTPUT_PATH=" .. context.output_path,
+				"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
+				"bash",
+				"-c",
+				--bash
+				[=[
           set -euo pipefail # Fail this script on first command failure
 
 
@@ -509,13 +511,13 @@ local e2e_tests_astas_cli = {
             mv default.profraw "${OUTPUT_CONTAINER_PATH}"/_latest
           fi
       ]=],
-		},
-		ddad_path,
-		coroutine.running(),
-		"E2E",
-		"Processing astas_cli artifacts",
-		"Artifacts processed",
-		"Failed to process artifacts"
+			},
+			ddad_path,
+			coroutine.running(),
+			"E2E",
+			"Processing astas_cli artifacts",
+			"Artifacts processed",
+			"Failed to process artifacts"
 		)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -524,10 +526,109 @@ local e2e_tests_astas_cli = {
 	end,
 }
 
+---@type Task
+local all_e2e_tests = {
+	name = "Run multiple E2E test targets",
+  overseer = {
+    options = {
+      ephemeral = false
+    },
+  },
+	first_run_pre = function(context)
+		context.ddad_path = ddad_path
+		local co = coroutine.running()
+		local pre_tasks = {}
+
+		local target_query =
+			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path, co)
+		table.insert(pre_tasks, target_query.task)
+		if not target_query.output then
+			context.failed = true
+			return pre_tasks
+		end
+
+		local test_targets = {}
+		for line in vim.gsplit(target_query.output, "\n", { trimempty = true }) do
+			local target = line:match("^py_test rule (//tools/env_simulator/e2e_tests:[^%s]+)$")
+			if target then
+				table.insert(test_targets, target)
+			end
+		end
+		table.sort(test_targets)
+		if vim.tbl_isempty(test_targets) then
+			vim.notify("No py_test targets found.", vim.log.levels.WARN)
+			context.failed = true
+			return pre_tasks
+		end
+
+		picker.select_many(test_targets, {
+			prompt = "Select E2E targets (1 or more)",
+			format_item = function(item)
+				return item:match("^[^:]+:(.+)$") or item
+			end,
+		}, function(items)
+			coroutine.resume(co, items)
+		end)
+		context.selected_targets = coroutine.yield()
+		if not context.selected_targets or vim.tbl_isempty(context.selected_targets) then
+			context.failed = true
+			return pre_tasks
+		end
+
+		context.selected_config_args = env_simulator_utils.select_config(co)
+		if not context.selected_config_args then
+			context.failed = true
+			return pre_tasks
+		end
+		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
+		context.extra_args = utils.input_args(co)
+		context.target_results = {}
+		context.main_name = "Run E2E targets: " .. table.concat(context.selected_targets, ", ")
+		return pre_tasks
+	end,
+	run_pre = function(context)
+		local pre_tasks = {}
+		local co = coroutine.running()
+
+		for _, target in ipairs(context.selected_targets) do
+			local cmd = { "bazel", "run" }
+			vim.list_extend(cmd, context.selected_config_args)
+			vim.list_extend(cmd, context.selected_repository_args)
+			vim.list_extend(cmd, context.extra_args)
+			table.insert(cmd, target)
+
+			local result = utils.run_command(
+				cmd,
+				ddad_path,
+				co,
+				"E2E",
+				"Running " .. target,
+				target .. " finished",
+				"Failed to run " .. target
+			)
+			table.insert(pre_tasks, result.task)
+			table.insert(context.target_results, {
+				target = target,
+				succeeded = result.task.status == "SUCCESS",
+			})
+		end
+
+		return pre_tasks
+	end,
+	run_main = function(context)
+		local cmd = { "printf", "%s\\n" }
+		for _, result in ipairs(context.target_results) do
+			table.insert(cmd, (result.succeeded and "PASSED: " or "FAILED: ") .. result.target)
+		end
+		return cmd
+	end,
+}
+
 ---@type Task[]
 local M = {
 	e2e_tests,
 	e2e_tests_astas_cli,
+	all_e2e_tests,
 }
 
 return M
