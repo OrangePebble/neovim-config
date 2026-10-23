@@ -22,6 +22,14 @@ return {
 				end
 			end,
 		})
+
+		-- Clear snippet highlighting when I press <Esc>.
+		vim.keymap.set({ "i", "s" }, "<Esc>", function()
+			if vim.snippet.active() then
+				vim.snippet.stop()
+			end
+			return "<Esc>"
+		end, { expr = true, silent = true })
 	end,
 
 	---@module 'blink.cmp'
@@ -95,7 +103,7 @@ return {
 		},
 
 		-- Show the possible function arguments while typing inside the ().
-		signature = { enabled = true },
+		-- signature = { enabled = true },
 
 		cmdline = {
 			keymap = {
