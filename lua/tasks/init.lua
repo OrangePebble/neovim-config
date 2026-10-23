@@ -77,6 +77,7 @@ local function run_task(task, context, first_run)
 	local first_run_pre_overseer_tasks
 	local run_pre_overseer_tasks
 	local run_post_overseer_tasks
+	context.failed = nil -- I need to reset this because it may have been set to true in a previous run.
 	if first_run then
 		if task.first_run_pre then
 			first_run_pre_overseer_tasks = task.first_run_pre(context)
