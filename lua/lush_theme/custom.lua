@@ -23,8 +23,7 @@ local fg0 = hsl(vim.g.colorscheme.foreground_0)
 local fg1 = hsl(vim.g.colorscheme.foreground_1) -- Status line
 local fg2 = hsl(vim.g.colorscheme.foreground_2) -- Line numbers, fold colums
 local comment = hsl(vim.g.colorscheme.comment)
-local sel0 = hsl(vim.g.colorscheme.selection_background_0) -- Popup bg, visual selection bg
-local sel1 = hsl(vim.g.colorscheme.selection_background_1) -- Popup sel bg, search bg
+local sel = hsl(vim.g.colorscheme.selection_background)
 local black = hsl(vim.g.colorscheme.black)
 local black_bright = hsl(vim.g.colorscheme.black_bright)
 local black_dim = hsl(vim.g.colorscheme.black_dim)
@@ -110,8 +109,8 @@ local theme = lush(function(injected_functions)
     NormalFloat    { fg = fg0, bg = bg1 }, -- Normal text in floating windows.
     FloatBorder    { fg = fg2, bg = bg1 }, -- Border of floating windows.
     FloatTitle     { fg = blue_bright, bg = bg1, gui = "bold" }, -- Title of floating windows.
-    Pmenu          { fg = fg0, bg = sel0 }, -- Popup menu: Normal item.
-    PmenuSel       { bg = sel1 }, -- Popup menu: Selected item.
+    Pmenu          { fg = fg0, bg = sel }, -- Popup menu: Normal item.
+    PmenuSel       { bg = sel }, -- Popup menu: Selected item.
     -- PmenuKind      { }, -- Popup menu: Normal item "kind"
     -- PmenuKindSel   { }, -- Popup menu: Selected item "kind"
     -- PmenuExtra     { }, -- Popup menu: Normal item "extra text"
@@ -120,7 +119,7 @@ local theme = lush(function(injected_functions)
     -- PmenuThumb     { }, -- Popup menu: Thumb of the scrollbar.
     Question       { MoreMsg }, -- |hit-enter| prompt and yes/no questions
     QuickFixLine   { CursorLine }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
-    Search         { fg = fg0, bg = sel1 }, -- Last search pattern highlighting (see 'hlsearch'). Also used for similar items that need to stand out.
+    Search         { fg = fg0, bg = sel, gui = "underline" }, -- Last search pattern highlighting (see 'hlsearch'). Also used for similar items that need to stand out.
     IncSearch      { fg = bg0, bg = orange }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
     CurSearch      { IncSearch }, -- Highlighting a search pattern under the cursor (see 'hlsearch')
     SpecialKey     { NonText }, -- Unprintable characters: text displayed differently from what it really is. But not 'listchars' whitespace. |hl-Whitespace|
@@ -134,7 +133,7 @@ local theme = lush(function(injected_functions)
     TabLineFill    { bg = bg1 }, -- Tab pages line, where there are no labels
     TabLineSel     { fg = bg0, bg = fg2 }, -- Tab pages line, active tab page label
     Title          { fg = blue_bright, gui = "bold" }, -- Titles for output from ":set all", ":autocmd" etc.
-    Visual         { bg = sel0 }, -- Visual mode selection
+    Visual         { bg = sel }, -- Visual mode selection
     VisualNOS      { Visual }, -- Visual mode selection when vim is "Not Owning the Selection".
     WarningMsg     { fg = red }, -- Warning messages
     Whitespace     { fg = bg3 }, -- "nbsp", "space", "tab" and "trail" in 'listchars'
@@ -198,12 +197,12 @@ local theme = lush(function(injected_functions)
 
     -- See :h lsp-highlight, some groups may not be listed, submit a PR fix to lush-template!
 
-    LspReferenceText            { bg = sel0 }, -- Used for highlighting "text" references
-    LspReferenceRead            { bg = sel0 }, -- Used for highlighting "read" references
-    LspReferenceWrite           { bg = sel0 }, -- Used for highlighting "write" references
+    LspReferenceText            { bg = sel }, -- Used for highlighting "text" references
+    LspReferenceRead            { bg = sel }, -- Used for highlighting "read" references
+    LspReferenceWrite           { bg = sel }, -- Used for highlighting "write" references
     LspCodeLens                 { fg = comment }, -- Used to color the virtual text of the codelens. See |nvim_buf_set_extmark()|.
     LspCodeLensSeparator        { fg = fg2 }, -- Used to color the seperator between two or more code lens.
-    LspSignatureActiveParameter { fg = sel1 }, -- Used to highlight the active parameter in the signature help. See |vim.lsp.handlers.signature_help()|.
+    LspSignatureActiveParameter { fg = bg4 }, -- Used to highlight the active parameter in the signature help. See |vim.lsp.handlers.signature_help()|.
 
     -- See :h diagnostic-highlights, some groups may not be listed, submit a PR fix to lush-template!
 
@@ -333,7 +332,7 @@ local theme = lush(function(injected_functions)
     sym"@markup.link"           { Delimiter }, -- text references, footnotes, citations, etc.
     sym"@markup.link.url"       { fg = blue_dim, gui = "italic,underline" }, -- URL-style links
     sym"@markup.link.label"     { fg = blue }, -- link, reference descriptions
-    sym"@markup.raw"            { fg = cyan, gui = "italic" }, -- literal or verbatim text (e.g. inline code)
+    sym"@markup.raw"            { fg = magenta }, -- literal or verbatim text (e.g. inline code)
     sym"@markup.raw.block"      { fg = pink }, -- literal or verbatim text as a stand-alone block (use priority 90 for blocks with injections)
     sym"@markup.list"           { fg = cyan_bright }, -- list markers
     sym"@markup.list.checked"   { fg = green }, -- checked todo-style list markers
@@ -509,7 +508,7 @@ local theme = lush(function(injected_functions)
 
     -- blink.cmp
     BlinkCmpDoc               { fg = fg0, bg = bg1 },
-    BlinkCmpDocBorder         { fg = sel0, bg = bg1 },
+    BlinkCmpDocBorder         { fg = sel, bg = bg1 },
     BlinkCmpLabel             { fg = fg0, },
     BlinkCmpLabelDeprecated   { fg = fg2, gui = "strikethrough" },
     BlinkCmpLabelMatch        { fg = blue_bright },
@@ -604,6 +603,9 @@ local theme = lush(function(injected_functions)
     -- Custom groups for my breakpoint input
     SnacksInputTitleBreakpoint  { FloatTitle, fg = red },
     SnacksInputBorderBreakpoint { FloatBorder, fg = orange_dim },
+
+    -- satellite.nvim
+    SatelliteBar { bg = bg4 },
 
     -- Change the colors and tinting of injected code blocks at ../utils/injected_code_tint.lua
   }
