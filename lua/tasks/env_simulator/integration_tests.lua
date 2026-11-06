@@ -108,9 +108,7 @@ local integration_tests = {
 			{ context.test_binary, "--gtest_list_tests" },
 			ddad_path,
 			"GTest",
-			"Listing tests",
-			"Listing tests finished",
-			"Listing tests failed"
+			"Listing tests"
 		)
 		table.insert(pre_tasks, list_result.task)
 		if not list_result.output then

@@ -28,18 +28,16 @@ end
 ---@param cmd string[]
 ---@param cwd string
 ---@param category string
----@param prog_msg string
----@param succ_msg string
----@param fail_msg string
+---@param title string
 ---@return { task: overseer.Task, output: string|nil }
-function M.run_command(cmd, cwd, category, prog_msg, succ_msg, fail_msg)
+function M.run_command(cmd, cwd, category, title)
 	local co = coroutine.running()
 	local overseer = require("overseer")
 	local task_defaults = require("tasks.task_defaults")
 	local progress = require("fidget.progress").handle.create({
-		title = prog_msg,
+		title = title,
 		lsp_client = { name = category },
-		message = table.concat(cmd, " "),
+		message = "Running",
 		percentage = 0,
 	})
 	local task = overseer.new_task(vim.tbl_deep_extend("force", task_defaults.overseer.options, {
@@ -57,7 +55,7 @@ function M.run_command(cmd, cwd, category, prog_msg, succ_msg, fail_msg)
 	coroutine.yield()
 
 	local succeeded = task.status == "SUCCESS"
-	progress.title = succeeded and succ_msg or fail_msg
+	progress.message = succeeded and "Completed" or "Failed"
 	progress:finish()
 	if not succeeded then
 		vim.notify("FAILURE " .. task.name, vim.log.levels.ERROR)
@@ -86,7 +84,7 @@ end
 function M.run_bazel_query(args, cwd)
 	local cmd = vim.list_extend({ "bazel", "query" }, M.bazel_output_args)
 	vim.list_extend(cmd, args)
-	return M.run_command(cmd, cwd, "Bazel", "Running query", "Query finished", "Query failed")
+	return M.run_command(cmd, cwd, "Bazel", "Querying")
 end
 ---@param args string[]
 ---@param cwd string
@@ -94,14 +92,7 @@ end
 function M.run_bazel_cquery(args, cwd)
 	local cmd = vim.list_extend({ "bazel", "cquery" }, M.bazel_output_args)
 	vim.list_extend(cmd, args)
-	return M.run_command(
-		cmd,
-		cwd,
-		"Bazel",
-		"Running configurable query",
-		"Configurable query finished",
-		"Configurable query failed"
-	)
+	return M.run_command(cmd, cwd, "Bazel", "Running configurable query")
 end
 ---@param args string[]
 ---@param cwd string
@@ -109,7 +100,7 @@ end
 function M.run_bazel_build(args, cwd)
 	local cmd = vim.list_extend({ "bazel", "build" }, M.bazel_output_args)
 	vim.list_extend(cmd, args)
-	return M.run_command(cmd, cwd, "Bazel", "Building", "Build finished", "Build failed")
+	return M.run_command(cmd, cwd, "Bazel", "Building")
 end
 
 return M

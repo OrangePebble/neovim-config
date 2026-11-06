@@ -277,9 +277,7 @@ local e2e_tests = {
 			},
 			ddad_path,
 			"E2E",
-			"Processing test outputs",
-			"Test outputs processed",
-			"Failed to process test outputs"
+			"Processing test outputs"
 		)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -417,9 +415,7 @@ local e2e_tests_astas_cli = {
 			},
 			ddad_path,
 			"E2E",
-			"Preparing astas_cli scenario",
-			"Scenario prepared",
-			"Failed to prepare scenario"
+			"Preparing astas_cli scenario"
 		)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -514,9 +510,7 @@ local e2e_tests_astas_cli = {
 			},
 			ddad_path,
 			"E2E",
-			"Processing astas_cli artifacts",
-			"Artifacts processed",
-			"Failed to process artifacts"
+			"Processing astas_cli artifacts"
 		)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -595,14 +589,7 @@ local all_e2e_tests = {
 			vim.list_extend(cmd, context.extra_args)
 			table.insert(cmd, target)
 
-			local result = utils.run_command(
-				cmd,
-				ddad_path,
-				"E2E",
-				"Running " .. target,
-				target .. " finished",
-				"Failed to run " .. target
-			)
+			local result = utils.run_command(cmd, ddad_path, "E2E", target)
 			table.insert(pre_tasks, result.task)
 			table.insert(context.target_results, {
 				target = target,
