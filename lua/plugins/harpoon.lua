@@ -169,10 +169,10 @@ return {
 			UI_CREATE = function(ctx)
 				-- Disable regular line numbers
 				vim.api.nvim_set_option_value("number", false, { win = ctx.win_id })
-				-- Apply special line number format
+				-- Show keys/numbers only on actual buffer lines, leaving wrapped/virtual rows blank.
 				vim.api.nvim_set_option_value(
 					"statuscolumn",
-					"%{get(g:harpoon_statuscolumn_keys, v:lnum - 1, &rnu && v:relnum ? v:relnum : v:lnum)} ",
+					"%{v:virtnum == 0 ? get(g:harpoon_statuscolumn_keys, v:lnum - 1, &rnu && v:relnum ? v:relnum : v:lnum) : ''} ",
 					{
 						win = ctx.win_id,
 					}
