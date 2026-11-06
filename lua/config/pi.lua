@@ -12,7 +12,16 @@ vim.api.nvim_set_hl(0, "PiSelectedInstance", { link = "FloatTitle", default = tr
 
 local picker = require("utils.picker")
 local uv = vim.uv
-local context_references = { "@this", "@buffer", "@diagnostics_buffer", "@diagnostics_line", "@diagnostics", "@quickfix" }
+local context_references = {
+	"@selection_text",
+	"@selection",
+	"@word",
+	"@buffer",
+	"@diagnostics_buffer",
+	"@diagnostics_line",
+	"@diagnostics",
+	"@quickfix",
+}
 function M.new()
 	return setmetatable({}, { __index = M })
 end
@@ -570,8 +579,14 @@ end
 local function capture_input_context()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local cursor = vim.api.nvim_win_get_cursor(0)
+	local word = vim.fn.expand("<cword>")
 	local start_line, end_line = cursor[1], cursor[1]
-	if vim.fn.mode():match("^[vV\22]") then
+	-- Without a visual selection, @selection_text refers to the current line.
+	local selection_text = vim.api.nvim_get_current_line()
+	local mode = vim.fn.mode()
+	if mode:match("^[vV\22]") then
+		-- Capture the exact region before leaving Visual mode, respecting selection type and 'selection'.
+		selection_text = table.concat(vim.fn.getregion(vim.fn.getpos("v"), vim.fn.getpos("."), { type = mode }), "\n")
 		-- Visual marks are not finalized until visual mode ends. Execute Escape
 		-- before reading them, matching opencode.nvim's context capture.
 		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<esc>", true, false, true), "x", true)
@@ -584,6 +599,8 @@ local function capture_input_context()
 		path = buffer_absolute_path(bufnr),
 		start_line = start_line,
 		end_line = end_line,
+		word = word,
+		selection_text = selection_text,
 		cursor_line = cursor[1],
 		cursor_column = cursor[2],
 		diagnostics = vim.diagnostic.get(bufnr),
@@ -687,22 +704,29 @@ end
 ---@return string
 local function expand_context_references(message, context)
 	local formatted_path = context.path and format_path_for_pi(context.path)
-	local this
+	local selection
 	if formatted_path then
-		this = context.start_line == context.end_line
+		selection = context.start_line == context.end_line
 			and string.format("%s:L%d", formatted_path, context.start_line)
 			or string.format("%s:L%d-L%d", formatted_path, context.start_line, context.end_line)
 	else
-		this = "unknown file"
+		selection = "unknown file"
 	end
-	-- `%f[^%a_]` makes the reference exact: @this expands, while @this_more
-	-- remains ordinary prompt text. A trailing space is not required.
-	message = message:gsub("@this%f[^%a_]", this)
-	message = message:gsub("@buffer%f[^%a_]", formatted_path or "unknown file")
-	message = message:gsub("@diagnostics_buffer%f[^%a_]", format_diagnostics(context.diagnostics))
-	message = message:gsub("@diagnostics_line%f[^%a_]", format_diagnostics(line_diagnostics(context)))
-	message = message:gsub("@diagnostics%f[^%a_]", format_diagnostics(cursor_diagnostics(context)))
-	return message:gsub("@quickfix%f[^%a_]", format_quickfix(context))
+	local replacements = {
+		["@selection"] = selection,
+		["@selection_text"] = context.selection_text,
+		["@word"] = context.word,
+		["@buffer"] = formatted_path or "unknown file",
+		["@diagnostics_buffer"] = format_diagnostics(context.diagnostics),
+		["@diagnostics_line"] = format_diagnostics(line_diagnostics(context)),
+		["@diagnostics"] = format_diagnostics(cursor_diagnostics(context)),
+		["@quickfix"] = format_quickfix(context),
+	}
+	-- Match whole references, leaving unknown tokens such as @selection_more unchanged.
+	-- A single pass with a callback inserts text literally: % and @references inside captured code stay intact.
+	return (message:gsub("@[%a_]+", function(reference)
+		return replacements[reference] or reference
+	end))
 end
 
 ---@param default? string
@@ -768,9 +792,8 @@ end
 
 --- Open the picker on first use, otherwise prompt the currently selected Pi.
 function M.prompt()
-	-- Capture selection, diagnostics, and quickfix state before Snacks.input
-	-- changes focus. @this, @buffer, @diagnostics, and @quickfix in the prompt
-	-- are expanded only when the input is submitted.
+	-- Capture selection, word, diagnostics, and quickfix state before Snacks.input
+	-- changes focus. Location and text references are expanded only when the input is submitted.
 	input_context = capture_input_context()
 	if selected_socket then
 		M.open_input()
