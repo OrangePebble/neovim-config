@@ -710,7 +710,7 @@ keymap("n", "<leader>dB", function()
 			require("dap").set_breakpoint(value)
 		end
 	end)
-end, { desc = "Set breakpoint condition" })
+end, { desc = "Set conditional breakpoint" })
 keymap("n", "<leader>db", function()
 	require("dap").toggle_breakpoint()
 end, { desc = "Toggle breakpoint" })

@@ -72,6 +72,31 @@ return {
 			enabled = true,
 			icon = "",
 			icon_pos = "title",
+			config = function(opts)
+				if opts.scope ~= "cursor" then
+					return
+				end
+				-- Place cursor-scoped inputs one row below the cursor, shifted left for the border and spacing.
+				opts.win.relative = "cursor"
+				opts.win.row = 1
+				opts.win.col = -2
+
+				-- For LSP rename, anchor below the word's beginning instead of the cursor's position within it.
+				if vim.trim(opts.prompt or "") == "New Name:" then
+					-- Find the keyword containing the cursor: \< / \> are word boundaries,
+					-- \k matches 'iskeyword' characters, and \%# matches the cursor position.
+					-- b: search backward; c: include the cursor; n: don't move it; W: don't wrap the search.
+					local start = vim.fn.searchpos([[\<\k*\%#\k*\>]], "bcnW")
+					if start[1] > 0 then
+						local cursor = vim.api.nvim_win_get_cursor(0)
+						local word = vim.fn.screenpos(0, start[1], start[2])
+						local current = vim.fn.screenpos(0, cursor[1], cursor[2] + 1)
+						-- Offset from the cursor to the word start, then move below it and left for border/spacing.
+						opts.win.row = word.row - current.row + 1
+						opts.win.col = word.col - current.col - 2
+					end
+				end
+			end,
 			win = {
 				title_pos = "left",
 				row = function()
