@@ -40,7 +40,7 @@ local carbonfox = {
 	cyan_bright =            "#92dcdd", -- cyan.lighten(30)
 	white_bright =           "#eaeaeb", -- white.lighten(30)
 	---- Extended terminal colors (used by terminals like 'foot')
-	selection_background =   "#2a2a2a",
+	selection_background_0 = "#2a2a2a",
 	black_dim =              "#242424", -- black.darken(15)
 	red_dim =                "#c54e45",
 	green_dim =              "#20a25a", -- green.darken(15)
@@ -56,6 +56,7 @@ local carbonfox = {
 	background_4 =           "#4f4f4f", -- background_1.lighten(24)
 	foreground_1 =           "#b8b8b8", -- foreground_0.darken(24)
 	foreground_2 =           "#7d7d7d", -- foreground_0.darken(48)
+	selection_background_1 = "#525253",
 	orange =                 "#ff8349",
 	orange_bright =          "#ffb999", -- orange.lighten(45)
 	orange_dim =             "#d96f3e",
