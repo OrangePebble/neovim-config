@@ -18,7 +18,7 @@ local e2e_tests = {
 			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path)
 		table.insert(pre_tasks, target_query.task)
 		local targets = target_query.output
-		if not targets then
+		if not targets or target_query.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end
@@ -56,7 +56,7 @@ local e2e_tests = {
 		local build_data_query = utils.run_bazel_query({ "--output=build", context.selected_target }, ddad_path)
 		table.insert(pre_tasks, build_data_query.task)
 		local build_data = build_data_query.output
-		if not build_data then
+		if not build_data or build_data_query.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end
@@ -74,7 +74,7 @@ local e2e_tests = {
 		local filegroup_query = utils.run_bazel_query({ "--output=build", json_filegroup }, ddad_path)
 		table.insert(pre_tasks, filegroup_query.task)
 		local json_filegroup_build_data = filegroup_query.output
-		if not json_filegroup_build_data then
+		if not json_filegroup_build_data or filegroup_query.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end
@@ -149,7 +149,7 @@ local e2e_tests = {
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
 		local result = utils.run_bazel_build(cmd, ddad_path)
-		if not result.output then
+		if not result.output or result.task.status ~= "SUCCESS" then
 			context.failed = true
 		end
 		return { result.task }
@@ -535,7 +535,7 @@ local all_e2e_tests = {
 		local target_query =
 			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path)
 		table.insert(pre_tasks, target_query.task)
-		if not target_query.output then
+		if not target_query.output or target_query.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end

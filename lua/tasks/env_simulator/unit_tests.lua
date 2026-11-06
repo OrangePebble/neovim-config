@@ -24,7 +24,7 @@ local unit_tests = {
 		}, ddad_path)
 		table.insert(pre_tasks, query_result.task)
 		local targets = query_result.output
-		if not targets then
+		if not targets or query_result.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end
@@ -81,7 +81,7 @@ local unit_tests = {
 		local cquery_result = utils.run_bazel_cquery(cquery_cmd, ddad_path)
 		table.insert(pre_tasks, cquery_result.task)
 		local test_binary = cquery_result.output
-		if not test_binary then
+		if not test_binary or cquery_result.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end
@@ -100,7 +100,7 @@ local unit_tests = {
 			"Listing tests"
 		)
 		table.insert(pre_tasks, list_result.task)
-		if not list_result.output then
+		if not list_result.output or list_result.task.status ~= "SUCCESS" then
 			context.failed = true
 			return pre_tasks
 		end
