@@ -7,15 +7,17 @@ return {
 		local Path = require("plenary.path")
 		local prev_sel_item = nil
 
-		-- Adds the ability to specify a line in harpoon with something like "path:line"
+		-- Supports path:line entries and # comments, including inline annotations.
 		harpoon:setup({
 			-- You can find the regular default values at https://github.com/ThePrimeagen/harpoon/blob/87b1a3506211538f460786c23f98ec63ad9af4e5/lua/harpoon/config.lua
 			default = {
 				display = function(list_item)
-					if list_item.context and list_item.context.fixed then
-						return string.format("%s:%d", list_item.value, list_item.context.row)
+					local context = list_item.context or {}
+					local text = list_item.value
+					if context.fixed then
+						text = string.format("%s:%d", text, context.row)
 					end
-					return list_item.value
+					return context.annotation and (text .. " " .. context.annotation) or text
 				end,
 				select = function(list_item, _, options)
 					if list_item == nil then
@@ -31,7 +33,10 @@ return {
 					-- This is here because changing between the same file doesn't trigger BufLeave.
 					if prev_sel_item ~= nil and prev_sel_item.value == list_item.value and not prev_fixed then
 						local cursor = vim.api.nvim_win_get_cursor(0)
-						prev_sel_item.context = { row = cursor[1], col = cursor[2], fixed = false }
+						prev_sel_item.context = prev_sel_item.context or {}
+						prev_sel_item.context.row = cursor[1]
+						prev_sel_item.context.col = cursor[2]
+						prev_sel_item.context.fixed = false
 					end
 
 					local bufnr = vim.fn.bufnr("^" .. list_item.value .. "$")
@@ -95,12 +100,17 @@ return {
 				create_list_item = function(_, name)
 					name = name and vim.trim(name)
 
-					-- Keep lines beginning with # as non-navigable comments.
-					if name and name:match("^#") then
-						return {
-							value = name,
-							context = { comment = true },
-						}
+					-- The first # starts a comment; only the text before it is parsed as path[:line].
+					local annotation
+					if name then
+						local entry, comment = name:match("^(.-)(#.*)$")
+						if comment then
+							name = vim.trim(entry)
+							if name == "" then
+								return { value = comment, context = { comment = true } }
+							end
+							annotation = comment
+						end
 					end
 
 					local path
@@ -133,7 +143,7 @@ return {
 
 					return {
 						value = path,
-						context = { row = row, col = col, fixed = fixed },
+						context = { row = row, col = col, fixed = fixed, annotation = annotation },
 					}
 				end,
 				BufLeave = function(arg, list)
@@ -178,10 +188,10 @@ return {
 					}
 				)
 				vim.api.nvim_win_call(ctx.win_id, function()
-					-- Color the :line suffix for fixed entries
-					vim.fn.matchadd("Number", [[:\d\+$]])
-					-- Color comments, and increase priority so possible :line suffixes don't get colored
-					vim.fn.matchadd("Comment", [[^\s*#.*$]], 20)
+					-- Color fixed-entry line numbers even with trailing whitespace or an inline comment.
+					vim.fn.matchadd("Number", [[:\d\+\ze\s*\%(#.*\)\?$]])
+					-- Comment highlighting takes priority over any :line-like text inside comments.
+					vim.fn.matchadd("Comment", [[#.*$]], 20)
 				end)
 			end,
 		})
