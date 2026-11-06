@@ -154,7 +154,7 @@ local integration_tests = {
 	run_pre = function(context)
 		-- The build already runs in first_run_pre to query available tests. This
 		-- repeats it on reruns, when first_run_pre is intentionally skipped.
-		local cmd = { "bazel", "build", context.selected_target }
+		local cmd = { context.selected_target }
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
 		local result = utils.run_bazel_build(cmd, ddad_path, coroutine.running())

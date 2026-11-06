@@ -1,5 +1,14 @@
 local M = {}
 
+-- Bazel flags that strip visual fluff, and make the output more suitable for parsing.
+M.bazel_output_args = {
+	"--color=no",
+	"--curses=no",
+	"--noshow_progress",
+	"--noshow_loading_progress",
+	"--noprogress_in_terminal_title",
+}
+
 ---@param co thread
 function M.input_args(co)
 	Snacks.input({
@@ -36,6 +45,8 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 	local task = overseer.new_task(vim.tbl_deep_extend("force", task_defaults.overseer.options, {
 		cmd = cmd,
 		cwd = cwd,
+		-- The regular output buffer preserves long lines and strips common ANSI escape sequences.
+		strategy = { "jobstart", use_terminal = false },
 		components = { "capture_raw_output", "on_exit_set_status" },
 	}))
 
@@ -52,20 +63,11 @@ function M.run_command(cmd, cwd, co, category, prog_msg, succ_msg, fail_msg)
 		vim.notify("FAILURE " .. task.name, vim.log.levels.ERROR)
 	end
 
-	-- We get plain text output without special terminal characters by reading the buffer.
-	-- We could get this directly from Overseer but that would require the OverseerResult buffer
-	--  not have terminal features like redrawing and colors.
 	local output = ""
 	local output_bufnr = task:get_bufnr()
 	if output_bufnr and vim.api.nvim_buf_is_valid(output_bufnr) and task.exit_code ~= nil then
 		local exit_marker = "[Process exited " .. task.exit_code .. "]"
-		local lines
-		-- We check if the line added by Overseer at the end exists a couple of times because buffer
-		--  drawing is async and the contents might not be up to date yet.
-		vim.wait(1000, function()
-			lines = vim.api.nvim_buf_get_lines(output_bufnr, 0, -1, false)
-			return vim.tbl_contains(lines, exit_marker)
-		end, 10)
+		local lines = vim.api.nvim_buf_get_lines(output_bufnr, 0, -1, false)
 		for i = #lines, 1, -1 do
 			if lines[i] == exit_marker then
 				table.remove(lines, i)
@@ -83,23 +85,19 @@ end
 ---@param co thread
 ---@return { task: overseer.Task, output: string|nil }
 function M.run_bazel_query(args, cwd, co)
-	return M.run_command(
-		vim.list_extend({ "bazel", "query" }, args),
-		cwd,
-		co,
-		"Bazel",
-		"Running query",
-		"Query finished",
-		"Query failed"
-	)
+	local cmd = vim.list_extend({ "bazel", "query" }, M.bazel_output_args)
+	vim.list_extend(cmd, args)
+	return M.run_command(cmd, cwd, co, "Bazel", "Running query", "Query finished", "Query failed")
 end
 ---@param args string[]
 ---@param cwd string
 ---@param co thread
 ---@return { task: overseer.Task, output: string|nil }
 function M.run_bazel_cquery(args, cwd, co)
+	local cmd = vim.list_extend({ "bazel", "cquery" }, M.bazel_output_args)
+	vim.list_extend(cmd, args)
 	return M.run_command(
-		vim.list_extend({ "bazel", "cquery" }, args),
+		cmd,
 		cwd,
 		co,
 		"Bazel",
@@ -113,15 +111,9 @@ end
 ---@param co thread
 ---@return { task: overseer.Task, output: string|nil }
 function M.run_bazel_build(args, cwd, co)
-	return M.run_command(
-		vim.list_extend({ "bazel", "build" }, args),
-		cwd,
-		co,
-		"Bazel",
-		"Building",
-		"Build finished",
-		"Build failed"
-	)
+	local cmd = vim.list_extend({ "bazel", "build" }, M.bazel_output_args)
+	vim.list_extend(cmd, args)
+	return M.run_command(cmd, cwd, co, "Bazel", "Building", "Build finished", "Build failed")
 end
 
 return M

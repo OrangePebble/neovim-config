@@ -251,25 +251,25 @@ local e2e_tests = {
           set -euo pipefail
 
           if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
-            printf '[\033[94minfo\033[0m] %s\n' "Multiple tests were selected, not moving .mcap files"
+            printf '[info] %s\n' "Multiple tests were selected, not moving .mcap files"
           fi
 
           while IFS=$'\t' read -r selected_test output_path; do
-            printf '[\033[94minfo\033[0m] %s\n' "Moving artifacts to ${output_path} and deleting old location"
+            printf '[info] %s\n' "Moving artifacts to ${output_path} and deleting old location"
             mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/"${selected_test}"/*/*/* "${output_path}"
 
             if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
               if compgen -G '/tmp/*.mcap' > /dev/null; then
-                printf '[\033[94minfo\033[0m] %s\n' "Moving .mcap files to ${output_path}"
+                printf '[info] %s\n' "Moving .mcap files to ${output_path}"
                 mv -- /tmp/*.mcap "${output_path}"
               else
-                printf '[\033[94minfo\033[0m] %s\n' "No .mcap files found, not moving them"
+                printf '[info] %s\n' "No .mcap files found, not moving them"
               fi
             fi
           done <<< "${TEST_OUTPUTS}"
           rm -rf "${RAW_ARTIFACTS_PATH}"
 
-          printf '[\033[94minfo\033[0m] %s\n' "Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
+          printf '[info] %s\n' "Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/. "${OUTPUT_CONTAINER_PATH}"/_latest
@@ -386,6 +386,7 @@ local e2e_tests_astas_cli = {
 		local result = utils.run_command(
 			{
 				"env",
+				"BAZEL_OUTPUT_ARGS=" .. table.concat(utils.bazel_output_args, " "),
 				"COMMON_RESOURCES_PATH=" .. context.common_resources_path,
 				"SELECTED_SCENARIO_PATH=" .. context.selected_scenario_path,
 				"DDAD_PATH=" .. context.ddad_path,
@@ -398,18 +399,18 @@ local e2e_tests_astas_cli = {
 				[[
           set -euo pipefail # Fail this script on first command failure
 
-          bazel build $SELECTED_CONFIG_ARGS $SELECTED_REPOSITORY_ARGS -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
+          bazel build $BAZEL_OUTPUT_ARGS $SELECTED_CONFIG_ARGS $SELECTED_REPOSITORY_ARGS -- //tools/env_simulator/astas_cli:astas_cli //tools/env_simulator/modules/stochastic_cognitive_model:create_fmu_zip
 
-          printf '[\033[94minfo\033[0m] %s\n' "Creating ${OUTPUT_PATH}/artifacts"
+          printf '[info] %s\n' "Creating ${OUTPUT_PATH}/artifacts"
           mkdir -p "${OUTPUT_PATH}"/artifacts
 
-          printf '[\033[94minfo\033[0m] %s\n' "Creating ${OUTPUT_PATH}/configuration and moving files into it"
+          printf '[info] %s\n' "Creating ${OUTPUT_PATH}/configuration and moving files into it"
           cp -r "${SELECTED_SCENARIO_PATH}" "${OUTPUT_PATH}"/configuration
           # Using rsync because cp without overwriting is a mess
   				rsync -a --ignore-existing "${COMMON_RESOURCES_PATH}/" "${OUTPUT_PATH}"/configuration/
           cp "${DDAD_PATH}"/bazel-bin/tools/env_simulator/modules/stochastic_cognitive_model/AlgorithmScm.fmu "${OUTPUT_PATH}"/configuration
 
-          printf '[\033[94minfo\033[0m] %s\n' "Using sed to replace /path/to/update in configuration files"
+          printf '[info] %s\n' "Using sed to replace /path/to/update in configuration files"
           sed -i "s|Plugins = {/path/to/update}|Plugins = {/opt/astas_core/plugins, ${DDAD_PATH}/bazel-bin/external/gecco_default/src/controller}|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
           sed -i "s|\"/path/to/update\"|\"${OUTPUT_PATH}/configuration\"|" "${OUTPUT_PATH}"/configuration/Scenarios/XOSC/Scenario.xosc
           sed -i "s|OutputDirectoryPath = /path/to/update|OutputDirectoryPath = $OUTPUT_PATH/artifacts|" "${OUTPUT_PATH}"/configuration/UserSettings/UserSettings.ini
@@ -465,6 +466,7 @@ local e2e_tests_astas_cli = {
 				"env",
 				"OUTPUT_PATH=" .. context.output_path,
 				"OUTPUT_CONTAINER_PATH=" .. context.output_container_path,
+				"BAZEL_OUTPUT_ARGS=" .. table.concat(utils.bazel_output_args, " "),
 				"bash",
 				"-c",
 				--bash
@@ -472,7 +474,7 @@ local e2e_tests_astas_cli = {
           set -euo pipefail # Fail this script on first command failure
 
 
-          printf '[\033[94minfo\033[0m] %s\n' "Starting python .venv"
+          printf '[info] %s\n' "Starting python .venv"
           VENV="${OUTPUT_CONTAINER_PATH}"/.venv
           if [ ! -f "${VENV}"/bin/activate ]; then
               # Uses system packages
@@ -482,28 +484,28 @@ local e2e_tests_astas_cli = {
 
           # Install the pytest plugin into the venv if it is not importable yet.
           if ! python3.12 -c 'import pytest_optestrunner' >/dev/null 2>&1; then
-            printf '[\033[94minfo\033[0m] %s\n' "Installing the python pytest plugin into .venv"
-            bazel fetch @op_test_runner//:op_test_runner
-            OPTR_FOLDER="$(bazel info output_base)/external/op_test_runner"
+            printf '[info] %s\n' "Installing the python pytest plugin into .venv"
+            bazel fetch $BAZEL_OUTPUT_ARGS @op_test_runner//:op_test_runner
+            OPTR_FOLDER="$(bazel info $BAZEL_OUTPUT_ARGS output_base)/external/op_test_runner"
             python3.12 -m pip install -e "$OPTR_FOLDER/plugin/optestrunner"
           fi
 
-          printf '[\033[94minfo\033[0m] %s\n' "Moving .xodr files into ${OUTPUT_PATH}/artifacts for opVisualizer"
+          printf '[info] %s\n' "Moving .xodr files into ${OUTPUT_PATH}/artifacts for opVisualizer"
           cp "${OUTPUT_PATH}"/configuration/*.xodr "${OUTPUT_PATH}"/artifacts
 
-          printf '[\033[94minfo\033[0m] %s\n' "Running pytest's optestrunner merge scripts"
+          printf '[info] %s\n' "Running pytest's optestrunner merge scripts"
           python3.12 -m pytest_optestrunner.merge_csv2csv -r "${OUTPUT_PATH}"/artifacts
           python3.12 -m pytest_optestrunner.merge -r "${OUTPUT_PATH}"/artifacts
 
-          printf '[\033[94minfo\033[0m] %s\n' "Fixing simulationOutput.xml's schemaVersion"
+          printf '[info] %s\n' "Fixing simulationOutput.xml's schemaVersion"
           sed -i "s|schemaVersion=\"0.0.3\"|schemaVersion=\"0.3.1\"|" "${OUTPUT_PATH}"/artifacts/simulationOutput.xml
 
-          printf '[\033[94minfo\033[0m] %s\n' "Removing configuration files, moving artifacts to ${OUTPUT_PATH}, and deleting old the artifacts' location"
+          printf '[info] %s\n' "Removing configuration files, moving artifacts to ${OUTPUT_PATH}, and deleting old the artifacts' location"
           rm -rf "${OUTPUT_PATH}"/configuration
           mv "${OUTPUT_PATH}"/artifacts/* "${OUTPUT_PATH}"
           rm -rf "${OUTPUT_PATH}"/artifacts
 
-          printf '[\033[94minfo\033[0m] %s\n' "Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
+          printf '[info] %s\n' "Copying artifacts to ${OUTPUT_CONTAINER_PATH}/_latest"
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/* "${OUTPUT_CONTAINER_PATH}"/_latest
@@ -591,7 +593,7 @@ local all_e2e_tests = {
 		local co = coroutine.running()
 
 		for _, target in ipairs(context.selected_targets) do
-			local cmd = { "bazel", "run" }
+			local cmd = vim.list_extend({ "bazel", "run" }, utils.bazel_output_args)
 			vim.list_extend(cmd, context.selected_config_args)
 			vim.list_extend(cmd, context.selected_repository_args)
 			vim.list_extend(cmd, context.extra_args)
