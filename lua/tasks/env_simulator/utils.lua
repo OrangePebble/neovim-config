@@ -7,8 +7,8 @@ if string.match(vim.fn.fnamemodify(M.ddad_path, ":t"), ".*env_simulator.*") then
 	M.ddad_path = vim.fn.fnamemodify(M.ddad_path, ":h:h")
 end
 
----@param co thread
-function M.select_config(co)
+function M.select_config()
+	local co = coroutine.running()
 	local special_config = "env_simulator_clang with debug flags"
 	picker.select_one({
 		special_config,
@@ -41,8 +41,8 @@ function M.select_config(co)
 	return cmd_args
 end
 
----@param co thread
-function M.select_override_repositories(co)
+function M.select_override_repositories()
+	local co = coroutine.running()
 	local available_repositories = {
 		-- { "osi_query_library", "/home/pedro/projects/osi-query-library" },
 		-- { "stochastics_library", "/home/pedro/projects/stochastics-library" },

@@ -32,7 +32,7 @@ local integration_tests = {
 		local query_result = utils.run_bazel_query({
 			"--output=label_kind",
 			"kind(cc_test, //tools/env_simulator/astas_core/Tests/Integration/...)",
-		}, ddad_path, co)
+		}, ddad_path)
 		table.insert(pre_tasks, query_result.task)
 		local targets = query_result.output
 		if not targets then
@@ -68,17 +68,17 @@ local integration_tests = {
 			return pre_tasks
 		end
 
-		context.selected_config_args = env_simulator_utils.select_config(co)
+		context.selected_config_args = env_simulator_utils.select_config()
 		if not context.selected_config_args then
 			context.failed = true
 			return pre_tasks
 		end
-		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
+		context.selected_repository_args = env_simulator_utils.select_override_repositories()
 
 		local build_cmd = { context.selected_target }
 		vim.list_extend(build_cmd, context.selected_config_args)
 		vim.list_extend(build_cmd, context.selected_repository_args)
-		local build_result = utils.run_bazel_build(build_cmd, ddad_path, co)
+		local build_result = utils.run_bazel_build(build_cmd, ddad_path)
 		table.insert(pre_tasks, build_result.task)
 		if build_result.task.status ~= "SUCCESS" then
 			context.failed = true
@@ -89,7 +89,7 @@ local integration_tests = {
 		vim.list_extend(cquery_cmd, context.selected_config_args)
 		vim.list_extend(cquery_cmd, context.selected_repository_args)
 		table.insert(cquery_cmd, context.selected_target)
-		local cquery_result = utils.run_bazel_cquery(cquery_cmd, ddad_path, co)
+		local cquery_result = utils.run_bazel_cquery(cquery_cmd, ddad_path)
 		table.insert(pre_tasks, cquery_result.task)
 		local test_binary = cquery_result.output
 		if not test_binary then
@@ -107,7 +107,6 @@ local integration_tests = {
 		local list_result = utils.run_command(
 			{ context.test_binary, "--gtest_list_tests" },
 			ddad_path,
-			co,
 			"GTest",
 			"Listing tests",
 			"Listing tests finished",
@@ -157,7 +156,7 @@ local integration_tests = {
 		local cmd = { context.selected_target }
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
-		local result = utils.run_bazel_build(cmd, ddad_path, coroutine.running())
+		local result = utils.run_bazel_build(cmd, ddad_path)
 		if result.task.status ~= "SUCCESS" then
 			context.failed = true
 		end

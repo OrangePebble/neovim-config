@@ -15,7 +15,7 @@ local e2e_tests = {
 
 		-- List all e2e_tests targets
 		local target_query =
-			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path, co)
+			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path)
 		table.insert(pre_tasks, target_query.task)
 		local targets = target_query.output
 		if not targets then
@@ -53,7 +53,7 @@ local e2e_tests = {
 		end
 
 		-- Get build data about the selected_target
-		local build_data_query = utils.run_bazel_query({ "--output=build", context.selected_target }, ddad_path, co)
+		local build_data_query = utils.run_bazel_query({ "--output=build", context.selected_target }, ddad_path)
 		table.insert(pre_tasks, build_data_query.task)
 		local build_data = build_data_query.output
 		if not build_data then
@@ -71,7 +71,7 @@ local e2e_tests = {
 		end
 
 		-- Get build data about the JSON file group
-		local filegroup_query = utils.run_bazel_query({ "--output=build", json_filegroup }, ddad_path, co)
+		local filegroup_query = utils.run_bazel_query({ "--output=build", json_filegroup }, ddad_path)
 		table.insert(pre_tasks, filegroup_query.task)
 		local json_filegroup_build_data = filegroup_query.output
 		if not json_filegroup_build_data then
@@ -130,12 +130,12 @@ local e2e_tests = {
 			return pre_tasks
 		end
 
-		context.selected_config_args = env_simulator_utils.select_config(co)
+		context.selected_config_args = env_simulator_utils.select_config()
 		if not context.selected_config_args then
 			context.failed = true
 			return pre_tasks
 		end
-		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
+		context.selected_repository_args = env_simulator_utils.select_override_repositories()
 
 		context.main_name = "Run E2E tests: " .. table.concat(context.selected_tests, ", ")
 		context.json_name = vim.fs.basename(json_path)
@@ -148,7 +148,7 @@ local e2e_tests = {
 		local cmd = { context.selected_target }
 		vim.list_extend(cmd, context.selected_config_args)
 		vim.list_extend(cmd, context.selected_repository_args)
-		local result = utils.run_bazel_build(cmd, ddad_path, coroutine.running())
+		local result = utils.run_bazel_build(cmd, ddad_path)
 		if not result.output then
 			context.failed = true
 		end
@@ -276,7 +276,6 @@ local e2e_tests = {
       ]],
 			},
 			ddad_path,
-			coroutine.running(),
 			"E2E",
 			"Processing test outputs",
 			"Test outputs processed",
@@ -344,13 +343,13 @@ local e2e_tests_astas_cli = {
 		end
 		context.selected_scenario_path = scenarios_path .. context.selected_scenario
 
-		local selected_config_args = env_simulator_utils.select_config(co)
+		local selected_config_args = env_simulator_utils.select_config()
 		if not selected_config_args then
 			context.failed = true
 			return
 		end
 		context.selected_config_args = table.concat(selected_config_args, " ")
-		local selected_repository_args = env_simulator_utils.select_override_repositories(co)
+		local selected_repository_args = env_simulator_utils.select_override_repositories()
 		context.selected_repository_args = table.concat(selected_repository_args, " ")
 
 		Snacks.input({ prompt = "Number of runs:", default = "1" }, function(value)
@@ -417,7 +416,6 @@ local e2e_tests_astas_cli = {
       ]],
 			},
 			ddad_path,
-			coroutine.running(),
 			"E2E",
 			"Preparing astas_cli scenario",
 			"Scenario prepared",
@@ -515,7 +513,6 @@ local e2e_tests_astas_cli = {
       ]=],
 			},
 			ddad_path,
-			coroutine.running(),
 			"E2E",
 			"Processing astas_cli artifacts",
 			"Artifacts processed",
@@ -542,7 +539,7 @@ local all_e2e_tests = {
 		local pre_tasks = {}
 
 		local target_query =
-			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path, co)
+			utils.run_bazel_query({ "--output=label_kind", "//tools/env_simulator/e2e_tests:all" }, ddad_path)
 		table.insert(pre_tasks, target_query.task)
 		if not target_query.output then
 			context.failed = true
@@ -577,20 +574,19 @@ local all_e2e_tests = {
 			return pre_tasks
 		end
 
-		context.selected_config_args = env_simulator_utils.select_config(co)
+		context.selected_config_args = env_simulator_utils.select_config()
 		if not context.selected_config_args then
 			context.failed = true
 			return pre_tasks
 		end
-		context.selected_repository_args = env_simulator_utils.select_override_repositories(co)
-		context.extra_args = utils.input_args(co)
+		context.selected_repository_args = env_simulator_utils.select_override_repositories()
+		context.extra_args = utils.input_args()
 		context.target_results = {}
 		context.main_name = "Run E2E targets: " .. table.concat(context.selected_targets, ", ")
 		return pre_tasks
 	end,
 	run_pre = function(context)
 		local pre_tasks = {}
-		local co = coroutine.running()
 
 		for _, target in ipairs(context.selected_targets) do
 			local cmd = vim.list_extend({ "bazel", "run" }, utils.bazel_output_args)
@@ -602,7 +598,6 @@ local all_e2e_tests = {
 			local result = utils.run_command(
 				cmd,
 				ddad_path,
-				co,
 				"E2E",
 				"Running " .. target,
 				target .. " finished",

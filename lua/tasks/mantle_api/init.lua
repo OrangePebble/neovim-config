@@ -28,7 +28,7 @@ local build = {
 			"--config=mantle_api",
 			"--config=mantle_api_clang",
 		}
-		local extra_args = utils.input_args(co)
+		local extra_args = utils.input_args()
 		vim.list_extend(cmd, extra_args)
 
 		table.insert(cmd, "--")
@@ -44,7 +44,6 @@ local build = {
 local compile_commands = {
 	name = "Generate compile_commands.json (all targets)",
 	first_run_pre = function(context)
-		local co = coroutine.running()
 		local cmd = {
 			"bazel-compile-commands",
 			"-b",
@@ -52,7 +51,7 @@ local compile_commands = {
 			"-b",
 			"--config=mantle_api_clang",
 		}
-		local extra_args = utils.input_args(co)
+		local extra_args = utils.input_args()
 		for _, flag in ipairs(extra_args) do
 			vim.list_extend(cmd, { "-b", flag })
 		end

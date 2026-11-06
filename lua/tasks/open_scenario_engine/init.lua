@@ -41,7 +41,7 @@ local build = {
 			"--config=ose_clang",
 			"--cxxopt=-includecstdint",
 		}
-		local extra_args = utils.input_args(co)
+		local extra_args = utils.input_args()
 		vim.list_extend(cmd, extra_args)
 
 		table.insert(cmd, "--")
@@ -85,7 +85,7 @@ local compile_commands = {
 			"-b",
 			"--cxxopt=-includecstdint",
 		}
-		local extra_args = utils.input_args(co)
+		local extra_args = utils.input_args()
 		for _, flag in ipairs(extra_args) do
 			vim.list_extend(cmd, { "-b", flag })
 		end

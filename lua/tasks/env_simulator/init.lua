@@ -37,8 +37,7 @@ local bazel_bin = {
 			return
 		end
 		local cmd = { file_path }
-		local co = coroutine.running()
-		vim.list_extend(cmd, utils.input_args(co))
+		vim.list_extend(cmd, utils.input_args())
 		context.cmd = cmd
 	end,
 	run_main = function(context)
@@ -69,15 +68,15 @@ local build = {
 			"build",
 			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
 		}
-		local selected_config = env_simulator_utils.select_config(co)
+		local selected_config = env_simulator_utils.select_config()
 		if not selected_config then
 			context.failed = true
 			return
 		end
 		vim.list_extend(cmd, selected_config)
-		local selected_repositories = env_simulator_utils.select_override_repositories(co)
+		local selected_repositories = env_simulator_utils.select_override_repositories()
 		vim.list_extend(cmd, selected_repositories)
-		local extra_args = utils.input_args(co)
+		local extra_args = utils.input_args()
 		vim.list_extend(cmd, extra_args)
 
 		table.insert(cmd, "--")
@@ -112,7 +111,7 @@ local compile_commands = {
 			"-b",
 			"--test_env=LD_LIBRARY_PATH=/opt/astas_core/lib_deps:/opt/astas_core/plugins:/usr/lib/x86_64-linux-gnu",
 		}
-		local selected_config = env_simulator_utils.select_config(co)
+		local selected_config = env_simulator_utils.select_config()
 		if not selected_config then
 			context.failed = true
 			return
@@ -120,11 +119,11 @@ local compile_commands = {
 		for _, flag in ipairs(selected_config) do
 			vim.list_extend(cmd, { "-b", flag })
 		end
-		local selected_repositories = env_simulator_utils.select_override_repositories(co)
+		local selected_repositories = env_simulator_utils.select_override_repositories()
 		for _, flag in ipairs(selected_repositories) do
 			vim.list_extend(cmd, { "-b", flag })
 		end
-		local extra_args = utils.input_args(co)
+		local extra_args = utils.input_args()
 		for _, flag in ipairs(extra_args) do
 			vim.list_extend(cmd, { "-b", flag })
 		end
