@@ -607,8 +607,6 @@ local theme = lush(function(injected_functions)
 
     -- satellite.nvim
     SatelliteBar { bg = bg4 },
-
-    -- Change the colors and tinting of injected code blocks at ../utils/injected_code_tint.lua
   }
 end)
 
