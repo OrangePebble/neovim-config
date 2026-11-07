@@ -2,6 +2,19 @@ vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 vim.g.autoformat = true
 
+local osc52 = require("vim.ui.clipboard.osc52")
+vim.g.clipboard = {
+	name = "OSC 52",
+	copy = {
+		["+"] = osc52.copy("+"),
+		["*"] = osc52.copy("*"),
+	},
+	paste = {
+		["+"] = osc52.paste("+"),
+		["*"] = osc52.paste("*"),
+	},
+}
+
 -- Many of the colors below are based on others, so here is an example to put a modified
 --  version into the yank register, this specific command gets the currently selected
 --  hex color and lightens it by 15%:
