@@ -4,11 +4,28 @@ return {
 	build = ":TSUpdate",
 	lazy = false,
 	config = function()
+		vim.api.nvim_create_autocmd("User", {
+			pattern = "TSUpdate",
+			group = vim.api.nvim_create_augroup("treesitter.parsers", { clear = true }),
+			callback = function()
+				require("nvim-treesitter.parsers").caddyfile = {
+					install_info = {
+						url = "https://github.com/caddyserver/tree-sitter-caddyfile",
+						revision = "53c0cf6521c2b562f448d59c0a4ba6fa77933928",
+						queries = "queries",
+					},
+					tier = 2, -- Custom integration, not upstream's stable support tier.
+				}
+			end,
+		})
+		vim.filetype.add({ filename = { Caddyfile = "caddyfile", caddyfile = "caddyfile" } })
+
 		require("nvim-treesitter").install({
 			-- Install parsers not built-in into neovim.
 			-- To get installed parsers run :lua vim.print(require("nvim-treesitter").get_installed())
 			-- For possible parsers check https://github.com/tree-sitter/tree-sitter/wiki/List-of-parsers
 			"bash",
+			"caddyfile",
 			"cpp",
 			"css",
 			"devicetree", -- For my zmk config
