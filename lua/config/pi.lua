@@ -13,13 +13,13 @@ vim.api.nvim_set_hl(0, "PiSelectedInstance", { link = "FloatTitle", default = tr
 local picker = require("utils.picker")
 local uv = vim.uv
 local context_references = {
+  "@selection",
+  "@buffer",
+  "@word",
 	"@selection_text",
-	"@selection",
-	"@word",
-	"@buffer",
+  "@diagnostics",
+  "@diagnostics_line",
 	"@diagnostics_buffer",
-	"@diagnostics_line",
-	"@diagnostics",
 	"@quickfix",
 }
 function M.new()
@@ -43,9 +43,11 @@ function M:get_completions(context, callback)
 	end
 
 	local kind = require("blink.cmp.types").CompletionItemKind.Enum
-	local items = vim.tbl_map(function(reference)
-		return {
+	local items = {}
+	for index, reference in ipairs(context_references) do
+		items[#items + 1] = {
 			label = reference,
+			sortText = ("%02d"):format(index),
 			kind = kind,
 			textEdit = {
 				newText = reference,
@@ -55,7 +57,7 @@ function M:get_completions(context, callback)
 				},
 			},
 		}
-	end, context_references)
+	end
 	callback({ items = items })
 end
 

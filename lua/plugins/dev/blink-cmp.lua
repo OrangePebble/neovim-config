@@ -130,7 +130,19 @@ return {
 		},
 
 		-- Use the Rust fuzzy matcher if available, fall back to the Lua implementation.
-		fuzzy = { implementation = "prefer_rust_with_warning" },
+		fuzzy = {
+			implementation = "prefer_rust_with_warning",
+
+			-- Blink supports a sorts function, but its type annotation only lists arrays.
+			---@diagnostic disable-next-line: assign-type-mismatch
+			sorts = function()
+				-- Preserve the configured @context order in Pi's prompt.
+				if vim.bo.filetype == "snacks_input" and vim.b.pi_context_input == true then
+					return { "sort_text", "score", "label" }
+				end
+				return { "score", "sort_text", "label" }
+			end,
+		},
 	},
 	opts_extend = { "sources.default" },
 }
