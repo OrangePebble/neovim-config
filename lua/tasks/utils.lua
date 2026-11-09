@@ -37,8 +37,7 @@ function M.run_command(cmd, cwd, category, title)
 	local progress = require("fidget.progress").handle.create({
 		title = title,
 		lsp_client = { name = category },
-		message = "Running",
-		percentage = 0,
+		message = "",
 	})
 	local task = overseer.new_task(vim.tbl_deep_extend("force", task_defaults.overseer.options, {
 		cmd = cmd,

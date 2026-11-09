@@ -183,16 +183,16 @@ local function ensure_progress()
 		return
 	end
 	progress = require("fidget.progress").handle.create({
-		title = "Pi",
-		message = "Working",
+		title = "Working",
+		message = "",
 		lsp_client = { name = "Pi" },
-		percentage = 0,
 	})
 end
 
 ---@param phase string
----@param message string
-local function set_progress(phase, message)
+---@param activity string
+---@param detail? string
+local function set_progress(phase, activity, detail)
 	ensure_progress()
 	-- message_update arrives for every streamed token. Do not redraw Fidget
 	-- unless Pi has actually entered a different visible phase.
@@ -200,7 +200,8 @@ local function set_progress(phase, message)
 		return
 	end
 	progress_phase = phase
-	progress.message = message
+	progress.title = activity
+	progress.message = detail or ""
 end
 
 local function has_active_tool_or_prompt()
@@ -251,15 +252,22 @@ local function handle_event(event)
 		set_progress("starting", "Starting")
 	elseif event_name == "turn_start" then
 		set_progress("thinking", "Thinking")
-	elseif event_name == "message_start" then
-		if event.data and event.data.message and event.data.message.role == "assistant" and not has_active_tool_or_prompt() then
-			set_progress("responding", "Responding")
-		end
 	elseif event_name == "message_update" then
-		-- Pi can emit a final assistant stream update after a tool starts. Keep
-		-- the more useful active tool/permission state until the next turn.
+		-- Classify the streamed assistant content instead of treating every
+		-- assistant update (including thinking and tool-call deltas) as a response.
+		-- Keep active tool/permission states until the next turn.
 		if not has_active_tool_or_prompt() then
-			set_progress("responding", "Responding")
+			local update = event.data and event.data.assistantMessageEvent
+			local update_type = update and update.type
+			if type(update_type) == "string" then
+				if vim.startswith(update_type, "thinking_") then
+					set_progress("thinking", "Thinking")
+				elseif vim.startswith(update_type, "text_") then
+					set_progress("responding", "Responding")
+				elseif vim.startswith(update_type, "toolcall_") then
+					set_progress("preparing-tool", "Preparing tool")
+				end
+			end
 		end
 	elseif event_name == "agent_end" then
 		local messages = event.data and event.data.messages or {}
@@ -279,25 +287,29 @@ local function handle_event(event)
 		set_progress("finishing", "Finishing")
 	elseif event_name == "tool_execution_start" then
 		local tool_name = event.data and event.data.toolName or "tool"
-		set_progress("tool:" .. tool_name, "Running " .. tool_name)
+		set_progress("tool:" .. tool_name, "Running tool", tool_name)
 	elseif event_name == "tool_execution_update" then
 		local tool_name = event.data and event.data.toolName or "tool"
-		set_progress("tool-update:" .. tool_name, "Running " .. tool_name .. "…")
+		set_progress("tool-update:" .. tool_name, "Running tool", tool_name)
 	elseif event_name == "tool_execution_end" then
 		local tool_name = event.data and event.data.toolName or "tool"
-		set_progress("tool-finished:" .. tool_name, "Finished " .. tool_name)
+		set_progress("tool-finished:" .. tool_name, "Tool finished", tool_name)
 	elseif event_name == "permissions:ui_prompt" then
 		set_progress("permission", "Waiting for permission")
 	elseif event_name == "ui_prompt_start" then
-		set_progress("user-input", "Waiting for user input")
+		set_progress("user-input", "Waiting for input", event.data and event.data.title or nil)
+	elseif event_name == "ui_prompt_end" and progress and progress_phase == "user-input" then
+		set_progress("resuming", "Resuming")
+	elseif event_name == "session_before_compact" and progress then
+		set_progress("compacting", "Compacting context", event.data and event.data.reason or nil)
 	elseif event_name == "session_compact" and progress then
 		set_progress("compacted", "Context compacted")
 	elseif event_name == "session_compact_failed" and progress then
 		set_progress("compaction-failed", "Compaction failed")
 	elseif event_name == "agent_settled" then
 		if progress then
-			progress.title = "Pi finished"
-			progress.message = "Prompt completed"
+			progress.title = terminal_stop_reason and "Stopped" or "Completed"
+			progress.message = terminal_stop_reason or ""
 			progress:finish()
 			progress = nil
 			progress_phase = nil
@@ -309,7 +321,8 @@ local function handle_event(event)
 		selected_socket = nil
 		selected_cwd = nil
 		if progress then
-			progress.title = "Pi disconnected"
+			progress.title = "Disconnected"
+			progress.message = ""
 			progress:finish()
 			progress = nil
 			progress_phase = nil
