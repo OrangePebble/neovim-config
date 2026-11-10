@@ -68,6 +68,7 @@ return {
 				fs = "glsl",
 				vs = "glsl",
 				xodr = "xml",
+				hujson = "jsonc",
 			},
 		})
 		-- Language servers to enable and automatically install using Mason.
