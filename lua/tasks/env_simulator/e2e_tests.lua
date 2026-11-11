@@ -247,16 +247,37 @@ local e2e_tests = {
 				"bash",
 				"-c",
 				--bash
-				[[
+				[=[
           set -euo pipefail
 
-          if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
+          if (( $(wc -l <<< "${TEST_OUTPUTS}") > 1 )); then
             printf '[info] %s\n' "Multiple tests were selected, not moving .mcap files"
           fi
 
           while IFS=$'\t' read -r selected_test output_path; do
             printf '[info] %s\n' "Moving artifacts to ${output_path} and deleting old location"
-            mv "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/"${selected_test}"/*/*/* "${output_path}"
+            # A simple `mv` is not enough because when a test uses a set with multiple scenarios.
+            for test_root in "${RAW_ARTIFACTS_PATH}"/tools/env_simulator/ExampleData/E2EOpTestArtifacts/*/Resources/*/"${selected_test}"; do
+              while IFS= read -r -d '' artifact_path; do
+                relative_path="${artifact_path#"${test_root}/"}"
+                parent_path="${relative_path%/*}"
+                if [[ "${parent_path}" == */* ]]; then
+                  # Do not repeat the test name when its config set has the same name.
+                  parent_path="${parent_path#"${selected_test}/"}"
+                  destination="${output_path}/${parent_path}"
+                else
+                  destination="${output_path}"
+                fi
+                mkdir -p "${destination}"
+                # Flatten the invocation directory, including hidden files.
+                shopt -s dotglob nullglob
+                artifact_contents=("${artifact_path}"/*)
+                if ((${#artifact_contents[@]})); then
+                  mv -- "${artifact_contents[@]}" "${destination}/"
+                fi
+                shopt -u dotglob nullglob
+              done < <(find "${test_root}" -type d -name '[[]*' -print0)
+            done
 
             if (( $(wc -l <<< "${TEST_OUTPUTS}") == 1 )); then
               if compgen -G '/tmp/*.mcap' > /dev/null; then
@@ -273,7 +294,7 @@ local e2e_tests = {
           rm -rf "${OUTPUT_CONTAINER_PATH}"/_latest
           mkdir "${OUTPUT_CONTAINER_PATH}"/_latest
           cp -r "${OUTPUT_PATH}"/. "${OUTPUT_CONTAINER_PATH}"/_latest
-      ]],
+      ]=],
 			},
 			ddad_path,
 			"E2E",
