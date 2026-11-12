@@ -161,7 +161,28 @@ return {
 			}, -- c/c++
 			cmake = {}, -- CMakeLists.txt
 			dockerls = {}, -- dockerfile
-			nil_ls = {}, -- nix
+			nixd = { -- nix
+				root_markers = { "flake.nix", ".git" },
+				before_init = function(_, config)
+					local root = config.root_dir
+					if not root or vim.fn.filereadable(root .. "/flake.nix") == 0 then
+						return
+					end
+					-- This flake exposes one NixOS configuration; discover it without a fixed hostname.
+					config.settings = vim.tbl_deep_extend("force", config.settings or {}, {
+						nixd = {
+							options = {
+								nixos = {
+									expr = string.format(
+										"(builtins.head (builtins.attrValues (builtins.getFlake %s).nixosConfigurations)).options",
+										vim.json.encode(root)
+									),
+								},
+							},
+						},
+					})
+				end,
+			},
 			pyright = {}, -- pyright
 			qmlls = {}, -- qml
 			glsl_analyzer = {}, -- OpenGL shader language
