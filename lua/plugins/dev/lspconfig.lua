@@ -177,6 +177,17 @@ return {
 			cssls = {}, -- css
 		})
 
+		local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
+		if string.match(cwd_name, ".*ddad.*") or string.match(cwd_name, ".*env_simulator.*") then
+			-- Pin the database to the workspace rather than Bazel's execution-root symlink.
+			-- Makes background indexing work.
+			local ddad_path = require("tasks.env_simulator.utils").ddad_path
+			servers.clangd.cmd = {
+				"clangd",
+				"--compile-commands-dir=" .. ddad_path,
+			}
+		end
+
 		-- https://github.com/neovim/nvim-lspconfig/wiki/Running-language-servers-in-containers
 		-- If this isn't enough check out existing lsp container and devcontainer plugins like:
 		--  https://github.com/lspcontainers/lspcontainers.nvim
@@ -184,32 +195,31 @@ return {
 		--  only when the new one failed but I couldn't tell.
 		-- WARN: For clangd to find the built files, the workspace inside the container has to be
 		--  the same as outside (the project directory).
-		local cwd_name = vim.fn.fnamemodify(vim.fn.getcwd(), ":t")
-		-- Using regex match to check multiple names and patterns
-		-- 'baibe' for my work's training project
-		if string.match(cwd_name, "(.*baibe.*)") then
-			if vim.system({ "docker", "exec", "workspace", "true" }):wait().code == 0 then
-				servers.clangd = vim.tbl_deep_extend("force", servers.clangd, {
-					cmd = {
-						"docker",
-						"exec",
-						"-i",
-						"workspace",
-						"clangd-19",
-						"--background-index",
-					},
-					before_init = function(params)
-						-- The processId inside a container is different so we ignore it.
-						params.processId = vim.NIL
-					end,
-				})
-			else
-				-- Dlay so neovim has time to load notification plugin.
-				vim.defer_fn(function()
-					vim.notify("clangd: docker exec failed (container not running?)", vim.log.levels.WARN)
-				end, 1000)
-			end
-		end
+		--
+		-- Example of using clangd inside a docker container workspace.
+		-- if string.match(cwd_name, "(.*example.*)") then
+		-- 	if vim.system({ "docker", "exec", "workspace", "true" }):wait().code == 0 then
+		-- 		servers.clangd = vim.tbl_deep_extend("force", servers.clangd, {
+		-- 			cmd = {
+		-- 				"docker",
+		-- 				"exec",
+		-- 				"-i",
+		-- 				"workspace",
+		-- 				"clangd-19",
+		-- 				"--background-index",
+		-- 			},
+		-- 			before_init = function(params)
+		-- 				-- The processId inside a container is different so we ignore it.
+		-- 				params.processId = vim.NIL
+		-- 			end,
+		-- 		})
+		-- 	else
+		-- 		-- Dlay so neovim has time to load notification plugin.
+		-- 		vim.defer_fn(function()
+		-- 			vim.notify("clangd: docker exec failed (container not running?)", vim.log.levels.WARN)
+		-- 		end, 1000)
+		-- 	end
+		-- end
 
 		for name, server in pairs(servers) do
 			vim.lsp.config(name, server)
