@@ -11,12 +11,12 @@ function M.select_config()
 	local co = coroutine.running()
 	local special_config = "env_simulator_clang with debug flags"
 	picker.select_one({
+    "env_simulator_release_gcc12",
+		"env_simulator_release",
+    "env_simulator_clang",
 		special_config,
 		"env_simulator_debug",
 		"env_simulator_debug_gcc12",
-		"env_simulator_clang",
-		"env_simulator_release",
-		"env_simulator_release_gcc12",
 	}, {
 		prompt = "Select config",
 	}, function(v)
